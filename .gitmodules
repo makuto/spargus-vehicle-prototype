@@ -1,3 +1,6 @@
 [submodule "bullet3"]
 	path = bullet3
 	url = https://github.com/bulletphysics/bullet3
+[submodule "base2.0"]
+	path = base2.0
+	url = https://github.com/makuto/base2.0

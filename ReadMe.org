@@ -2,8 +2,29 @@
 This is a 3D vehicle game prototype inspired by the gameplay and feel of the dune buggies in [[https://en.wikipedia.org/wiki/Jak_3][Jak 3]].
 
 ** Setup
-Spargus Vehicle Prototype uses [[https://github.com/bulletphysics/bullet3][Bullet3]] for physics.
+Clone and init submodules for dependencies:
 
 #+BEGIN_SRC sh
 git clone --recurse-submodules https://github.com/makuto/spargus-vehicle-prototype
 #+END_SRC
+
+*** SFML Setup
+SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL (I should dump base2.0 eventually...) 
+
+Running ~BuildDependencies.sh~ will build base2.0. You will need to have installed SFML 2 already. (*TODO:* Add instructions on how to do this)
+
+*** Bullet3 Setup
+Spargus Vehicle Prototype uses [[https://github.com/bulletphysics/bullet3][Bullet3]] for physics.
+
+Build bullet3:
+#+BEGIN_SRC sh
+cd spargus-vehicle-prototype
+./BuildDependencies.sh
+#+END_SRC
+
+/Optional:/ Test the examples:
+
+#+BEGIN_SRC sh
+./bullet3/build_cmake/examples/ExampleBrowser/App_ExampleBrowser
+#+END_SRC
+

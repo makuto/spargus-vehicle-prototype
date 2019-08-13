@@ -1,0 +1,85 @@
+# Building Tests:
+# jam clean
+# jam -j4 -q
+
+# (if building the same target repeatedly, don't clean, if that wasn't obvious)
+
+##
+## Compiler
+##
+
+C++ = clang++ ;
+LINK = clang++ ;
+# LINKFLAGS = -shared ;
+
+if $(UNIX)      { SUFSHR = .so ; }
+else if $(NT)   { SUFSHR = .dll ; }
+		
+##
+## Compiler arguments
+##
+
+# Arguments used on all projects, regardless of any variables
+C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter ;
+
+# Enable debug symbols
+ALLLIBSC++FLAGS = -g ;
+# Required arguments for linux
+# LINUXC++FLAGS = -g ;
+
+LINKLIBS = -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
+-lpthread -ldl
+-Lbase2.0 -lBase20
+
+-Lbullet3/build_cmake/src/Bullet3Dynamics
+-Lbullet3/build_cmake/src/Bullet3Collision
+-Lbullet3/build_cmake/src/Bullet3Common
+
+-Lbullet3/build_cmake/src/BulletDynamics
+-Lbullet3/build_cmake/src/BulletCollision
+-Lbullet3/build_cmake/examples/ThirdPartyLibs/clsocket
+# -Lbullet3/build_cmake/src/BulletCommon
+
+-lclsocket
+
+-Lbullet3/build_cmake/src/LinearMath
+
+-lBullet3Common
+-lBullet3Dynamics
+-lBullet3Collision
+
+# -lBulletCommon
+-lBulletDynamics
+-lBulletCollision
+
+-lLinearMath ;
+
+LINKFLAGS = -Wl,-rpath,. ;
+
+KEEPOBJS = true ; # This doesn't actually fix anything, though it seems like it should
+NOARSCAN = true ; # This actually fixes the problem
+#AR = ar rUu ; # I was thinking maybe the AR command was wrong (always outputting deterministically)
+               # It doesn't seem like this is the problem though
+AR = ar cr ;
+
+OPTIM = -O0 ;
+
+HDRS = src bullet3/src base2.0 ;
+
+# E.g.
+# jam -j4 -q -sCROSS_COMPILE_WINDOWS=true
+if $(CROSS_COMPILE_WINDOWS)
+{
+	CC = x86_64-w64-mingw32-gcc ;
+	LINK = x86_64-w64-mingw32-gcc ;
+	AR = x86_64-w64-mingw32-ar ;
+	SUFSHR = .dll ;
+}
+
+# Some helpful Jam commands
+# -q        : stop on failed target
+# -jN       : use N cores
+# -sVAR=VAL : Set VAR to VAL. Note that setting WINDOWS=false is the same as setting UNREAL=true,
+#              frustratingly
+# -dx       : print commands being used
+# -n        : don't actually run commands
