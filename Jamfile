@@ -1,6 +1,9 @@
 SubDir . ;
 
-Main spargus_vehicle_prototype : src/Main.cpp ;
+Main spargus_vehicle_prototype : src/Main.cpp
+                                 src/PhysicsVehicle.cpp
+                                 src/PhysicsWorld.cpp
+                                 ;
 
 # LinkLibraries spargus_vehicle_prototype : libBase20 ;
 

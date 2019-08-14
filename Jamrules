@@ -1,89 +1,92 @@
-# Building Tests:
-# jam clean
-# jam -j4 -q
-
-# (if building the same target repeatedly, don't clean, if that wasn't obvious)
-
 ##
-## Compiler
+## Compilation
 ##
 
 C++ = clang++ ;
 LINK = clang++ ;
-# LINKFLAGS = -shared ;
 
-if $(UNIX)      { SUFSHR = .so ; }
-else if $(NT)   { SUFSHR = .dll ; }
+# If I was building a library, these would be useful
+# LINKFLAGS = -shared ;
+# if $(UNIX)      { SUFSHR = .so ; }
+# else if $(NT)   { SUFSHR = .dll ; }
 		
-##
 ## Compiler arguments
-##
 
 # Arguments used on all projects, regardless of any variables
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION ;
+
+HDRS = src bullet3/src base2.0 ;
 
 # Enable debug symbols
 ALLLIBSC++FLAGS = -g ;
 # Required arguments for linux
 # LINUXC++FLAGS = -g ;
 
-LINKLIBS = -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
+OPTIM = -O0 ;
+
+##
+## Linking
+##
+
+LINKLIBS =
+# Standard
 -lpthread -ldl
+
+# SFML
+-lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
+
+# Base
 -Lbase2.0 -lBase20
-/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletSoftBody/libBulletSoftBody.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/Extras/InverseDynamics/libBulletInverseDynamicsUtils.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletInverseDynamics/libBulletInverseDynamics.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/examples/ThirdPartyLibs/BussIK/libBussIK.so -lpthread -ldl /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletDynamics/libBulletDynamics.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletCollision/libBulletCollision.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/LinearMath/libLinearMath.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/Bullet3Common/libBullet3Common.so.2.88 /home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletDynamics/CMakeFiles/BulletDynamics.dir/MLCPSolvers/btDantzigLCP.o
-# ;
 
--Lbullet3/build_cmake/src/Bullet3Dynamics
--Lbullet3/build_cmake/src/BulletInverseDynamics
--Lbullet3/build_cmake/src/Bullet3InverseDynamicsUtils
--Lbullet3/build_cmake/src/BulletSoftBody
--Lbullet3/build_cmake/src/Bullet3Collision
--Lbullet3/build_cmake/src/Bullet3Common
-
+# Bullet libraries
 -Lbullet3/build_cmake/src/BulletDynamics
 -Lbullet3/build_cmake/src/BulletCollision
-# # -Lbullet3/build_cmake/src/BulletCommon
-
+-Lbullet3/build_cmake/src/Bullet3Common
 -Lbullet3/build_cmake/src/LinearMath
 
--lBulletSoftBody
--lBulletInverseDynamics
-# -lBulletInverseDynamicsUtils
 -lBullet3Common
-# -lBullet3Dynamics
--lBullet3Collision
-
-# -lBulletCommon
 -lBulletDynamics
 -lBulletCollision
+-lLinearMath
+
+# Stuff I'm not using, but could use
+# -Lbullet3/build_cmake/src/BulletSoftBody
+# -Lbullet3/build_cmake/src/BulletInverseDynamics
+# -Lbullet3/build_cmake/src/Bullet3InverseDynamicsUtils
+# -lBulletSoftBody
+# -lBulletInverseDynamics
+# -lBulletInverseDynamicsUtils
 ;
-# -lLinearMath ;
 
 # LINKFLAGS = -Wl,-rpath,. ;
+
+# TODO: Copy libs to better directory, or static link?
 LINKFLAGS =
--Wl,-rpath,.:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletSoftBody:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/Extras/InverseDynamics:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletInverseDynamics:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/examples/ThirdPartyLibs/Gwen:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/examples/ThirdPartyLibs/BussIK:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletDynamics:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/BulletCollision:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/LinearMath:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/Bullet3Common:/home/macoy/Development/code/repositories/spargus-vehicle-prototype/bullet3/build_cmake/src/Bullet3Collision
+-Wl,-rpath,.:bullet3/build_cmake/src/BulletSoftBody:bullet3/build_cmake/Extras/InverseDynamics:bullet3/build_cmake/src/BulletInverseDynamics:bullet3/build_cmake/examples/ThirdPartyLibs/Gwen:bullet3/build_cmake/examples/ThirdPartyLibs/BussIK:bullet3/build_cmake/src/BulletDynamics:bullet3/build_cmake/src/BulletCollision:bullet3/build_cmake/src/LinearMath:bullet3/build_cmake/src/Bullet3Common:bullet3/build_cmake/src/Bullet3Collision
 ;
 
+##
+## Jam stuff
+##
+
+# Fix for unnecessary rebuilding any Jam project
 KEEPOBJS = true ; # This doesn't actually fix anything, though it seems like it should
 NOARSCAN = true ; # This actually fixes the problem
 #AR = ar rUu ; # I was thinking maybe the AR command was wrong (always outputting deterministically)
                # It doesn't seem like this is the problem though
 AR = ar cr ;
 
-OPTIM = -O0 ;
-
-HDRS = src bullet3/src base2.0 ;
-
+# Cross compilation
 # E.g.
 # jam -j4 -q -sCROSS_COMPILE_WINDOWS=true
-if $(CROSS_COMPILE_WINDOWS)
-{
-	CC = x86_64-w64-mingw32-gcc ;
-	LINK = x86_64-w64-mingw32-gcc ;
-	AR = x86_64-w64-mingw32-ar ;
-	SUFSHR = .dll ;
-}
+# if $(CROSS_COMPILE_WINDOWS)
+# {
+# 	CC = x86_64-w64-mingw32-gcc ;
+# 	LINK = x86_64-w64-mingw32-gcc ;
+# 	AR = x86_64-w64-mingw32-ar ;
+# 	SUFSHR = .dll ;
+# }
 
 # Some helpful Jam commands
 # -q        : stop on failed target
