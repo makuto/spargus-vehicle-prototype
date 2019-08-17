@@ -14,14 +14,14 @@ LINK = clang++ ;
 
 # Arguments used on all projects, regardless of any variables
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
-C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION ;
+C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
 HDRS = src bullet3/src base2.0 ;
 
-# Enable debug symbols
-ALLLIBSC++FLAGS = -g ;
-# Required arguments for linux
-# LINUXC++FLAGS = -g ;
+if $(DEBUG_BUILD)
+{ BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
+else
+{ BULLET3_BUILD_DIR = bullet3/build_cmake ; }
 
 OPTIM = -O0 ;
 
@@ -40,10 +40,10 @@ LINKLIBS =
 -Lbase2.0 -lBase20
 
 # Bullet libraries
--Lbullet3/build_cmake/src/BulletDynamics
--Lbullet3/build_cmake/src/BulletCollision
--Lbullet3/build_cmake/src/Bullet3Common
--Lbullet3/build_cmake/src/LinearMath
+-L$(BULLET3_BUILD_DIR)/src/BulletDynamics
+-L$(BULLET3_BUILD_DIR)/src/BulletCollision
+-L$(BULLET3_BUILD_DIR)/src/Bullet3Common
+-L$(BULLET3_BUILD_DIR)/src/LinearMath
 
 -lBullet3Common
 -lBulletDynamics
@@ -51,9 +51,9 @@ LINKLIBS =
 -lLinearMath
 
 # Stuff I'm not using, but could use
-# -Lbullet3/build_cmake/src/BulletSoftBody
-# -Lbullet3/build_cmake/src/BulletInverseDynamics
-# -Lbullet3/build_cmake/src/Bullet3InverseDynamicsUtils
+# -L$(BULLET3_BUILD_DIR)/src/BulletSoftBody
+# -L$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics
+# -L$(BULLET3_BUILD_DIR)/src/Bullet3InverseDynamicsUtils
 # -lBulletSoftBody
 # -lBulletInverseDynamics
 # -lBulletInverseDynamicsUtils
@@ -62,9 +62,8 @@ LINKLIBS =
 # LINKFLAGS = -Wl,-rpath,. ;
 
 # TODO: Copy libs to better directory, or static link?
-LINKFLAGS =
--Wl,-rpath,.:bullet3/build_cmake/src/BulletSoftBody:bullet3/build_cmake/Extras/InverseDynamics:bullet3/build_cmake/src/BulletInverseDynamics:bullet3/build_cmake/examples/ThirdPartyLibs/Gwen:bullet3/build_cmake/examples/ThirdPartyLibs/BussIK:bullet3/build_cmake/src/BulletDynamics:bullet3/build_cmake/src/BulletCollision:bullet3/build_cmake/src/LinearMath:bullet3/build_cmake/src/Bullet3Common:bullet3/build_cmake/src/Bullet3Collision
-;
+LINKFLAGS = -g
+-Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision ;
 
 ##
 ## Jam stuff

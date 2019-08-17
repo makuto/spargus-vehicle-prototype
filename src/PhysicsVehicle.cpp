@@ -40,11 +40,8 @@ btScalar suspensionRestLength(0.6);
 // Vehicle implementation
 //
 
-PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld)
+PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsWorld)
 {
-	vehicleRayCaster = new btDefaultVehicleRaycaster(physicsWorld.world);
-	vehicle = new btRaycastVehicle(tuning, carChassis, vehicleRayCaster);
-
 	// Create chassis
 	{
 		btCollisionShape* chassisShape = new btBoxShape(btVector3(1.f, 0.5f, 2.f));
@@ -74,11 +71,14 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld)
 		transform.setOrigin(btVector3(0, 0.f, 0));
 
 		carChassis = physicsWorld.localCreateRigidBody(800, transform, compound);
-		// m_carChassis->setDamping(0.2,0.2);
+		// carChassis->setDamping(0.2,0.2);
+
+		/// never deactivate the vehicle
+		carChassis->setActivationState(DISABLE_DEACTIVATION);
 	}
 
-	/// never deactivate the vehicle
-	carChassis->setActivationState(DISABLE_DEACTIVATION);
+	vehicleRayCaster = new btDefaultVehicleRaycaster(physicsWorld.world);
+	vehicle = new btRaycastVehicle(tuning, carChassis, vehicleRayCaster);
 
 	physicsWorld.world->addVehicle(vehicle);
 
@@ -118,6 +118,62 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld)
 		wheel.m_frictionSlip = wheelFriction;
 		wheel.m_rollInfluence = rollInfluence;
 	}
+	
+	Reset();
+}
+
+void PhysicsVehicle::Reset()
+{
+	gVehicleSteering = 0.f;
+	gBreakingForce = defaultBreakingForce;
+	gEngineForce = 0.f;
+
+	carChassis->setCenterOfMassTransform(btTransform::getIdentity());
+	carChassis->setLinearVelocity(btVector3(0, 0, 0));
+	carChassis->setAngularVelocity(btVector3(0, 0, 0));
+	ownerWorld.world->getBroadphase()->getOverlappingPairCache()->cleanProxyFromPairs(
+	    carChassis->getBroadphaseHandle(), ownerWorld.world->getDispatcher());
+	if (vehicle)
+	{
+		vehicle->resetSuspension();
+		for (int i = 0; i < vehicle->getNumWheels(); i++)
+		{
+			// synchronize the wheels with the (interpolated) chassis worldtransform
+			vehicle->updateWheelTransform(i, true);
+		}
+	}
+
+	// btTransform liftTrans;
+	// liftTrans.setIdentity();
+	// liftTrans.setOrigin(m_liftStartPos);
+	// liftBody->activate();
+	// liftBody->setCenterOfMassTransform(liftTrans);
+	// liftBody->setLinearVelocity(btVector3(0, 0, 0));
+	// liftBody->setAngularVelocity(btVector3(0, 0, 0));
+
+	// btTransform forkTrans;
+	// forkTrans.setIdentity();
+	// forkTrans.setOrigin(m_forkStartPos);
+	// m_forkBody->activate();
+	// m_forkBody->setCenterOfMassTransform(forkTrans);
+	// m_forkBody->setLinearVelocity(btVector3(0, 0, 0));
+	// m_forkBody->setAngularVelocity(btVector3(0, 0, 0));
+
+	// //	m_liftHinge->setLimit(-LIFT_EPS, LIFT_EPS);
+	// m_liftHinge->setLimit(0.0f, 0.0f);
+	// m_liftHinge->enableAngularMotor(false, 0, 0);
+
+	// m_forkSlider->setLowerLinLimit(0.1f);
+	// m_forkSlider->setUpperLinLimit(0.1f);
+	// m_forkSlider->setPoweredLinMotor(false);
+
+	// btTransform loadTrans;
+	// loadTrans.setIdentity();
+	// loadTrans.setOrigin(m_loadStartPos);
+	// m_loadBody->activate();
+	// m_loadBody->setCenterOfMassTransform(loadTrans);
+	// m_loadBody->setLinearVelocity(btVector3(0, 0, 0));
+	// m_loadBody->setAngularVelocity(btVector3(0, 0, 0));
 }
 
 void PhysicsVehicle::Update(float deltaTime)
