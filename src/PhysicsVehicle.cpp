@@ -2,6 +2,8 @@
 
 #include "PhysicsWorld.hpp"
 
+#include <iostream>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Vehicle constants
 //
@@ -189,4 +191,8 @@ void PhysicsVehicle::Update(float deltaTime)
 	vehicle->setSteeringValue(gVehicleSteering, wheelIndex);
 	wheelIndex = 1;
 	vehicle->setSteeringValue(gVehicleSteering, wheelIndex);
+
+	const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
+	std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
+	          << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
 }

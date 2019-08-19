@@ -36,6 +36,10 @@ LINKLIBS =
 # SFML
 -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
 
+# OpenGL
+-lGL
+-lGLU
+
 # Base
 -Lbase2.0 -lBase20
 

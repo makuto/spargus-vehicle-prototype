@@ -1,5 +1,12 @@
 #include "PhysicsWorld.hpp"
 
+#include "BulletDynamics/MLCPSolvers/btDantzigSolver.h"
+#include "BulletDynamics/MLCPSolvers/btMLCPSolver.h"
+#include "BulletDynamics/MLCPSolvers/btSolveProjectedGaussSeidel.h"
+#include "LinearMath/btAlignedObjectArray.h"
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
+
 #include <iostream>
 
 // TODO: Find out what this means
@@ -30,6 +37,9 @@ PhysicsWorld::PhysicsWorld()
 	world = new btDiscreteDynamicsWorld(collisionDispatcher, overlappingPairCache, constraintSolver,
 	                                    collisionConfiguration);
 
+	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	world->setDebugDrawer(&debugDrawer);
+
 	if (bulletUseMCLPSolver)
 	{
 		// for direct solver it is better to have a small A matrix
@@ -42,6 +52,23 @@ PhysicsWorld::PhysicsWorld()
 		world->getSolverInfo().m_minimumSolverBatchSize = 128;
 	}
 	world->getSolverInfo().m_globalCfm = 0.00001;
+	
+	//world->setGravity(btVector3(0,0,0));	
+
+	// Ground (for testing only)
+	{
+		btVector3 groundExtents(50, 50, 50);
+		groundExtents[upAxisIndex] = 3;
+		btCollisionShape* groundShape = new btBoxShape(groundExtents);
+		// TODO Don't leak this
+		// collisionShapes.push_back(groundShape);
+
+		btTransform tr;
+		tr.setIdentity();
+		tr.setOrigin(btVector3(0, -3, 0));
+
+		localCreateRigidBody(0, tr, groundShape);
+	}
 }
 
 void PhysicsWorld::Update(float deltaTime)
@@ -89,6 +116,11 @@ void PhysicsWorld::Update(float deltaTime)
 		}
 #endif  // VERBOSE_FEEDBACK
 	}
+}
+
+void PhysicsWorld::DebugRender()
+{
+	world->debugDrawWorld();
 }
 
 btRigidBody* PhysicsWorld::localCreateRigidBody(btScalar mass, const btTransform& startTransform,
