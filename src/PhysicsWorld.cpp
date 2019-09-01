@@ -97,7 +97,7 @@ void PhysicsWorld::Update(float deltaTime)
 			sol->setNumFallbacks(0);
 		}
 
-#define VERBOSE_FEEDBACK
+// #define VERBOSE_FEEDBACK
 #ifdef VERBOSE_FEEDBACK
 		if (!numSimSteps)
 			std::cout << "Interpolated transforms\n";

@@ -10,33 +10,8 @@
 
 #define CUBE_HALF_EXTENTS 1
 
-btVector3 wheelDirectionCS0(0, -1, 0);
-btVector3 wheelAxleCS(-1, 0, 0);
-
-/// btRaycastVehicle is the interface for the constraint that implements the raycast vehicle
-/// notice that for higher-quality slow-moving vehicles, another approach might be better
-/// implementing explicit hinged-wheel constraints with cylinder collision, rather then raycasts
-float gEngineForce = 0.f;
-
-float defaultBreakingForce = 10.f;
-float gBreakingForce = 100.f;
-
-float maxEngineForce = 1000.f;  // this should be engine/velocity dependent
-float maxBreakingForce = 100.f;
-
-float gVehicleSteering = 0.f;
-float steeringIncrement = 0.04f;
-float steeringClamp = 0.3f;
-
-float wheelRadius = 0.5f;
-float wheelWidth = 0.4f;
-float wheelFriction = 1000;  // BT_LARGE_FLOAT;
-
-float suspensionStiffness = 20.f;
-float suspensionDamping = 2.3f;
-float suspensionCompression = 4.4f;
-float rollInfluence = 0.1f;  // 1.0f;
-btScalar suspensionRestLength(0.6);
+const btVector3 wheelDirectionCS0(0, -1, 0);
+const btVector3 wheelAxleCS(-1, 0, 0);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vehicle implementation
@@ -84,51 +59,54 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 	physicsWorld.world->addVehicle(vehicle);
 
-	float connectionHeight = 1.2f;
-
-	bool isFrontWheel = true;
-
-	// choose coordinate system
-	vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
-
-	btVector3 connectionPointCS0(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
-	                             2 * CUBE_HALF_EXTENTS - wheelRadius);
-
-	vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-	                  wheelRadius, tuning, isFrontWheel);
-	connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
-	                               2 * CUBE_HALF_EXTENTS - wheelRadius);
-
-	vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-	                  wheelRadius, tuning, isFrontWheel);
-	connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
-	                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
-	isFrontWheel = false;
-	vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-	                  wheelRadius, tuning, isFrontWheel);
-	connectionPointCS0 = btVector3(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
-	                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
-	vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-	                  wheelRadius, tuning, isFrontWheel);
-
-	for (int i = 0; i < vehicle->getNumWheels(); i++)
+	// Create wheels
 	{
-		btWheelInfo& wheel = vehicle->getWheelInfo(i);
-		wheel.m_suspensionStiffness = suspensionStiffness;
-		wheel.m_wheelsDampingRelaxation = suspensionDamping;
-		wheel.m_wheelsDampingCompression = suspensionCompression;
-		wheel.m_frictionSlip = wheelFriction;
-		wheel.m_rollInfluence = rollInfluence;
+		float connectionHeight = 1.2f;
+
+		bool isFrontWheel = true;
+
+		// choose coordinate system
+		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
+
+		btVector3 connectionPointCS0(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
+		                             2 * CUBE_HALF_EXTENTS - wheelRadius);
+
+		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
+		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
+		                               2 * CUBE_HALF_EXTENTS - wheelRadius);
+
+		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
+		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
+		                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
+		isFrontWheel = false;
+		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
+		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
+		                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
+		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
+		                  wheelRadius, tuning, isFrontWheel);
+
+		for (int i = 0; i < vehicle->getNumWheels(); i++)
+		{
+			btWheelInfo& wheel = vehicle->getWheelInfo(i);
+			wheel.m_suspensionStiffness = suspensionStiffness;
+			wheel.m_wheelsDampingRelaxation = suspensionDamping;
+			wheel.m_wheelsDampingCompression = suspensionCompression;
+			wheel.m_frictionSlip = wheelFriction;
+			wheel.m_rollInfluence = rollInfluence;
+		}
 	}
-	
+
 	Reset();
 }
 
 void PhysicsVehicle::Reset()
 {
-	gVehicleSteering = 0.f;
-	gBreakingForce = defaultBreakingForce;
-	gEngineForce = 0.f;
+	VehicleSteering = 0.f;
+	BreakingForce = defaultBreakingForce;
+	EngineForce = 0.f;
 
 	carChassis->setCenterOfMassTransform(btTransform::getIdentity());
 	carChassis->setLinearVelocity(btVector3(0, 0, 0));
@@ -145,6 +123,7 @@ void PhysicsVehicle::Reset()
 		}
 	}
 
+	// Macoy: forklift stuff. Commented out.
 	// btTransform liftTrans;
 	// liftTrans.setIdentity();
 	// liftTrans.setOrigin(m_liftStartPos);
@@ -181,18 +160,18 @@ void PhysicsVehicle::Reset()
 void PhysicsVehicle::Update(float deltaTime)
 {
 	int wheelIndex = 2;
-	vehicle->applyEngineForce(gEngineForce, wheelIndex);
-	vehicle->setBrake(gBreakingForce, wheelIndex);
+	vehicle->applyEngineForce(EngineForce, wheelIndex);
+	vehicle->setBrake(BreakingForce, wheelIndex);
 	wheelIndex = 3;
-	vehicle->applyEngineForce(gEngineForce, wheelIndex);
-	vehicle->setBrake(gBreakingForce, wheelIndex);
+	vehicle->applyEngineForce(EngineForce, wheelIndex);
+	vehicle->setBrake(BreakingForce, wheelIndex);
 
 	wheelIndex = 0;
-	vehicle->setSteeringValue(gVehicleSteering, wheelIndex);
+	vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 	wheelIndex = 1;
-	vehicle->setSteeringValue(gVehicleSteering, wheelIndex);
+	vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 
-	const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
-	std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
-	          << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
+	// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
+	// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
+	//           << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
 }

@@ -58,9 +58,9 @@ struct Camera
 		sf::Mouse::setPosition(sf::Vector2i(win.getWidth() / 2, win.getHeight() / 2), *winBase);
 	}
 
-	void UpdateInput()
+	void UpdateInput(inputManager& input)
 	{
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		if (input.isPressed(inputCode::W))
 		{
 			/* yrotrad = (yrot / 180 * 3.141592654f);
 			    xrotrad = (xrot / 180 * 3.141592654f);
@@ -71,19 +71,19 @@ struct Camera
 			camTranslate[2] -= float(cos(camRot[1] / 180 * 3.141592654));
 			// camPos[1]=-10;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		if (input.isPressed(inputCode::S))
 		{
 			camTranslate[0] -= float(sin(camRot[1] / 180 * 3.141592654));
 			camTranslate[2] += float(cos(camRot[1] / 180 * 3.141592654));
 			// camTranslate[2]=50*win.GetFrameTime();
 			// camPos[1]=-10;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		if (input.isPressed(inputCode::A))
 		{
 			camTranslate[0] -= float(cos(camRot[1] / 180 * 3.141592654));
 			camTranslate[2] -= float(sin(camRot[1] / 180 * 3.141592654));
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		if (input.isPressed(inputCode::D))
 		{
 			camTranslate[0] += float(cos(camRot[1] / 180 * 3.141592654));
 			camTranslate[2] += float(sin(camRot[1] / 180 * 3.141592654));
@@ -108,8 +108,6 @@ struct Camera
 
 	void UpdateStart()
 	{
-		UpdateInput();
-
 		// Set camera
 		if (camRot[0] < -90)
 			camRot[0] = -90;
@@ -152,6 +150,37 @@ struct Camera
 		glPopMatrix();
 	}
 };
+
+void processInput(inputManager& input, PhysicsVehicle& vehicle)
+{
+	// Steering
+	if (input.isPressed(inputCode::Left))
+	{
+		vehicle.VehicleSteering += vehicle.steeringIncrement;
+		if (vehicle.VehicleSteering > vehicle.steeringClamp)
+			vehicle.VehicleSteering = vehicle.steeringClamp;
+	}
+
+	if (input.isPressed(inputCode::Right))
+	{
+		vehicle.VehicleSteering -= vehicle.steeringIncrement;
+		if (vehicle.VehicleSteering < -vehicle.steeringClamp)
+			vehicle.VehicleSteering = -vehicle.steeringClamp;
+	}
+
+	// Acceleration/braking
+	if (input.isPressed(inputCode::Up))
+	{
+		vehicle.EngineForce = vehicle.maxEngineForce;
+		vehicle.BreakingForce = 0.f;
+	}
+
+	if (input.isPressed(inputCode::Down))
+	{
+		vehicle.EngineForce = -vehicle.maxEngineForce;
+		vehicle.BreakingForce = 0.f;
+	}
+}
 
 int main()
 {
@@ -234,15 +263,22 @@ int main()
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
+		cam.UpdateInput(input);
 		cam.UpdateStart();
+
+		processInput(input, vehicle);
 
 		vehicle.Update(lastFrameTime);
 		physicsWorld.Update(lastFrameTime);
 
 		glCallList(groundCallList);
+
 		physicsWorld.DebugRender();
 
 		cam.UpdateEnd();
+
+		// TODO: Next: Lock camera to transform
+		const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
 
 		// Finished physics update and drawing; send it on its way
 		mainWindow.update();
