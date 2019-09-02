@@ -16,12 +16,12 @@ struct PhysicsVehicle
 
 	// Controls
 	float EngineForce = 0.f;
-	float BreakingForce = 100.f;
+	float BrakingForce = 100.f;
 	float VehicleSteering = 0.f;
 
 	// Control constants
 	float maxEngineForce = 1000.f;  // this should be engine/velocity dependent
-	float maxBreakingForce = 100.f;
+	float maxBrakingForce = 100.f;
 
 	float steeringIncrement = 0.04f;
 	float steeringClamp = 0.3f;
@@ -44,7 +44,7 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
 	//
-	float defaultBreakingForce = 10.f;
+	float defaultBrakingForce = 10.f;
 
 	float wheelRadius = 0.5f;
 	float wheelWidth = 0.4f;

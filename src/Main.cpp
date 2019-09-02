@@ -58,7 +58,7 @@ struct Camera
 		sf::Mouse::setPosition(sf::Vector2i(win.getWidth() / 2, win.getHeight() / 2), *winBase);
 	}
 
-	void UpdateInput(inputManager& input)
+	void FreeCam(inputManager& input)
 	{
 		if (input.isPressed(inputCode::W))
 		{
@@ -139,7 +139,80 @@ struct Camera
 		glTranslatef(-camPos[0], camPos[1], -camPos[2]);
 		glPushMatrix();
 	}
-	
+
+	void ChaseCamera(btScalar* openGlMatrix)
+	{
+		const double cameraHeight = 15.0;
+		const double cameraPullback = -15.0;
+		const double cameraPitch = 30.0;
+		
+		// Undo old matrix
+		glPopMatrix();
+
+		glLoadIdentity();
+
+		// Look at method
+		// if (true)
+		// {
+		// 	// double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
+		// 	// openGlMatrix[14]};
+		// 	double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
+		// 	                     0.};  // openGlMatrix[14] + cameraPullback};
+		// 	// Offset position
+		// 	// Look at target
+		// 	double targetPosition[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
+		// 	// double targetPosition[] = {0., 0., 0.};
+		// 	gluLookAt(
+		// 	    /*Position=*/position[0], position[1], position[2],
+		// 	    /*Look at (world space)=*/targetPosition[0], targetPosition[1], targetPosition[2],
+		// 	    /*Up vector=*/0, 1, 0);
+		// }
+
+		// Look at method 2
+		if (false)
+		{
+			// double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
+			// openGlMatrix[14]};
+			double position[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
+			// Offset position
+			// Look at target
+			double targetPosition[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
+			// double targetPosition[] = {0., 0., 0.};
+			gluLookAt(
+			    /*Position=*/position[0], position[1], position[2],
+			    /*Look at (world space)=*/targetPosition[0], targetPosition[1], targetPosition[2],
+			    /*Up vector=*/0, 1, 0);
+
+			// glTranslatef(0.f, cameraHeight, cameraPullback);
+			
+		}
+
+		// Manual method
+		if (true)
+		{
+			glRotatef(180.f, 0, 1, 0);
+			// glTranslatef(0.f, -cameraHeight, cameraPullback);
+			glTranslatef(0.f, -4.f, 8.f);
+			// double rotMatNoTransform[][4] = {
+			//     {openGlMatrix[0], openGlMatrix[1], openGlMatrix[2], 0},
+			//     {openGlMatrix[4], openGlMatrix[5], openGlMatrix[6], 0},
+			//     {openGlMatrix[7], openGlMatrix[8], openGlMatrix[9], 0},
+			//     {0., 0., 0., 1.},
+			// };
+
+			glMultMatrixd(openGlMatrix);
+			// glMultMatrixd(rotMatNoTransform);
+			// glRotatef(camRot[0], 1, 0, 0);
+			// glRotatef(camRot[2], 0, 0, 1);
+
+			// Pitch camera
+			// glRotated(cameraPitch, 1, 0, 0);
+
+		}
+
+		glPushMatrix();
+	}
+
 	void UpdateEnd()
 	{
 		// Reset translation vector
@@ -153,17 +226,28 @@ struct Camera
 
 void processInput(inputManager& input, PhysicsVehicle& vehicle)
 {
+	bool useGameSteering = true;
+	// Reset steering and forces immediately
+	if (useGameSteering)
+	{
+		vehicle.EngineForce = 0.f;
+		vehicle.BrakingForce = 0.f;
+		vehicle.VehicleSteering = 0.f;
+	}
+
+	double steeringIncrement = useGameSteering ? vehicle.steeringClamp : vehicle.steeringIncrement;
+
 	// Steering
 	if (input.isPressed(inputCode::Left))
 	{
-		vehicle.VehicleSteering += vehicle.steeringIncrement;
+		vehicle.VehicleSteering += steeringIncrement;
 		if (vehicle.VehicleSteering > vehicle.steeringClamp)
 			vehicle.VehicleSteering = vehicle.steeringClamp;
 	}
 
 	if (input.isPressed(inputCode::Right))
 	{
-		vehicle.VehicleSteering -= vehicle.steeringIncrement;
+		vehicle.VehicleSteering -= steeringIncrement;
 		if (vehicle.VehicleSteering < -vehicle.steeringClamp)
 			vehicle.VehicleSteering = -vehicle.steeringClamp;
 	}
@@ -172,13 +256,22 @@ void processInput(inputManager& input, PhysicsVehicle& vehicle)
 	if (input.isPressed(inputCode::Up))
 	{
 		vehicle.EngineForce = vehicle.maxEngineForce;
-		vehicle.BreakingForce = 0.f;
+		vehicle.BrakingForce = 0.f;
 	}
 
 	if (input.isPressed(inputCode::Down))
 	{
-		vehicle.EngineForce = -vehicle.maxEngineForce;
-		vehicle.BreakingForce = 0.f;
+		// Start going backwards if the brake is held near zero
+		if (vehicle.vehicle->getCurrentSpeedKmHour() < 0.1f)
+		{
+			vehicle.EngineForce = -vehicle.maxEngineForce;
+			vehicle.BrakingForce = 0.f;
+		}
+		else
+		{
+			vehicle.EngineForce = 0.f;
+			vehicle.BrakingForce = vehicle.maxBrakingForce;
+		}
 	}
 }
 
@@ -255,15 +348,17 @@ int main()
 	//
 
 	// A made up but sane first frame
-	float lastFrameTime = 0.032f;
+	float lastFrameTime = 0.016f;
 	timer frameTimer;
 	frameTimer.start();
 
 	Camera cam(mainWindow);
+	bool useChaseCam = true;
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
-		cam.UpdateInput(input);
+		if (!useChaseCam)
+			cam.FreeCam(input);
 		cam.UpdateStart();
 
 		processInput(input, vehicle);
@@ -271,14 +366,23 @@ int main()
 		vehicle.Update(lastFrameTime);
 		physicsWorld.Update(lastFrameTime);
 
+		// Use vehicle transform to position camera
+		if (useChaseCam)
+		{
+			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
+			btTransform camTransform = vehicleTransform.inverse();
+			btScalar vehicleMat[16];
+			// vehicleTransform.getOpenGLMatrix(vehicleMat);
+			camTransform.getOpenGLMatrix(vehicleMat);
+			
+			cam.ChaseCamera(vehicleMat);
+		}
+
 		glCallList(groundCallList);
 
 		physicsWorld.DebugRender();
 
 		cam.UpdateEnd();
-
-		// TODO: Next: Lock camera to transform
-		const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
 
 		// Finished physics update and drawing; send it on its way
 		mainWindow.update();

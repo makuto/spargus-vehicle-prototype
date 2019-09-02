@@ -105,7 +105,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 void PhysicsVehicle::Reset()
 {
 	VehicleSteering = 0.f;
-	BreakingForce = defaultBreakingForce;
+	BrakingForce = defaultBrakingForce;
 	EngineForce = 0.f;
 
 	carChassis->setCenterOfMassTransform(btTransform::getIdentity());
@@ -161,10 +161,10 @@ void PhysicsVehicle::Update(float deltaTime)
 {
 	int wheelIndex = 2;
 	vehicle->applyEngineForce(EngineForce, wheelIndex);
-	vehicle->setBrake(BreakingForce, wheelIndex);
+	vehicle->setBrake(BrakingForce, wheelIndex);
 	wheelIndex = 3;
 	vehicle->applyEngineForce(EngineForce, wheelIndex);
-	vehicle->setBrake(BreakingForce, wheelIndex);
+	vehicle->setBrake(BrakingForce, wheelIndex);
 
 	wheelIndex = 0;
 	vehicle->setSteeringValue(VehicleSteering, wheelIndex);
