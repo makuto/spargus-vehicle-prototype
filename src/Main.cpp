@@ -9,13 +9,9 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
-#include "tiny_gltf.h"
-
 #include <map>
 
 #include "Camera.hpp"
-#include "ModelLoader.hpp"
-#include "ModelRender.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
@@ -120,26 +116,11 @@ int main()
 
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
 	initializeWindow(mainWindow);
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
-	{
-		std::cout << "Failed to initialize GLEW\n";
-		return 1;
-	}
 
 	inputManager input(&mainWindow);
 
-	tinygltf::Model groundModel;
-	if (!LoadModelFromGltf("assets/World.glb", groundModel))
-		return 1;
-	
-	// initModel(groundModel);
-
-	GLCallListIndex groundModelCallList = buildCallListFromModel(groundModel);
-	// GLCallListIndex groundModelCallList = buildCallListFromModel2(groundModel);
-
 	// OpenGL world setup
-	GLCallListIndex groundCallList = -1;
+	GLuint groundCallList = -1;
 	{
 		glEnable(GL_DEPTH_TEST);
 		// glEnable(GL_LIGHTING);
@@ -229,11 +210,8 @@ int main()
 		}
 
 		glCallList(groundCallList);
-		// glCallList(groundModelCallList);
 
 		physicsWorld.DebugRender();
-
-		// drawModel2(groundModel);
 
 		cam.UpdateEnd();
 

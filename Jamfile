@@ -1,6 +1,7 @@
 SubDir . ;
 
 Main spargus_vehicle_prototype : src/Main.cpp
+src/Camera.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/DebugDraw.cpp
