@@ -57,7 +57,7 @@ PhysicsWorld::PhysicsWorld()
 
 	// Ground (for testing only)
 	{
-		btVector3 groundExtents(50, 50, 50);
+		btVector3 groundExtents(100.0, 100.0, 100.0);
 		groundExtents[upAxisIndex] = 3;
 		btCollisionShape* groundShape = new btBoxShape(groundExtents);
 		// TODO Don't leak this
