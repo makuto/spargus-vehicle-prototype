@@ -16,7 +16,7 @@ LINK = clang++ ;
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
-HDRS = src bullet3/src base2.0 ;
+HDRS = src bullet3/src base2.0 tinygltf ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
@@ -39,6 +39,7 @@ LINKLIBS =
 # OpenGL
 -lGL
 -lGLU
+-lGLEW
 
 # Base
 -Lbase2.0 -lBase20

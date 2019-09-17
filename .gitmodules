@@ -4,3 +4,6 @@
 [submodule "base2.0"]
 	path = base2.0
 	url = https://github.com/makuto/base2.0
+[submodule "tinygltf"]
+	path = tinygltf
+	url = https://github.com/syoyo/tinygltf.git
