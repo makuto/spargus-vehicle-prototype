@@ -16,7 +16,7 @@ LINK = clang++ ;
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
-HDRS = src bullet3/src base2.0 ;
+HDRS = src bullet3/src base2.0 ../ogre2-template/include ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
@@ -61,13 +61,36 @@ LINKLIBS =
 # -lBulletSoftBody
 # -lBulletInverseDynamics
 # -lBulletInverseDynamicsUtils
+
+# Mogre TODO only on ogre
+-L../ogre2-template
+-lMogre
+# Ogre
+-L../ogre2-template/Ogre/ogre/build/Release/lib
+-L../ogre2-template/build_ogre_gltf
+-lOgreHlmsPbs
+-lOgreHlmsUnlit
+-lOgreMain
+
+# Ogre 2D overlays
+-lOgreOverlay
+
+# TODO This should eventually be stripped out
+-lOgreSamplesCommon
+
+-lSDL2
+
+# Gltf support
+-Lbuild_ogre_gltf
+-lOgre_glTF
 ;
 
 # LINKFLAGS = -Wl,-rpath,. ;
 
 # TODO: Copy libs to better directory, or static link?
+# TODO: Only do ogre stuff on ogre exe
 LINKFLAGS = -g
--Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision ;
+-Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:../ogre2-template:../ogre2-template/build_ogre_gltf:../ogre2-template/Ogre/ogre/build/Release/lib ;
 
 ##
 ## Jam stuff

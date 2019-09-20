@@ -1,13 +1,19 @@
 SubDir . ;
 
 Main spargus_vehicle_prototype : src/Main.cpp
-src/Camera.cpp
+;
+
+Main spargus_vehicle_prototype_ogre : src/Main_Ogre.cpp
+;
+
+Library libSpargus : src/Camera.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/DebugDraw.cpp
-                                 ;
+;
 
-# LinkLibraries spargus_vehicle_prototype : libBase20 ;
+LinkLibraries spargus_vehicle_prototype : libSpargus ;
+LinkLibraries spargus_vehicle_prototype_ogre : libSpargus ;
 
 # SubInclude . base2.0 ;
 
