@@ -1,8 +1,13 @@
 #pragma once
 
-namespace tinygltf
-{
-	class Model;
-}
+#include <string>
+#include <vector>
 
-bool LoadModelFromGltf(const char* filename, tinygltf::Model& modelOut);
+#include "material.h"
+#include "mesh.h"
+
+namespace gltf
+{
+bool LoadGLTF(const std::string& filename, float scale, std::vector<Mesh<float>>* meshes,
+              std::vector<Material>* materials, std::vector<Texture>* textures, bool debugOutput);
+}
