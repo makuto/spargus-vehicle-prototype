@@ -56,6 +56,7 @@ PhysicsWorld::PhysicsWorld()
 	//world->setGravity(btVector3(0,0,0));	
 
 	// Ground (for testing only)
+	if (false)
 	{
 		btVector3 groundExtents(100.0, 100.0, 100.0);
 		groundExtents[upAxisIndex] = 3;

@@ -2,8 +2,10 @@ SubDir . ;
 
 Main spargus_vehicle_prototype : src/Main.cpp
 src/Camera.cpp
-src/ModelLoader.cpp
-src/ModelRender.cpp
+src/ModelUtilities/ModelLoader.cpp
+src/ModelUtilities/ModelToBullet.cpp
+# TODO Remove
+# src/ModelUtilities/ModelRender.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/DebugDraw.cpp
