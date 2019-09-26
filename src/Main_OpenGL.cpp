@@ -12,6 +12,7 @@
 #include <map>
 
 #include "Camera.hpp"
+#include "DebugDraw.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
@@ -112,6 +113,10 @@ int main()
 	//
 
 	PhysicsWorld physicsWorld;
+	DebugDraw debugDrawer;
+	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	physicsWorld.world->setDebugDrawer(&debugDrawer);
+
 	PhysicsVehicle vehicle(physicsWorld);
 
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);

@@ -16,7 +16,10 @@ LINK = clang++ ;
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
-HDRS = src bullet3/src base2.0 ../ogre2-template/include ;
+HDRS = src bullet3/src ;
+
+SFML_HDRS = base2.0 ;
+OGRE_HDRS = ../ogre2-template/include ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
@@ -29,19 +32,9 @@ OPTIM = -O0 ;
 ## Linking
 ##
 
-LINKLIBS =
+COMMON_LIBS =
 # Standard
 -lpthread -ldl
-
-# SFML
--lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
-
-# OpenGL
--lGL
--lGLU
-
-# Base
--Lbase2.0 -lBase20
 
 # Bullet libraries
 -L$(BULLET3_BUILD_DIR)/src/BulletDynamics
@@ -61,8 +54,22 @@ LINKLIBS =
 # -lBulletSoftBody
 # -lBulletInverseDynamics
 # -lBulletInverseDynamicsUtils
+;
 
-# Mogre TODO only on ogre
+SFML_LIBS = 
+# SFML
+-lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
+
+# OpenGL
+-lGL
+-lGLU
+
+# Base
+-Lbase2.0 -lBase20
+;
+
+OGRE_LIBS =
+# Mogre
 -L../ogre2-template
 -lMogre
 # Ogre
@@ -85,11 +92,20 @@ LINKLIBS =
 -lOgre_glTF
 ;
 
+# Note that this is overridden by most Mains
+LINKLIBS =
+$(COMMONLIBS)
+;
+
 # LINKFLAGS = -Wl,-rpath,. ;
 
 # TODO: Copy libs to better directory, or static link?
-# TODO: Only do ogre stuff on ogre exe
-LINKFLAGS = -g
+LINKFLAGS =
+-g
+-Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision ;
+
+# This is a bit unfortunate: Jam does something weird when I try to append linkflags. I'll just copy paste for now
+OGRE_LINKFLAGS = -g
 -Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:../ogre2-template:../ogre2-template/build_ogre_gltf:../ogre2-template/Ogre/ogre/build/Release/lib ;
 
 ##

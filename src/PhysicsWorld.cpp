@@ -37,9 +37,10 @@ PhysicsWorld::PhysicsWorld()
 	world = new btDiscreteDynamicsWorld(collisionDispatcher, overlappingPairCache, constraintSolver,
 	                                    collisionConfiguration);
 
-	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	world->setDebugDrawer(&debugDrawer);
-
+	// Let the clients decide how this should be provided
+	// debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	// world->setDebugDrawer(&debugDrawer);
+	
 	if (bulletUseMCLPSolver)
 	{
 		// for direct solver it is better to have a small A matrix

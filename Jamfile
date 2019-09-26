@@ -1,19 +1,30 @@
 SubDir . ;
 
-Main spargus_vehicle_prototype : src/Main.cpp
-;
+SubDirHdrs $(SFML_HDRS) ;
 
-Main spargus_vehicle_prototype_ogre : src/Main_Ogre.cpp
-;
-
-Library libSpargus : src/Camera.cpp
-src/PhysicsVehicle.cpp
-src/PhysicsWorld.cpp
+# SFML/OpenGL based rendering
+Main spargus_vehicle_prototype_opengl : src/Main_OpenGL.cpp
 src/DebugDraw.cpp
 ;
+LINKLIBS on spargus_vehicle_prototype_opengl$(SUFEXE) = $(SFML_LIBS) $(COMMON_LIBS) ;
 
-LinkLibraries spargus_vehicle_prototype : libSpargus ;
-LinkLibraries spargus_vehicle_prototype_ogre : libSpargus ;
+# # Ogre based rendering
+# Main spargus_vehicle_prototype_ogre : src/Main_Ogre.cpp
+# ;
+# LINKLIBS on spargus_vehicle_prototype_ogre$(SUFEXE) = $(OGRE_LIBS) $(COMMON_LIBS) ;
 
+Library libSpargus :
+src/Math.cpp
+src/Camera.cpp
+src/Game.cpp
+src/PhysicsVehicle.cpp
+src/PhysicsWorld.cpp
+;
+
+LinkLibraries spargus_vehicle_prototype_opengl : libSpargus ;
+# LinkLibraries spargus_vehicle_prototype_ogre : libSpargus ;
+
+SubInclude . src ;
 # SubInclude . base2.0 ;
+
 

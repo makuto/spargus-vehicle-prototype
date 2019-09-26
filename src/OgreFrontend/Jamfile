@@ -1,0 +1,14 @@
+SubDir . src OgreFrontend ;
+
+SubDirHdrs $(OGRE_HDRS) ;
+
+# Ogre based rendering
+Main spargus_vehicle_prototype_ogre : Main_Ogre.cpp
+;
+LINKLIBS on spargus_vehicle_prototype_ogre$(SUFEXE) = $(OGRE_LIBS) $(COMMON_LIBS) ;
+LINKFLAGS on spargus_vehicle_prototype_ogre$(SUFEXE) = $(OGRE_LINKFLAGS) ;
+
+LinkLibraries spargus_vehicle_prototype_ogre : libSpargus ;
+
+MakeLocate spargus_vehicle_prototype_ogre$(SUFEXE) : . ;
+
