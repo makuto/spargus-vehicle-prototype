@@ -1,12 +1,14 @@
 #include "ModelToBullet.hpp"
 
+#include "PhysicsWorld.hpp"
+
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
 // This is an abomination
 // TODO It leaks memory
 // From bullet3/examples/SoftDemo/SoftDemo.cpp (with modifications)
-void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, btDiscreteDynamicsWorld* dynamicsWorld)
+void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, PhysicsWorld& world)
 {
 	size_t totalVerts = mesh.vertices.size() / 3;
 	size_t totalTriangles = mesh.vertices.size() / 3 / 3;
@@ -49,7 +51,6 @@ void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, btDiscreteDynamicsWor
 		// 		gGroundIndices[index++] = (j + 1) * NUM_VERTS_X + i + 1;
 		// 	}
 		// }
-		
 
 		btTriangleIndexVertexArray* indexVertexArrays =
 		    new btTriangleIndexVertexArray(totalTriangles, gGroundIndices, indexStride, totalVerts,
@@ -61,12 +62,16 @@ void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, btDiscreteDynamicsWor
 		groundShape->setMargin(0.5);
 	}
 
-	btCollisionObject* newOb = new btCollisionObject();
-	btTransform tr;
-	tr.setIdentity();
-	tr.setOrigin(btVector3(0, 0, 0));
-	newOb->setWorldTransform(tr);
-	newOb->setInterpolationWorldTransform(tr);
-	newOb->setCollisionShape(groundShape);
-	dynamicsWorld->addCollisionObject(newOb);
+	// This only handles collision. It must be a rigid body to receive raycasts etc.
+	// btCollisionObject* newOb = new btCollisionObject();
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(btVector3(0.0, 0.0, 0.0));
+	// newOb->setWorldTransform(transform);
+	// newOb->setInterpolationWorldTransform(transform);
+	// newOb->setCollisionShape(groundShape);
+
+	world.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, transform, groundShape);
+	
+	world.world->updateAabbs();
 }

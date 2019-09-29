@@ -99,71 +99,22 @@ void Camera::UpdateStart()
 
 void Camera::ChaseCamera(double* openGlMatrix)
 {
-	const double cameraHeight = 15.0;
-	const double cameraPullback = -15.0;
-	const double cameraPitch = 30.0;
+	const double cameraHeight = 4.0;
+	const double cameraPullback = 15.0;
+	// const double cameraPitch = 30.0;
 
 	// Undo old matrix
 	glPopMatrix();
 
 	glLoadIdentity();
 
-	// Look at method
-	// if (true)
-	// {
-	// 	// double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
-	// 	// openGlMatrix[14]};
-	// 	double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
-	// 	                     0.};  // openGlMatrix[14] + cameraPullback};
-	// 	// Offset position
-	// 	// Look at target
-	// 	double targetPosition[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
-	// 	// double targetPosition[] = {0., 0., 0.};
-	// 	gluLookAt(
-	// 	    /*Position=*/position[0], position[1], position[2],
-	// 	    /*Look at (world space)=*/targetPosition[0], targetPosition[1], targetPosition[2],
-	// 	    /*Up vector=*/0, 1, 0);
-	// }
+	glRotatef(180.f, 0, 1, 0);
+	glTranslatef(0.f, -cameraHeight, cameraPullback);
 
-	// Look at method 2
-	if (false)
-	{
-		// double position[] = {openGlMatrix[12], openGlMatrix[13] + cameraHeight,
-		// openGlMatrix[14]};
-		double position[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
-		// Offset position
-		// Look at target
-		double targetPosition[] = {openGlMatrix[12], openGlMatrix[13], openGlMatrix[14]};
-		// double targetPosition[] = {0., 0., 0.};
-		gluLookAt(
-		    /*Position=*/position[0], position[1], position[2],
-		    /*Look at (world space)=*/targetPosition[0], targetPosition[1], targetPosition[2],
-		    /*Up vector=*/0, 1, 0);
+	glMultMatrixd(openGlMatrix);
 
-		// glTranslatef(0.f, cameraHeight, cameraPullback);
-	}
-
-	// Manual method
-	if (true)
-	{
-		glRotatef(180.f, 0, 1, 0);
-		// glTranslatef(0.f, -cameraHeight, cameraPullback);
-		glTranslatef(0.f, -4.f, 8.f);
-		// double rotMatNoTransform[][4] = {
-		//     {openGlMatrix[0], openGlMatrix[1], openGlMatrix[2], 0},
-		//     {openGlMatrix[4], openGlMatrix[5], openGlMatrix[6], 0},
-		//     {openGlMatrix[7], openGlMatrix[8], openGlMatrix[9], 0},
-		//     {0., 0., 0., 1.},
-		// };
-
-		glMultMatrixd(openGlMatrix);
-		// glMultMatrixd(rotMatNoTransform);
-		// glRotatef(camRot[0], 1, 0, 0);
-		// glRotatef(camRot[2], 0, 0, 1);
-
-		// Pitch camera
-		// glRotated(cameraPitch, 1, 0, 0);
-	}
+	// Pitch camera
+	// glRotated(cameraPitch, 1, 0, 0);
 
 	glPushMatrix();
 }

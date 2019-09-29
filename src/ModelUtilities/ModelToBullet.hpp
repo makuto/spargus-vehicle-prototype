@@ -2,6 +2,6 @@
 
 #include "mesh.h"
 
-class btDiscreteDynamicsWorld;
+struct PhysicsWorld;
 
-void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, btDiscreteDynamicsWorld* dynamicsWorld);
+void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, PhysicsWorld& world);

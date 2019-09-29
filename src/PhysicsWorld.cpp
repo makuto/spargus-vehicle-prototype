@@ -20,8 +20,8 @@ PhysicsWorld::PhysicsWorld()
 	// m_collisionShapes.push_back(groundShape);
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-	btVector3 worldMin(-1000, -1000, -1000);
-	btVector3 worldMax(1000, 1000, 1000);
+	btVector3 worldMin(-5000.0, -5000.0, -5000.0);
+	btVector3 worldMax(5000.0, 5000.0, 5000.0);
 	overlappingPairCache = new btAxisSweep3(worldMin, worldMax);
 	if (bulletUseMCLPSolver)
 	{
@@ -37,7 +37,14 @@ PhysicsWorld::PhysicsWorld()
 	world = new btDiscreteDynamicsWorld(collisionDispatcher, overlappingPairCache, constraintSolver,
 	                                    collisionConfiguration);
 
-	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	// debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	debugDrawer.setDebugMode(
+		btIDebugDraw::DBG_DrawWireframe //|
+		// btIDebugDraw::DBG_DrawAabb |
+		// btIDebugDraw::DBG_DrawContactPoints
+		// btIDebugDraw::DBG_DrawNormals
+		);
+
 	world->setDebugDrawer(&debugDrawer);
 
 	if (bulletUseMCLPSolver)
@@ -68,7 +75,7 @@ PhysicsWorld::PhysicsWorld()
 		tr.setIdentity();
 		tr.setOrigin(btVector3(0, -3, 0));
 
-		localCreateRigidBody(0, tr, groundShape);
+		localCreateRigidBody(StaticRigidBodyMass, tr, groundShape);
 	}
 }
 
@@ -78,6 +85,9 @@ void PhysicsWorld::Update(float deltaTime)
 
 	if (world)
 	{
+		
+		world->updateAabbs();
+		
 		// during idle mode, just run 1 simulation step maximum
 		int maxSimSubSteps = 2;
 
@@ -138,7 +148,6 @@ btRigidBody* PhysicsWorld::localCreateRigidBody(btScalar mass, const btTransform
 
 		// using motionstate is recommended, it provides interpolation capabilities, and only
 		// synchronizes 'active' objects
-
 #define USE_MOTIONSTATE 1
 #ifdef USE_MOTIONSTATE
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);

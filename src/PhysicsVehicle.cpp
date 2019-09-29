@@ -8,8 +8,6 @@
 // Vehicle constants
 //
 
-#define CUBE_HALF_EXTENTS 1
-
 const btVector3 wheelDirectionCS0(0, -1, 0);
 const btVector3 wheelAxleCS(-1, 0, 0);
 
@@ -19,35 +17,38 @@ const btVector3 wheelAxleCS(-1, 0, 0);
 
 PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsWorld)
 {
+	float cubeHalfExtents = chassisLength / 2.f;
+
 	// Create chassis
 	{
-		btCollisionShape* chassisShape = new btBoxShape(btVector3(1.f, 0.5f, 2.f));
+		btCollisionShape* chassisShape =
+		    new btBoxShape(btVector3(chassisWidth, chassisHeight, chassisLength));
 		collisionShapes.push_back(chassisShape);
 
 		btCompoundShape* compound = new btCompoundShape();
 		collisionShapes.push_back(compound);
-		btTransform localTrans;
-		localTrans.setIdentity();
-		// localTrans effectively shifts the center of mass with respect to the chassis
-		localTrans.setOrigin(btVector3(0, 1, 0));
+		btTransform localTransform;
+		localTransform.setIdentity();
+		// localTransform effectively shifts the center of mass with respect to the chassis
+		localTransform.setOrigin(btVector3(0, 1, 0));
 
-		compound->addChildShape(localTrans, chassisShape);
+		compound->addChildShape(localTransform, chassisShape);
 
-		{
-			btCollisionShape* suppShape = new btBoxShape(btVector3(0.5f, 0.1f, 0.5f));
-			btTransform suppLocalTrans;
-			suppLocalTrans.setIdentity();
-			// localTrans effectively shifts the center of mass with respect to the chassis
-			suppLocalTrans.setOrigin(btVector3(0, 1.0, 2.5));
-			compound->addChildShape(suppLocalTrans, suppShape);
-		}
+		// This was the lift or something for the forklift reference. Commented for future ref
+		// {
+		// 	btCollisionShape* suppShape = new btBoxShape(btVector3(0.5f, 0.1f, 0.5f));
+		// 	btTransform suppLocalTrans;
+		// 	suppLocalTrans.setIdentity();
+		// 	// localTransform effectively shifts the center of mass with respect to the chassis
+		// 	suppLocalTrans.setOrigin(btVector3(0, 1.0, 2.5));
+		// 	compound->addChildShape(suppLocalTrans, suppShape);
+		// }
 
 		btTransform transform;
 		transform.setIdentity();
-		// transform.setOrigin(btVector3(0, -3, 0));
-		transform.setOrigin(btVector3(0, 0.f, 0));
+		transform.setOrigin(btVector3(0, -3, 0));
 
-		carChassis = physicsWorld.localCreateRigidBody(800, transform, compound);
+		carChassis = physicsWorld.localCreateRigidBody(massKg, transform, compound);
 		// carChassis->setDamping(0.2,0.2);
 
 		/// never deactivate the vehicle
@@ -61,30 +62,28 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 	// Create wheels
 	{
-		float connectionHeight = 1.2f;
-
 		bool isFrontWheel = true;
 
 		// choose coordinate system
 		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
 
-		btVector3 connectionPointCS0(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
-		                             2 * CUBE_HALF_EXTENTS - wheelRadius);
+		btVector3 connectionPointCS0(cubeHalfExtents - (0.3 * wheelWidth), connectionHeight,
+		                             2 * cubeHalfExtents - wheelRadius);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
-		                               2 * CUBE_HALF_EXTENTS - wheelRadius);
+		connectionPointCS0 = btVector3(-cubeHalfExtents + (0.3 * wheelWidth), connectionHeight,
+		                               2 * cubeHalfExtents - wheelRadius);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-CUBE_HALF_EXTENTS + (0.3 * wheelWidth), connectionHeight,
-		                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
+		connectionPointCS0 = btVector3(-cubeHalfExtents + (0.3 * wheelWidth), connectionHeight,
+		                               -2 * cubeHalfExtents + wheelRadius);
 		isFrontWheel = false;
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(CUBE_HALF_EXTENTS - (0.3 * wheelWidth), connectionHeight,
-		                               -2 * CUBE_HALF_EXTENTS + wheelRadius);
+		connectionPointCS0 = btVector3(cubeHalfExtents - (0.3 * wheelWidth), connectionHeight,
+		                               -2 * cubeHalfExtents + wheelRadius);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 
@@ -159,19 +158,28 @@ void PhysicsVehicle::Reset()
 
 void PhysicsVehicle::Update(float deltaTime)
 {
-	int wheelIndex = 2;
-	vehicle->applyEngineForce(EngineForce, wheelIndex);
-	vehicle->setBrake(BrakingForce, wheelIndex);
-	wheelIndex = 3;
-	vehicle->applyEngineForce(EngineForce, wheelIndex);
-	vehicle->setBrake(BrakingForce, wheelIndex);
+	// Rear-wheel drive
+	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)
+	{
+		vehicle->applyEngineForce(EngineForce, wheelIndex);
+		vehicle->setBrake(BrakingForce, wheelIndex);
+	}
 
-	wheelIndex = 0;
-	vehicle->setSteeringValue(VehicleSteering, wheelIndex);
-	wheelIndex = 1;
-	vehicle->setSteeringValue(VehicleSteering, wheelIndex);
+	// Steering
+	for (int wheelIndex = 0; wheelIndex < 2; ++wheelIndex)
+	{
+		vehicle->setSteeringValue(VehicleSteering, wheelIndex);
+	}
 
 	// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
 	// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
-	//           << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
+	          // << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
+
+	if (false)
+	{
+		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
+		std::cout << "Vehicle location: " << vehicleTransform.getOrigin().getX() << ", "
+		          << vehicleTransform.getOrigin().getY() << ", "
+		          << vehicleTransform.getOrigin().getZ() << "\n";
+	}
 }

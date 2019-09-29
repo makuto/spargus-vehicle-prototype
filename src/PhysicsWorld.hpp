@@ -33,6 +33,9 @@ struct PhysicsWorld
 	void Update(float deltaTime);
 	void DebugRender();
 
+	// rigidbody is dynamic if and only if mass is non zero, otherwise static
+	static constexpr btScalar StaticRigidBodyMass = 0.f;
+
 	btRigidBody* localCreateRigidBody(btScalar mass, const btTransform& startTransform,
 	                                  btCollisionShape* shape);
 };
