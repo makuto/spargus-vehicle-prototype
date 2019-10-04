@@ -70,6 +70,7 @@ private:
 	float rollInfluence = 0.1f;  // 1.0f;
 	btScalar suspensionRestLength = 0.6;
 	
+public:
 	// Control constants
 	float maxEngineForce = 1000.f;  // this should be engine/velocity dependent
 	float maxBrakingForce = 100.f;
