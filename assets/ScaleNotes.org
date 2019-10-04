@@ -1,0 +1,49 @@
+* Dimensions
+
+| Thing       | Dimension      | Size (meters) |
+|-------------+----------------+---------------|
+| Jak         | Height         |         1.799 |
+| Car         | Width          |       3.61509 |
+| Chassis     | Width          |         1.418 |
+|             | Length         |       4.42349 |
+|             | Height (front) |           0.5 |
+|             | Height (rear)  |        2.2447 |
+| Rear wheel  | Diameter       |        1.6439 |
+|             | Width (tread)  |          0.54 |
+| Front wheel | Diameter       |       1.29046 |
+|             | Width (tread)  |         0.419 |
+
+** DesertScreamer_Rear
+Jak is 664 pixels tall
+1.799m
+(from [[https://msis.jsc.nasa.gov/sections/section03.htm#3.3.1%20Body%20Size][NASA body size]])
+
+Car is 1236 pixels wide (including wheels)
+0.53 Jak height to car width (or vise versa)
+
+Actual car width (had to eyeball due to perspective): 3.61509m
+
+Chassis width 485px 0.39 of total car width (1.418m). Roll cage referenced.
+It would be a smart idea to roll the car and look at its skidplate...
+
+Chassis height is eyeballed. It is top of seat, not top of frame.
+
+** DesertScreamer_Side
+Rear wheel has 713 pixel diameter
+From front of rear wheel to back of front wheel = 641px (0.899 of 1 wheel)
+
+Front wheel is 0.785 of 1 wheel
+
+* Mass
+Average dune buggy ~1000lbs (453kg)
+
+[[https://en.wikipedia.org/wiki/Dune_buggy][Wikipedia on dune buggies]]
+
+* Screen position
+Camera pulls out and pitches a bit upwards when moving.
+** Moving
+Front of car to bottom of screen: 373px
+to top of screen: 490px
+
+Car takes up bottom 43%
+

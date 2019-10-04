@@ -12,6 +12,8 @@
 #include <map>
 
 #include "Camera.hpp"
+#include "ModelUtilities/ModelLoader.hpp"
+#include "ModelUtilities/ModelToBullet.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
@@ -119,8 +121,29 @@ int main()
 
 	inputManager input(&mainWindow);
 
+	// Ground mesh from GLTF
+	{
+		// if (!LoadModelFromGltf("assets/World.glb", groundModel))
+		std::vector<gltf::Mesh<float>> meshes;
+		std::vector<gltf::Material> materials;
+		std::vector<gltf::Texture> textures;
+		bool debugOutput = false;
+		if (!gltf::LoadGLTF("assets/World.glb", /*scale=*/1.f, &meshes, &materials, &textures,
+		                    debugOutput))
+			// if (!gltf::LoadGLTF("assets/Plane.glb", /*scale=*/50.f, &meshes, &materials, &textures,
+		                    // debugOutput))
+			return 1;
+		for (const gltf::Mesh<float>& mesh : meshes)
+			BulletMeshFromGltfMesh(mesh, physicsWorld);
+	}
+
+	// initModel(groundModel);
+
+	// GLCallListIndex groundModelCallList = buildCallListFromModel(groundModel);
+	// GLCallListIndex groundModelCallList = buildCallListFromModel2(groundModel);
+
 	// OpenGL world setup
-	GLuint groundCallList = -1;
+	int groundCallList = -1;
 	{
 		glEnable(GL_DEPTH_TEST);
 		// glEnable(GL_LIGHTING);
@@ -132,7 +155,8 @@ int main()
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 
-		gluPerspective(60, mainWindow.getWidth() / mainWindow.getHeight(), 1, 500);
+		float fieldOfView = 60.f;
+		gluPerspective(fieldOfView, mainWindow.getWidth() / mainWindow.getHeight(), 1, 500);
 		glRotatef(0, 0, 1, 0);
 
 		// Floor
@@ -185,6 +209,7 @@ int main()
 
 	Camera cam(mainWindow);
 	bool useChaseCam = true;
+	// bool useChaseCam = false;
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
@@ -209,7 +234,7 @@ int main()
 			cam.ChaseCamera(vehicleMat);
 		}
 
-		glCallList(groundCallList);
+		// glCallList(groundCallList);
 
 		physicsWorld.DebugRender();
 

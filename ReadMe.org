@@ -8,7 +8,10 @@ Clone and init submodules for dependencies:
 git clone --recurse-submodules https://github.com/makuto/spargus-vehicle-prototype
 #+END_SRC
 
-Install Jam. (*TODO:* add instructions)
+Jam is used to build the project. Install Jam:
+#+BEGIN_SRC sh
+sudo apt install jam
+#+END_SRC
 
 *** SFML Setup
 SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL (I should dump base2.0 eventually...) 

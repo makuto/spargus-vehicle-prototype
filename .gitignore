@@ -30,3 +30,21 @@
 *.exe
 *.out
 *.app
+spargus_vehicle_prototype
+spargus_vehicle_prototype_ogre
+spargus_vehicle_prototype_opengl
+
+# Blender backups
+*.blend1
+
+# Emacs stuff
+TAGS
+
+# Ogre stuff
+*.cache
+Ogre.log
+hlmsDiskCache*
+100000000PixelShader_ps.glsl
+100000000VertexShader_vs.glsl
+300000000PixelShader_ps.glsl
+300000000VertexShader_vs.glsl
