@@ -22,7 +22,7 @@
 // int WindowHeight = 700;
 int WindowWidth = 1920;
 int WindowHeight = 1080;
-#define WIN_BACKGROUND_COLOR 34, 34, 34, 255
+#define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
 void initializeWindow(window& win)
 {
@@ -128,10 +128,11 @@ int main()
 		std::vector<gltf::Material> materials;
 		std::vector<gltf::Texture> textures;
 		bool debugOutput = false;
-		if (!gltf::LoadGLTF("assets/World.glb", /*scale=*/1.f, &meshes, &materials, &textures,
+		const char* groundModelFilename = "assets/World.glb";
+		// const char* groundModelFilename = "assets/Plane.glb";
+		// const char* groundModelFilename = "assets/Mountain.glb";
+		if (!gltf::LoadGLTF(groundModelFilename, /*scale=*/1.f, &meshes, &materials, &textures,
 		                    debugOutput))
-			// if (!gltf::LoadGLTF("assets/Plane.glb", /*scale=*/50.f, &meshes, &materials, &textures,
-		                    // debugOutput))
 			return 1;
 		for (const gltf::Mesh<float>& mesh : meshes)
 			BulletMeshFromGltfMesh(mesh, physicsWorld);
