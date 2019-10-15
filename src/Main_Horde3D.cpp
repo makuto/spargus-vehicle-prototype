@@ -238,7 +238,7 @@ int main()
 			btScalar vehicleMat[16];
 			// vehicleTransform.getOpenGLMatrix(vehicleMat);
 			camTransform.getOpenGLMatrix(vehicleMat);
-			h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1, 1, 1);
+			// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1, 1, 1);
 			
 			cam.ChaseCamera(vehicleMat);
 		}

@@ -2,7 +2,8 @@
 #include <Horde3D.h>
 #include <Horde3DUtils.h>
 
-H3DNode model = 0, cam = 0;
+H3DNode model = 0;
+H3DNode hordeCamera = 0;
 
 void hordeInitialize(int winWidth, int winHeight)
 {
@@ -27,17 +28,17 @@ void hordeInitialize(int winWidth, int winHeight)
 	H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
 	// Set light position and radius
 	h3dSetNodeTransform(light, 0, 20, 0, 0, 0, 0, 1, 1, 1);
-	h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 50.0f);
+	h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 500.0f);
 
 	// Add camera
-	cam = h3dAddCameraNode(H3DRootNode, "Camera", pipeRes);
+	hordeCamera = h3dAddCameraNode(H3DRootNode, "Camera", pipeRes);
 
 	// Setup viewport and render target sizes
-	h3dSetNodeParamI(cam, H3DCamera::ViewportXI, 0);
-	h3dSetNodeParamI(cam, H3DCamera::ViewportYI, 0);
-	h3dSetNodeParamI(cam, H3DCamera::ViewportWidthI, winWidth);
-	h3dSetNodeParamI(cam, H3DCamera::ViewportHeightI, winHeight);
-	h3dSetupCameraView(cam, 45.0f, (float)winWidth / winHeight, 0.5f, 2048.0f);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportXI, 0);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, 0);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, winWidth);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, winHeight);
+	h3dSetupCameraView(hordeCamera, 60.0f, (float)winWidth / winHeight, 0.5f, 2048.0f);
 	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 }
 
@@ -58,7 +59,7 @@ void hordeUpdate(float fps)
 	                    1, 1, 1);             // Scale
 
 	// Render scene
-	h3dRender(cam);
+	h3dRender(hordeCamera);
 
 	// Finish rendering of frame
 	h3dFinalizeFrame();

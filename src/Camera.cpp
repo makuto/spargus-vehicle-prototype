@@ -6,6 +6,12 @@
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
+#define HANDMADE_MATH_IMPLEMENTATION
+#include "HandmadeMath.h"
+
+#include "Render_Horde3D.hpp"
+#include <Horde3D.h>
+
 Camera::Camera(window& winOwner) : win(winOwner)
 {
 	winBase = win.getBase();
@@ -87,14 +93,14 @@ void Camera::UpdateStart()
 	camPos[2] += camTranslate[2];
 
 	// Define the camera matrix
-	glLoadIdentity();
-	gluLookAt(0, 0, 1, 0, 0, -1, 0, 1, 0);
-	glRotatef(camRot[0], 1, 0, 0);
-	glRotatef(camRot[1], 0, 1, 0);
-	glRotatef(camRot[2], 0, 0, 1);
+	// glLoadIdentity();
+	// gluLookAt(0, 0, 1, 0, 0, -1, 0, 1, 0);
+	// glRotatef(camRot[0], 1, 0, 0);
+	// glRotatef(camRot[1], 0, 1, 0);
+	// glRotatef(camRot[2], 0, 0, 1);
 
-	glTranslatef(-camPos[0], camPos[1], -camPos[2]);
-	glPushMatrix();
+	// glTranslatef(-camPos[0], camPos[1], -camPos[2]);
+	// glPushMatrix();
 }
 
 void Camera::ChaseCamera(double* openGlMatrix)
@@ -102,21 +108,22 @@ void Camera::ChaseCamera(double* openGlMatrix)
 	const double cameraHeight = 4.0;
 	const double cameraPullback = 15.0;
 	// const double cameraPitch = 30.0;
+	
+	hmm_mat4* carMatrix = reinterpret_cast<hmm_mat4*>(openGlMatrix);
 
-	// Undo old matrix
-	glPopMatrix();
+	hmm_vec3 rotateYAxis = {0, 1, 0};
+	hmm_mat4 camMatrix = HMM_Rotate(180.f, rotateYAxis);
+	camMatrix.Elements[3][0] = 0.f;
+    camMatrix.Elements[3][1] = -cameraHeight;
+    camMatrix.Elements[3][2] = cameraPullback;
 
-	glLoadIdentity();
-
-	glRotatef(180.f, 0, 1, 0);
-	glTranslatef(0.f, -cameraHeight, cameraPullback);
-
-	glMultMatrixd(openGlMatrix);
+	HMM_MultiplyMat4(camMatrix, *carMatrix);
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);
 
-	glPushMatrix();
+	// Not sure if this cast is necessary (just use .Elements?)
+	h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(camMatrix.Elements));
 }
 
 void Camera::UpdateEnd()
@@ -126,5 +133,5 @@ void Camera::UpdateEnd()
 	camTranslate[1] = 0;
 	camTranslate[2] = 0;
 
-	glPopMatrix();
+	// glPopMatrix();
 }

@@ -1,13 +1,13 @@
 SubDir . ;
 
-Main spargus_vehicle_prototype : src/Main.cpp
-src/Camera.cpp
-src/ModelUtilities/ModelLoader.cpp
-src/ModelUtilities/ModelToBullet.cpp
-src/PhysicsVehicle.cpp
-src/PhysicsWorld.cpp
-src/DebugDraw.cpp
-;
+# Main spargus_vehicle_prototype : src/Main.cpp
+# src/Camera.cpp
+# src/ModelUtilities/ModelLoader.cpp
+# src/ModelUtilities/ModelToBullet.cpp
+# src/PhysicsVehicle.cpp
+# src/PhysicsWorld.cpp
+# src/DebugDraw.cpp
+# ;
 
 
 Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
