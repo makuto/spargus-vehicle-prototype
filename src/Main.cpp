@@ -209,8 +209,8 @@ int main()
 	frameTimer.start();
 
 	Camera cam(mainWindow);
-	bool useChaseCam = true;
-	// bool useChaseCam = false;
+	// bool useChaseCam = true;
+	bool useChaseCam = false;
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{

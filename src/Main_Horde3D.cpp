@@ -28,6 +28,15 @@ int WindowHeight = 1080;
 
 void initializeWindow(window& win)
 {
+	{
+		sf::ContextSettings settings = win.getBase()->getSettings();
+
+		std::cout << "depth bits:" << settings.depthBits << std::endl;
+		std::cout << "stencil bits:" << settings.stencilBits << std::endl;
+		std::cout << "antialiasing level:" << settings.antialiasingLevel << std::endl;
+		std::cout << "version:" << settings.majorVersion << "." << settings.minorVersion
+		          << std::endl;
+	}
 	win.setBackgroundColor(WIN_BACKGROUND_COLOR);
 
 	// shouldClose manages some state
@@ -107,6 +116,21 @@ void processInput(inputManager& input, PhysicsVehicle& vehicle)
 	}
 }
 
+// See https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
+struct WindowScopedContextActivate
+{
+	window& win;
+	WindowScopedContextActivate(window& newWin) : win(newWin)
+	{
+		win.getBase()->setActive(true);
+	}
+
+	~WindowScopedContextActivate()
+	{
+		win.getBase()->setActive(false);
+	}
+};
+
 int main()
 {
 	std::cout << "Spargus Vehicle Prototype\n";
@@ -120,8 +144,11 @@ int main()
 
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
 	initializeWindow(mainWindow);
-	
-	hordeInitialize(WindowWidth, WindowHeight);
+
+	{
+		WindowScopedContextActivate activate(mainWindow);
+		hordeInitialize(WindowWidth, WindowHeight);
+	}
 
 	inputManager input(&mainWindow);
 
@@ -216,11 +243,13 @@ int main()
 	Camera cam(mainWindow);
 	bool useChaseCam = true;
 	// bool useChaseCam = false;
-	
+
 	mainWindow.shouldClear(false);
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
+		mainWindow.getBase()->setActive(true);
+
 		if (!useChaseCam)
 			cam.FreeCam(input);
 		cam.UpdateStart();
@@ -238,20 +267,32 @@ int main()
 			btScalar vehicleMat[16];
 			// vehicleTransform.getOpenGLMatrix(vehicleMat);
 			camTransform.getOpenGLMatrix(vehicleMat);
-			// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1, 1, 1);
-			
+			// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1, 1,
+			// 1);
+
 			cam.ChaseCamera(vehicleMat);
 		}
 
-		// glCallList(groundCallList);
-		hordeUpdate(previousFrameTime);
-		
+		glCallList(groundCallList);
+
+		// hordeUpdate(previousFrameTime);
+		GLenum eError = glGetError();
+		if (eError)
+			std::cout << eError;
 		physicsWorld.DebugRender();
-		
+		eError = glGetError();
+		if (eError)
+			std::cout << eError;
+
 		cam.UpdateEnd();
 
 		// Finished physics update and drawing; send it on its way
 		mainWindow.update();
+		eError = glGetError();
+		if (eError)
+			std::cout << eError;
+
+		mainWindow.getBase()->setActive(false);
 
 		previousFrameTime = frameTimer.getTime();
 		frameTimer.start();

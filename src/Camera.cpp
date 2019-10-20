@@ -67,6 +67,16 @@ void Camera::FreeCam(inputManager& input)
 		                       *winBase);
 		prevY = win.getHeight() / 2;
 	}
+
+	hmm_vec3 rotateYAxis = {0, 1, 0};
+	hmm_vec3 rotateXAxis = {1, 0, 0};
+	hmm_mat4 camMatrix = HMM_Rotate(camRot[0], rotateXAxis);
+	hmm_mat4 camMatrixRotY = HMM_Rotate(camRot[1], rotateYAxis);
+	camMatrix = HMM_MultiplyMat4(camMatrix, camMatrixRotY);	
+	camMatrix.Elements[3][0] = camPos[0];
+	camMatrix.Elements[3][1] = camPos[1];
+	camMatrix.Elements[3][2] = camPos[2];
+	h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
 }
 
 void Camera::UpdateStart()
@@ -117,7 +127,7 @@ void Camera::ChaseCamera(double* openGlMatrix)
     camMatrix.Elements[3][1] = -cameraHeight;
     camMatrix.Elements[3][2] = cameraPullback;
 
-	HMM_MultiplyMat4(camMatrix, *carMatrix);
+	camMatrix = HMM_MultiplyMat4(camMatrix, *carMatrix);
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);
