@@ -1,0 +1,9 @@
+<Model name="BasicBuggy" geometry="assets/BasicBuggy.geo">
+
+	<Mesh name="Chassis" material="assets/BasicBuggy_Material.material.xml" tx="1.80757" ty="0.827908" tz="-2.98023e-08" batchStart="0" batchCount="66" vertRStart="0" vertREnd="47">
+		<Mesh name="Wheel_Rear.LR" material="assets/BasicBuggy_Material.003.material.xml" tx="1.53702" ty="0" tz="0" batchStart="66" batchCount="8064" vertRStart="48" vertREnd="7075" />
+		<Mesh name="Wheel_Front.LR" material="assets/BasicBuggy_Material.003.material.xml" tx="1.47884" ty="-0.178" tz="3.13595" sx="0.785" sy="0.785" sz="0.785" batchStart="8130" batchCount="8064" vertRStart="7076" vertREnd="14103" />
+		<Mesh name="Chassis_RollCage" material="assets/BasicBuggy_Material.001.material.xml" batchStart="16194" batchCount="27060" vertRStart="14104" vertREnd="39684" />
+		<Mesh name="Seat" material="assets/BasicBuggy_Material.002.material.xml" tx="0" ty="-0.716124" tz="0.569162" rx="0.0351764" ry="87.7048" rz="-4.41618" sx="1.00129" sy="1.00001" sz="1.61802" batchStart="43254" batchCount="324" vertRStart="39685" vertREnd="39902" />
+	</Mesh>
+</Model>

@@ -152,7 +152,7 @@ int main()
 				cameraPos[2] += camSpeed * frameTimer.getTime();				
 			}
 
-			std::cout << cameraPos[0] << ", " << cameraPos[1] << ", " << cameraPos[2] << "\n";
+			// std::cout << cameraPos[0] << ", " << cameraPos[1] << ", " << cameraPos[2] << "\n";
 			h3dSetNodeTransform(hordeCamera, cameraPos[0], cameraPos[1], cameraPos[2], 0, 0, 0, 1,
 			                    1, 1);
 		}
