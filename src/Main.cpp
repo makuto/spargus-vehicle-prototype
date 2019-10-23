@@ -215,7 +215,7 @@ int main()
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
 		if (!useChaseCam)
-			cam.FreeCam(input);
+			cam.FreeCam(input, lastFrameTime);
 		cam.UpdateStart();
 
 		processInput(input, vehicle);

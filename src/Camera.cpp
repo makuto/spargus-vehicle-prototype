@@ -19,8 +19,18 @@ Camera::Camera(window& winOwner) : win(winOwner)
 	sf::Mouse::setPosition(sf::Vector2i(win.getWidth() / 2, win.getHeight() / 2), *winBase);
 }
 
-void Camera::FreeCam(inputManager& input)
+void Camera::FreeCam(inputManager& input, float frameTime)
 {
+	float horizontalSpeed = 20.f;
+	float verticalSpeed = 20.f;
+
+	// Slow camera motion while holding shift
+	if (input.isPressed(inputCode::RShift) || input.isPressed(inputCode::LShift))
+	{
+		horizontalSpeed = 2.f;
+		verticalSpeed = 2.f;
+	}
+
 	if (input.isPressed(inputCode::W))
 	{
 		/* yrotrad = (yrot / 180 * 3.141592654f);
@@ -28,34 +38,43 @@ void Camera::FreeCam(inputManager& input)
 		    xpos += float(sin(yrotrad)) ;
 		    zpos -= float(cos(yrotrad)) ;
 		 * */
-		camTranslate[0] += float(sin(camRot[1] / 180 * 3.141592654));
-		camTranslate[2] -= float(cos(camRot[1] / 180 * 3.141592654));
+		camTranslate[0] +=
+		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		camTranslate[2] -=
+		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		// camPos[1]=-10;
 	}
 	if (input.isPressed(inputCode::S))
 	{
-		camTranslate[0] -= float(sin(camRot[1] / 180 * 3.141592654));
-		camTranslate[2] += float(cos(camRot[1] / 180 * 3.141592654));
+		camTranslate[0] -=
+		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		camTranslate[2] +=
+		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		// camTranslate[2]=50*win.GetFrameTime();
 		// camPos[1]=-10;
 	}
 	if (input.isPressed(inputCode::A))
 	{
-		camTranslate[0] -= float(cos(camRot[1] / 180 * 3.141592654));
-		camTranslate[2] -= float(sin(camRot[1] / 180 * 3.141592654));
+		camTranslate[0] -=
+		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		camTranslate[2] -=
+		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 	}
 	if (input.isPressed(inputCode::D))
 	{
-		camTranslate[0] += float(cos(camRot[1] / 180 * 3.141592654));
-		camTranslate[2] += float(sin(camRot[1] / 180 * 3.141592654));
+		camTranslate[0] +=
+		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		camTranslate[2] +=
+		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 	}
+
 	if (input.isPressed(inputCode::Q))
 	{
-		camTranslate[1] -= 1.f;
+		camTranslate[1] -= verticalSpeed * frameTime;
 	}
 	if (input.isPressed(inputCode::E))
 	{
-		camTranslate[1] += 1.f;
+		camTranslate[1] += verticalSpeed * frameTime;
 	}
 
 	// camRot[1]=(10*(in->GetMouseX()*win.GetWidth()/10) + 400)/win.GetWidth();

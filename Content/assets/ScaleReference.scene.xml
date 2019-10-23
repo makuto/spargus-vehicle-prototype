@@ -1,0 +1,8 @@
+<Model name="ScaleReference" geometry="assets/ScaleReference.geo">
+
+	<Mesh name="Wheel_Front.RL" material="assets/ScaleReference_Material.001.material.xml" tx="3.28641" ty="0.649908" tz="3.13595" sx="0.785" sy="0.785" sz="0.785" batchStart="0" batchCount="744" vertRStart="0" vertREnd="464" />
+	<Mesh name="Chassis" material="assets/ScaleReference_Material.001.material.xml" tx="1.80757" ty="0.827908" tz="-2.98023e-08" batchStart="744" batchCount="60" vertRStart="465" vertREnd="500" />
+	<Mesh name="Wheel_Rear.R" material="assets/ScaleReference_Material.001.material.xml" tx="3.34459" ty="0.827908" tz="-2.98023e-08" batchStart="804" batchCount="372" vertRStart="501" vertREnd="731" />
+	<Mesh name="Wheel_Rear.L" material="assets/ScaleReference_Material.001.material.xml" tx="0.270553" ty="0.827908" tz="-2.98023e-08" batchStart="1176" batchCount="372" vertRStart="732" vertREnd="956" />
+	<Mesh name="AdultMaleReference" material="assets/ScaleReference_Material.001.material.xml" batchStart="1548" batchCount="36" vertRStart="957" vertREnd="980" />
+</Model>

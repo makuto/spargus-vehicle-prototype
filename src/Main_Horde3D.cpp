@@ -239,8 +239,8 @@ int main()
 		std::vector<gltf::Material> materials;
 		std::vector<gltf::Texture> textures;
 		bool debugOutput = false;
-		const char* groundModelFilename = "assets/World.glb";
-		// const char* groundModelFilename = "assets/Plane.glb";
+		// const char* groundModelFilename = "assets/World.glb";
+		const char* groundModelFilename = "assets/Plane.glb";
 		// const char* groundModelFilename = "assets/Mountain.glb";
 		if (!gltf::LoadGLTF(groundModelFilename, /*scale=*/1.f, &meshes, &materials, &textures,
 		                    debugOutput))
@@ -276,7 +276,7 @@ int main()
 		// Camera
 		{
 			if (!useChaseCam)
-				cam.FreeCam(input);
+				cam.FreeCam(input, previousFrameTime);
 			cam.UpdateStart();
 			// Use vehicle transform to position camera
 			if (useChaseCam)

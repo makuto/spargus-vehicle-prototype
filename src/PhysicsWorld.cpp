@@ -77,6 +77,23 @@ PhysicsWorld::PhysicsWorld()
 
 		localCreateRigidBody(StaticRigidBodyMass, tr, groundShape);
 	}
+
+	// Scale sync with Adult Male Reference from assets/ScaleReference.blend
+	if (false)
+	{
+		float height = 1.799f;
+		btVector3 scaleReferenceExtents(0.249f / 2.f, height / 2.f, 0.55f / 2.f);
+		// scaleReferenceExtents[upAxisIndex] = 3;
+		btCollisionShape* shape = new btBoxShape(scaleReferenceExtents);
+		// TODO Don't leak this
+		// collisionShapes.push_back(shape);
+
+		btTransform tr;
+		tr.setIdentity();
+		tr.setOrigin(btVector3(0.f, height / 2.f, 0.f));
+
+		localCreateRigidBody(StaticRigidBodyMass, tr, shape);
+	}
 }
 
 void PhysicsWorld::Update(float deltaTime)

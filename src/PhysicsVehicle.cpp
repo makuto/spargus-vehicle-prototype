@@ -17,18 +17,20 @@ const btVector3 wheelAxleCS(-1, 0, 0);
 
 PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsWorld)
 {
-	float cubeHalfExtents = chassisLength / 2.f;
+	float chassisWidthHalfExtents = chassisWidth / 2.f;
+	float chassisLengthHalfExtents = chassisLength / 2.f;
 
 	// Create chassis
 	{
 		btCollisionShape* chassisShape =
-		    new btBoxShape(btVector3(chassisWidth, chassisHeight, chassisLength));
+		    new btBoxShape(btVector3(chassisWidthHalfExtents, chassisHeight / 2, chassisLengthHalfExtents));
 		collisionShapes.push_back(chassisShape);
 
 		btCompoundShape* compound = new btCompoundShape();
 		collisionShapes.push_back(compound);
 		btTransform localTransform;
 		localTransform.setIdentity();
+		// TODO: Figure this out
 		// localTransform effectively shifts the center of mass with respect to the chassis
 		localTransform.setOrigin(btVector3(0, 1, 0));
 
@@ -46,7 +48,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(0, -3, 0));
+		transform.setOrigin(btVector3(0, 0, 0));
 
 		carChassis = physicsWorld.localCreateRigidBody(massKg, transform, compound);
 		// carChassis->setDamping(0.2,0.2);
@@ -67,23 +69,23 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		// choose coordinate system
 		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
 
-		btVector3 connectionPointCS0(cubeHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                             2 * cubeHalfExtents - wheelRadius);
+		btVector3 connectionPointCS0(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
+		                             2 * chassisLengthHalfExtents - wheelRadius);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-cubeHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               2 * cubeHalfExtents - wheelRadius);
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
+		                               2 * chassisLengthHalfExtents - wheelRadius);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-cubeHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               -2 * cubeHalfExtents + wheelRadius);
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
+		                               -2 * chassisLengthHalfExtents + wheelRadius);
 		isFrontWheel = false;
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(cubeHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                               -2 * cubeHalfExtents + wheelRadius);
+		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
+		                               -2 * chassisLengthHalfExtents + wheelRadius);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 
@@ -173,7 +175,7 @@ void PhysicsVehicle::Update(float deltaTime)
 
 	// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
 	// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
-	          // << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
+	// << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
 
 	if (false)
 	{

@@ -16,9 +16,19 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	// Environment
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0);
-	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
-	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
+	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
+	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
 	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
+
+	// Scale reference
+	if (false)
+	{
+		H3DRes scaleReferenceRes =
+		    h3dAddResource(H3DResTypes::SceneGraph, "assets/ScaleReference.scene.xml", 0);
+
+		H3DNode scaleReferenceNode = h3dAddNodes(H3DRootNode, scaleReferenceRes);
+		h3dSetNodeTransform(scaleReferenceNode, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
+	}
 
 	// H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/forward.pipeline.xml", 0);
 	// Add model resource
@@ -38,10 +48,10 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	// Add environment
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
-	h3dSetNodeTransform(env, 0.f, -20.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
+	h3dSetNodeTransform(env, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
 
 	buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
-	h3dSetNodeTransform(buggyNode, -10, -5, 0, 0, 0, 0, 20.f, 20.f, 20.f);
+	h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
 
 	// Add model to scene
 	// model = h3dAddNodes(H3DRootNode, modelRes);
@@ -50,10 +60,13 @@ void hordeInitialize(int winWidth, int winHeight)
 	// h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
 
 	// Add light source
-	H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
-	// Set light position and radius
-	h3dSetNodeTransform(light, 0, 20, 0, 0, 0, 0, 1, 1, 1);
-	h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 500.0f);
+	if (false)
+	{
+		H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
+		// Set light position and radius
+		h3dSetNodeTransform(light, 0, 20, 0, 0, 0, 0, 1, 1, 1);
+		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 500.0f);
+	}
 
 	// Add camera
 	hordeCamera = h3dAddCameraNode(H3DRootNode, "Camera", pipeRes);
@@ -67,7 +80,7 @@ void hordeInitialize(int winWidth, int winHeight)
 	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 
 	// h3dSetOption(H3DOptions::DebugViewMode, 1.0f);
-	h3dSetOption(H3DOptions::MaxLogLevel, 10000.f);
+	// h3dSetOption(H3DOptions::MaxLogLevel, 10000.f);
 	// h3dSetOption(H3DOptions::WireframeMode, 1.0f);
 
 	// From knight

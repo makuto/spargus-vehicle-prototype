@@ -8,9 +8,9 @@ class inputManager;
 struct Camera
 {
 private:
-	float camPos[3] = {0, -10, 0};
+	float camPos[3] = {0, 10, 0};
 	float camRot[3] = {0, 0, 0};
-	float camTranslate[3] = {0, 0, -10};
+	float camTranslate[3] = {0, 0, 0};
 	window& win;
 	float add = 1;
 	float prevY = 0;
@@ -20,7 +20,7 @@ private:
 public:
 	Camera(window& winOwner);
 
-	void FreeCam(inputManager& input);
+	void FreeCam(inputManager& input, float frameTime);
 	void ChaseCamera(double* openGlMatrix);
 
 	void UpdateStart();
