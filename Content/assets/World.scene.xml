@@ -1,4 +1,4 @@
 <Model name="World" geometry="assets/World.geo">
 
-	<Mesh name="Plane" material="assets/World_.material.xml" tx="-0.00011324" ty="-0.0170794" tz="-0.0847565" sx="0.532159" sy="0.532159" sz="0.532159" batchStart="0" batchCount="7680" vertRStart="0" vertREnd="7679" />
+	<Mesh name="Plane" material="assets/World_Material.material.xml" tx="-0.00011324" ty="-0.0170794" tz="-0.0847565" sx="0.532159" sy="0.532159" sz="0.532159" batchStart="0" batchCount="7680" vertRStart="0" vertREnd="7679" />
 </Model>

@@ -13,3 +13,9 @@
 [submodule "Handmade-Math"]
 	path = Handmade-Math
 	url = https://github.com/HandmadeMath/Handmade-Math
+[submodule "linalg"]
+	path = linalg
+	url = https://github.com/sgorsten/linalg
+[submodule "glm"]
+	path = glm
+	url = https://github.com/g-truc/glm

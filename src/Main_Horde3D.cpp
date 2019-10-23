@@ -17,7 +17,20 @@
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
+#include <Horde3D.h>
 #include "Render_Horde3D.hpp"
+
+#include "linalg.h"
+
+void hordeMatrixFromBulletTransform(const btTransform& transform, float* hordeMatrixOut)
+{
+	btScalar bulletMat[16];
+	transform.getOpenGLMatrix(bulletMat);
+	for (size_t i = 0; i < sizeof(bulletMat) / sizeof(bulletMat[0]); i++)
+	{
+		hordeMatrixOut[i] = bulletMat[i];
+	}
+}
 
 // Window variables
 // int WindowWidth = 1200;
@@ -131,6 +144,73 @@ struct WindowScopedContextActivate
 	}
 };
 
+// Copy pasted :(
+bool macoyGluInvertMatrix(const float m[16], float invOut[16])
+{
+	float inv[16], det;
+	int i;
+
+	inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] +
+	         m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
+
+	inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] -
+	         m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
+
+	inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] +
+	         m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
+
+	inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] -
+	          m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
+
+	inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] -
+	         m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
+
+	inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] +
+	         m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
+
+	inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] -
+	         m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
+
+	inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] +
+	          m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
+
+	inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] +
+	         m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
+
+	inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] -
+	         m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
+
+	inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] +
+	          m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
+
+	inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] -
+	          m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
+
+	inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] -
+	         m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
+
+	inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] +
+	         m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
+
+	inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] -
+	          m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
+
+	inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] +
+	          m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
+
+	det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+	if (det == 0)
+		return false;
+
+	det = 1.0 / det;
+
+	for (i = 0; i < 16; i++)
+		invOut[i] = inv[i] * det;
+
+	return true;
+}
+
 int main()
 {
 	std::cout << "Spargus Vehicle Prototype\n";
@@ -169,68 +249,6 @@ int main()
 			BulletMeshFromGltfMesh(mesh, physicsWorld);
 	}
 
-	// initModel(groundModel);
-
-	// GLCallListIndex groundModelCallList = buildCallListFromModel(groundModel);
-	// GLCallListIndex groundModelCallList = buildCallListFromModel2(groundModel);
-
-	// OpenGL world setup
-	int groundCallList = -1;
-	if (false)
-	{
-		glEnable(GL_DEPTH_TEST);
-		// glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-		float pos[4] = {5, 0, -1, 1};
-		glLightfv(GL_LIGHT0, GL_POSITION, pos);
-		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
-		// glEnable(GL_CULL_FACE);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		float fieldOfView = 60.f;
-		gluPerspective(fieldOfView, mainWindow.getWidth() / mainWindow.getHeight(), 1, 500);
-		glRotatef(0, 0, 1, 0);
-
-		// Floor
-		glMatrixMode(GL_MODELVIEW);
-		{
-			groundCallList = glGenLists(1);
-			glNewList(groundCallList, GL_COMPILE);
-			glBegin(GL_QUADS);
-
-			// Ground
-			float groundExtent = 100.f;
-			float groundHalfExtent = groundExtent;
-			glNormal3f(0, 1, 0);
-			glVertex3f(-groundHalfExtent, -0.f, groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(groundHalfExtent, -0.f, groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(groundHalfExtent, -0.f, -groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(-groundHalfExtent, -0.f, -groundHalfExtent);
-
-			glEnd();
-			glEndList();
-		}
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Lighting
-		// float col[4] = {1, 1, 1, 0.0};
-		float col[4] = {34 / 255.f, 34 / 255.f, 34 / 255.f, 0.0};
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
-		// glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 25);
-
-		// Fog
-		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_LINEAR);
-		glFogfv(GL_FOG_COLOR, col);
-		glFogf(GL_FOG_START, 100.f);
-		glFogf(GL_FOG_END, 200.);
-	}
-
 	////////////////////////////////////////////////////////////////////////////////
 	// Game loop
 	//
@@ -241,8 +259,8 @@ int main()
 	frameTimer.start();
 
 	Camera cam(mainWindow);
-	bool useChaseCam = true;
-	// bool useChaseCam = false;
+	// bool useChaseCam = true;
+	bool useChaseCam = false;
 
 	mainWindow.shouldClear(false);
 
@@ -250,47 +268,91 @@ int main()
 	{
 		mainWindow.getBase()->setActive(true);
 
-		if (!useChaseCam)
-			cam.FreeCam(input);
-		cam.UpdateStart();
-
 		processInput(input, vehicle);
 
 		vehicle.Update(previousFrameTime);
 		physicsWorld.Update(previousFrameTime);
 
-		// Use vehicle transform to position camera
-		if (useChaseCam)
+		// Camera
 		{
-			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-			btTransform camTransform = vehicleTransform.inverse();
-			btScalar vehicleMat[16];
-			// vehicleTransform.getOpenGLMatrix(vehicleMat);
-			camTransform.getOpenGLMatrix(vehicleMat);
-			// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1, 1,
-			// 1);
+			if (!useChaseCam)
+				cam.FreeCam(input);
+			cam.UpdateStart();
+			// Use vehicle transform to position camera
+			if (useChaseCam)
+			{
+				const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
+				btTransform camTransform = vehicleTransform.inverse();
+				btScalar vehicleMat[16];
+				// vehicleTransform.getOpenGLMatrix(vehicleMat);
+				camTransform.getOpenGLMatrix(vehicleMat);
+				// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1,
+				// 1, 1);
 
-			cam.ChaseCamera(vehicleMat);
+				// TODO: There's definitely something wrong with this function
+				cam.ChaseCamera(vehicleMat);
+			}
+			cam.UpdateEnd();
 		}
 
-		glCallList(groundCallList);
+		// Place buggy model at vehicle position
+		{
+			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
+			float vehicleFloatMat[16];
+			hordeMatrixFromBulletTransform(vehicleTransform, vehicleFloatMat);
+			h3dSetNodeTransMat(buggyNode, vehicleFloatMat);
+			// First person camera
+			// h3dSetNodeTransMat(hordeCamera, vehicleFloatMat);
+		}
 
-		// hordeUpdate(previousFrameTime);
-		GLenum eError = glGetError();
-		if (eError)
-			std::cout << eError;
-		physicsWorld.DebugRender();
-		eError = glGetError();
-		if (eError)
-			std::cout << eError;
+		// glCallList(groundCallList);
 
-		cam.UpdateEnd();
+		hordeUpdate(previousFrameTime);
+
+		// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
+		{
+			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
+			const float* cameraTranslationMat = 0;
+			// Retrieve camera position...
+			h3dGetNodeTransMats(hordeCamera, 0, &cameraTranslationMat);
+
+			// In case of an invalid camera (e.g. pipeline not set) return
+			if (cameraTranslationMat)
+			{
+				// ... and projection matrix
+				float projectionMat[16];
+				h3dGetCameraProjMat(hordeCamera, projectionMat);
+
+				// ...
+
+				// Set projection matrix
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixf(projectionMat);
+				// apply camera transformation
+				glMatrixMode(GL_MODELVIEW);
+				float inverseCameraMat[16];
+				macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
+				// linalg::aliases::float4x4* transMat =
+				// (linalg::aliases::float4x4*)&cameraTranslationMat;
+				// linalg::aliases::float4x4 inverseCameraMat = linalg::inverse(*transMat);
+				// glLoadMatrixf(&inverseCameraMat[0][0]);
+				glLoadMatrixf(inverseCameraMat);
+
+				// then later in e.g. drawGizmo
+
+				// Uncomment for local transform, if necessary
+				// glPushMatrix();
+				// glMultMatrixf(nodeTransform);  // Load scene node matrix
+
+				// ... draw code
+				physicsWorld.DebugRender();
+
+				// glPopMatrix();
+			}
+		}
 
 		// Finished physics update and drawing; send it on its way
 		mainWindow.update();
-		eError = glGetError();
-		if (eError)
-			std::cout << eError;
 
 		mainWindow.getBase()->setActive(false);
 

@@ -49,6 +49,14 @@ void Camera::FreeCam(inputManager& input)
 		camTranslate[0] += float(cos(camRot[1] / 180 * 3.141592654));
 		camTranslate[2] += float(sin(camRot[1] / 180 * 3.141592654));
 	}
+	if (input.isPressed(inputCode::Q))
+	{
+		camTranslate[1] -= 1.f;
+	}
+	if (input.isPressed(inputCode::E))
+	{
+		camTranslate[1] += 1.f;
+	}
 
 	// camRot[1]=(10*(in->GetMouseX()*win.GetWidth()/10) + 400)/win.GetWidth();
 	camRot[1] += (sf::Mouse::getPosition(*winBase).x - prevX) / 5 /**winBase.GetWidth()/3600*/;
@@ -68,15 +76,18 @@ void Camera::FreeCam(inputManager& input)
 		prevY = win.getHeight() / 2;
 	}
 
-	hmm_vec3 rotateYAxis = {0, 1, 0};
-	hmm_vec3 rotateXAxis = {1, 0, 0};
-	hmm_mat4 camMatrix = HMM_Rotate(camRot[0], rotateXAxis);
-	hmm_mat4 camMatrixRotY = HMM_Rotate(camRot[1], rotateYAxis);
-	camMatrix = HMM_MultiplyMat4(camMatrix, camMatrixRotY);	
-	camMatrix.Elements[3][0] = camPos[0];
-	camMatrix.Elements[3][1] = camPos[1];
-	camMatrix.Elements[3][2] = camPos[2];
-	h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
+	// hmm_vec3 rotateYAxis = {0, 1, 0};
+	// hmm_vec3 rotateZAxis = {0, 0, 1};
+	// hmm_mat4 camMatrix = HMM_Rotate(camRot[0], rotateZAxis);
+	// hmm_mat4 camMatrixRotY = HMM_Rotate(camRot[1], rotateYAxis);
+	// camMatrix = HMM_MultiplyMat4(camMatrix, camMatrixRotY);	
+	// camMatrix.Elements[3][0] = camPos[0];
+	// camMatrix.Elements[3][1] = camPos[1];
+	// camMatrix.Elements[3][2] = camPos[2];
+	// h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
+
+	h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
+	                    1.f, 1.f, 1.f);
 }
 
 void Camera::UpdateStart()
@@ -119,7 +130,11 @@ void Camera::ChaseCamera(double* openGlMatrix)
 	const double cameraPullback = 15.0;
 	// const double cameraPitch = 30.0;
 	
-	hmm_mat4* carMatrix = reinterpret_cast<hmm_mat4*>(openGlMatrix);
+	hmm_mat4 carMatrix;
+	for (int i = 0; i < 16; i++)
+	{
+		carMatrix.Elements[i / 4][i % 4] = openGlMatrix[i];
+	}
 
 	hmm_vec3 rotateYAxis = {0, 1, 0};
 	hmm_mat4 camMatrix = HMM_Rotate(180.f, rotateYAxis);
@@ -127,7 +142,7 @@ void Camera::ChaseCamera(double* openGlMatrix)
     camMatrix.Elements[3][1] = -cameraHeight;
     camMatrix.Elements[3][2] = cameraPullback;
 
-	camMatrix = HMM_MultiplyMat4(camMatrix, *carMatrix);
+	camMatrix = HMM_MultiplyMat4(camMatrix, carMatrix);
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);

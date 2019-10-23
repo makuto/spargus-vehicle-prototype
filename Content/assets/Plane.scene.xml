@@ -1,0 +1,4 @@
+<Model name="Plane" geometry="assets/Plane.geo">
+
+	<Mesh name="Plane" material="assets/Plane_Material.001.material.xml" sx="28.2557" sy="28.2557" sz="28.2557" batchStart="0" batchCount="384" vertRStart="0" vertREnd="80" />
+</Model>

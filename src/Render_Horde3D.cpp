@@ -6,27 +6,31 @@
 
 H3DNode model = 0;
 H3DNode hordeCamera = 0;
+H3DNode buggyNode = 0;
 H3DRes fontMaterialRes = 0;
 
 void hordeInitialize(int winWidth, int winHeight)
 {
 	// Initialize engine
 	h3dInit(H3DRenderDevice::OpenGL4);
-	// h3dInit(H3DRenderDevice::OpenGL2);
 
 	// Environment
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0);
-	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
+	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
+	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
+	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
+
+	// H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/forward.pipeline.xml", 0);
+	// Add model resource
+	// H3DRes modelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/knight/knight.scene.xml",
+	// 0);
+	// // H3DRes modelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/man/man.scene.xml", 0);
+	// // Add animation resource
+	// // H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
+	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 
 	// Add pipeline resource
 	H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);
-	// H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/forward.pipeline.xml", 0);
-	// Add model resource
-	H3DRes modelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/knight/knight.scene.xml", 0);
-	// H3DRes modelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/man/man.scene.xml", 0);
-	// Add animation resource
-	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
-	H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 	// Add font
 	fontMaterialRes = h3dAddResource(H3DResTypes::Material, "overlays/font.material.xml", 0);
 	// Load added resources
@@ -34,16 +38,16 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	// Add environment
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
-	h3dSetNodeTransform(env, 0, -20, 0, 0, 0, 0, 20, 20, 20);
+	h3dSetNodeTransform(env, 0.f, -20.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
 
-	// H3DNode model2 = h3dAddNodes(H3DRootNode, modelRes);
-	// h3dSetNodeTransform(model2, -10, -5, 0, 0, 0, 0, 0.5f, 0.5f, 0.5f);
+	buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
+	h3dSetNodeTransform(buggyNode, -10, -5, 0, 0, 0, 0, 20.f, 20.f, 20.f);
 
 	// Add model to scene
-	model = h3dAddNodes(H3DRootNode, modelRes);
-	h3dSetNodeTransform(model, 0, -3, 0, 0, 0, 0, 0.5f, 0.5f, 0.5f);
+	// model = h3dAddNodes(H3DRootNode, modelRes);
+	// h3dSetNodeTransform(model, 0, -3, 0, 0, 0, 0, 0.5f, 0.5f, 0.5f);
 	// Apply animation
-	h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
+	// h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
 
 	// Add light source
 	H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
@@ -178,22 +182,25 @@ void hordeTestInitialize(int winWidth, int winHeight)
 
 void hordeUpdate(float fps)
 {
-	static float t = 0;
+	if (model)
+	{
+		static float t = 0;
 
-	// Increase animation time
-	t += fps;
+		// Increase animation time
+		t += fps;
 
-	// std::cout << t << "\n";
-	// Play animation
-	h3dSetModelAnimParams(model, 0, t * 24.f, 1.0f);
-	h3dUpdateModel(model, H3DModelUpdateFlags::Animation | H3DModelUpdateFlags::Geometry);
+		// std::cout << t << "\n";
+		// Play animation
+		h3dSetModelAnimParams(model, 0, t * 24.f, 1.0f);
+		h3dUpdateModel(model, H3DModelUpdateFlags::Animation | H3DModelUpdateFlags::Geometry);
 
-	// // Set new model position
-	// h3dSetNodeTransform(model, t * 10, 0, 0,  // Translation
-	//                     0, 0, 0,              // Rotation
-	//                     1, 1, 1);             // Scale
-	
-	h3dutShowText("Test", /*x, y*/10, 10, /*size*/10, /*r,g,b*/1.f, 0.f, 0.f, fontMaterialRes);
+		// // Set new model position
+		// h3dSetNodeTransform(model, t * 10, 0, 0,  // Translation
+		//                     0, 0, 0,              // Rotation
+		//                     1, 1, 1);             // Scale
+	}
+
+	h3dutShowText("Test", /*x, y*/ 10, 10, /*size*/ 10, /*r,g,b*/ 1.f, 0.f, 0.f, fontMaterialRes);
 
 	// Render scene
 	h3dRender(hordeCamera);

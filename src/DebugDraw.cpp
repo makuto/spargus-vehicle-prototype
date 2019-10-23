@@ -4,6 +4,9 @@
 #include <SFML/OpenGL.hpp>
 #include <iostream>
 
+#include "Render_Horde3D.hpp"
+#include "Horde3D.h"
+
 void DebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor,
                          const btVector3& toColor)
 {
