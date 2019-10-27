@@ -14,6 +14,7 @@
 #include "Camera.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
+#include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
@@ -222,7 +223,12 @@ int main()
 	PhysicsWorld physicsWorld;
 	PhysicsVehicle vehicle(physicsWorld);
 
+	// objTest();
+	// objToBulletTriangleMesh(physicsWorld, "assets/Plane.obj");
+	objToBulletTriangleMesh(physicsWorld, "assets/World.obj");
+
 	// Test bullet serialization
+	if (false)
 	{
 		serializeConcaveMesh();
 
@@ -361,7 +367,7 @@ int main()
 				// glMultMatrixf(nodeTransform);  // Load scene node matrix
 
 				// ... draw code
-				physicsWorld.DebugRender();
+				// physicsWorld.DebugRender();
 
 				// glPopMatrix();
 			}

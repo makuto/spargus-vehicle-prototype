@@ -110,7 +110,7 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 	// camMatrix.Elements[3][2] = camPos[2];
 	// h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
 
-	std::cout << camRot[0] << ", " << camRot[1] << "\n";
+	// std::cout << camRot[0] << ", " << camRot[1] << "\n";
 
 	h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
 	                    1.f, 1.f, 1.f);

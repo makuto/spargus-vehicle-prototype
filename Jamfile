@@ -1,30 +1,33 @@
 SubDir . ;
 
-Main spargus_vehicle_prototype : src/Main.cpp
-src/Render_Horde3D.cpp
-src/Camera.cpp
-src/ModelUtilities/ModelLoader.cpp
-src/ModelUtilities/ModelToBullet.cpp
-src/PhysicsVehicle.cpp
-src/PhysicsWorld.cpp
-src/DebugDraw.cpp
-;
+# Main spargus_vehicle_prototype : src/Main.cpp
+# src/Render_Horde3D.cpp
+# src/Camera.cpp
+# src/ModelUtilities/ModelLoader.cpp
+# src/ModelUtilities/ObjLoader.cpp
+# src/ModelUtilities/ModelToBullet.cpp
+# src/PhysicsVehicle.cpp
+# src/PhysicsWorld.cpp
+# src/DebugDraw.cpp
+# ;
 
 
 Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
 src/Render_Horde3D.cpp
 src/Camera.cpp
 src/ModelUtilities/ModelLoader.cpp
+src/ModelUtilities/ObjLoader.cpp
 src/ModelUtilities/ModelToBullet.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/DebugDraw.cpp
 ;
 
-Main spargus_vehicle_prototype_testHorde3D : src/Main_HordeTest.cpp
-src/Render_Horde3D.cpp
-src/Camera.cpp
-;
+# Use horde assets to text horde features
+# Main spargus_vehicle_prototype_testHorde3D : src/Main_HordeTest.cpp
+# src/Render_Horde3D.cpp
+# src/Camera.cpp
+# ;
 
 # LinkLibraries spargus_vehicle_prototype : libBase20 ;
 

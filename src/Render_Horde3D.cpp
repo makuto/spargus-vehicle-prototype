@@ -16,8 +16,8 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	// Environment
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0);
-	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
-	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
+	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
+	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
 	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
 
 	// Scale reference
@@ -48,7 +48,7 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	// Add environment
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
-	h3dSetNodeTransform(env, 0.f, -5.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
+	h3dSetNodeTransform(env, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
 
 	buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
 	h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
