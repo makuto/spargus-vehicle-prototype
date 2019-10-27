@@ -6,11 +6,15 @@
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
-#define HANDMADE_MATH_IMPLEMENTATION
-#include "HandmadeMath.h"
+#include <glm/mat4x4.hpp>  // mat4
+#include <glm/vec3.hpp>    // vec3
+#include <glm/trigonometric.hpp>  //radians
+#include <glm/ext/matrix_transform.hpp>
 
 #include "Render_Horde3D.hpp"
 #include <Horde3D.h>
+
+#include "Math.hpp"
 
 #include <iostream>
 
@@ -100,18 +104,6 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 		prevY = win.getHeight() / 2;
 	}
 
-	// hmm_vec3 rotateYAxis = {0, 1, 0};
-	// hmm_vec3 rotateZAxis = {0, 0, 1};
-	// hmm_mat4 camMatrix = HMM_Rotate(camRot[0], rotateZAxis);
-	// hmm_mat4 camMatrixRotY = HMM_Rotate(camRot[1], rotateYAxis);
-	// camMatrix = HMM_MultiplyMat4(camMatrix, camMatrixRotY);	
-	// camMatrix.Elements[3][0] = camPos[0];
-	// camMatrix.Elements[3][1] = camPos[1];
-	// camMatrix.Elements[3][2] = camPos[2];
-	// h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
-
-	// std::cout << camRot[0] << ", " << camRot[1] << "\n";
-
 	h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
 	                    1.f, 1.f, 1.f);
 }
@@ -138,16 +130,6 @@ void Camera::UpdateStart()
 	camPos[0] += camTranslate[0];
 	camPos[1] += camTranslate[1];
 	camPos[2] += camTranslate[2];
-
-	// Define the camera matrix
-	// glLoadIdentity();
-	// gluLookAt(0, 0, 1, 0, 0, -1, 0, 1, 0);
-	// glRotatef(camRot[0], 1, 0, 0);
-	// glRotatef(camRot[1], 0, 1, 0);
-	// glRotatef(camRot[2], 0, 0, 1);
-
-	// glTranslatef(-camPos[0], camPos[1], -camPos[2]);
-	// glPushMatrix();
 }
 
 void Camera::ChaseCamera(double* openGlMatrix)
@@ -155,26 +137,29 @@ void Camera::ChaseCamera(double* openGlMatrix)
 	const double cameraHeight = 4.0;
 	const double cameraPullback = 15.0;
 	// const double cameraPitch = 30.0;
+
+	// Copy opengl matrix into something we can manipulate easily
+	glm::mat4 carMatrix;
+	openGlMatrixToGlmMat4(openGlMatrix, carMatrix);
 	
-	hmm_mat4 carMatrix;
-	for (int i = 0; i < 16; i++)
-	{
-		carMatrix.Elements[i / 4][i % 4] = openGlMatrix[i];
-	}
+	// Invert direction for camera
+	glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
+	glm::mat4 camMatrix(1.f);
+	
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
+	// Pull camera up and back
+	glm::vec3 translateVec = {0.f, -cameraHeight, -cameraPullback};
+	camMatrix = glm::translate(camMatrix, translateVec);
 
-	hmm_vec3 rotateYAxis = {0, 1, 0};
-	hmm_mat4 camMatrix = HMM_Rotate(180.f, rotateYAxis);
-	camMatrix.Elements[3][0] = 0.f;
-    camMatrix.Elements[3][1] = -cameraHeight;
-    camMatrix.Elements[3][2] = cameraPullback;
-
-	camMatrix = HMM_MultiplyMat4(camMatrix, carMatrix);
+	camMatrix = camMatrix * rotationMatrix * carMatrix;
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);
 
+	camMatrix = glm::inverse(camMatrix);
+	
 	// Not sure if this cast is necessary (just use .Elements?)
-	h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(camMatrix.Elements));
+	h3dSetNodeTransMat(hordeCamera, &camMatrix[0][0]);
 }
 
 void Camera::UpdateEnd()

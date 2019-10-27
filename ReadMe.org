@@ -13,6 +13,24 @@ Jam is used to build the project. Install Jam:
 sudo apt install jam
 #+END_SRC
 
+Build dependencies:
+#+BEGIN_SRC sh
+cd spargus-vehicle-prototype
+./BuildDependencies.sh
+#+END_SRC
+
+Build Spargus:
+#+BEGIN_SRC sh
+./Build.sh
+#+END_SRC
+
+For Debug:
+#+BEGIN_SRC sh
+./Build_Debug.sh
+#+END_SRC
+
+~spargus_vehicle_prototype~ should be run in the root directory of the repository.
+
 *** SFML Setup
 SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL (I should dump base2.0 eventually...) 
 
@@ -33,3 +51,10 @@ cd spargus-vehicle-prototype
 ./bullet3/build_cmake/examples/ExampleBrowser/App_ExampleBrowser
 #+END_SRC
 
+** Asset pipeline
+*** Create the asset in your desired modeling program
+*** Export Collada and Wavefront Obj
+Collada is used by Horde3D to display the mesh, while the Obj is used to create the collision mesh. The meshes can differ if desired (e.g. for a low-poly collision mesh).
+On export, ensure *Triangulate Mesh* and *Apply Modifiers* are checked.
+*** Run ~BuildAssets.sh~
+This prepares assets for Horde3D.

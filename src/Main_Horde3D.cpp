@@ -17,21 +17,12 @@
 #include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
+#include "Math.hpp"
 
 #include <Horde3D.h>
 #include "Render_Horde3D.hpp"
 
 #include "linalg.h"
-
-void hordeMatrixFromBulletTransform(const btTransform& transform, float* hordeMatrixOut)
-{
-	btScalar bulletMat[16];
-	transform.getOpenGLMatrix(bulletMat);
-	for (size_t i = 0; i < sizeof(bulletMat) / sizeof(bulletMat[0]); i++)
-	{
-		hordeMatrixOut[i] = bulletMat[i];
-	}
-}
 
 // Window variables
 // int WindowWidth = 1200;
@@ -71,7 +62,7 @@ void windowResizeCB(float width, float height)
 	glViewport(0, 0, width, height);
 }
 
-void processInput(inputManager& input, PhysicsVehicle& vehicle)
+void processVehicleInput(inputManager& input, PhysicsVehicle& vehicle)
 {
 	bool useGameSteering = true;
 	// Reset steering and forces immediately
@@ -281,8 +272,8 @@ int main()
 	frameTimer.start();
 
 	Camera cam(mainWindow);
-	// bool useChaseCam = true;
-	bool useChaseCam = false;
+	bool useChaseCam = true;
+	// bool useChaseCam = false;
 
 	mainWindow.shouldClear(false);
 
@@ -290,7 +281,7 @@ int main()
 	{
 		mainWindow.getBase()->setActive(true);
 
-		processInput(input, vehicle);
+		processVehicleInput(input, vehicle);
 
 		vehicle.Update(previousFrameTime);
 		physicsWorld.Update(previousFrameTime);
@@ -332,8 +323,8 @@ int main()
 		hordeUpdate(previousFrameTime);
 
 		// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
+		// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
 		{
-			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
 			const float* cameraTranslationMat = 0;
 			// Retrieve camera position...
 			h3dGetNodeTransMats(hordeCamera, 0, &cameraTranslationMat);
@@ -367,7 +358,8 @@ int main()
 				// glMultMatrixf(nodeTransform);  // Load scene node matrix
 
 				// ... draw code
-				// physicsWorld.DebugRender();
+				if (false)
+					physicsWorld.DebugRender();
 
 				// glPopMatrix();
 			}
