@@ -222,6 +222,21 @@ int main()
 	PhysicsWorld physicsWorld;
 	PhysicsVehicle vehicle(physicsWorld);
 
+	// Test bullet serialization
+	{
+		serializeConcaveMesh();
+
+		btCollisionShape* concaveTestShape = importConcaveMesh();
+		if (concaveTestShape)
+		{
+			btTransform startTransform;
+			startTransform.setIdentity();
+			startTransform.setOrigin(btVector3(0, -1, 0));
+			physicsWorld.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, startTransform,
+			                                  concaveTestShape);
+		}
+	}
+
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
 	initializeWindow(mainWindow);
 
@@ -233,6 +248,7 @@ int main()
 	inputManager input(&mainWindow);
 
 	// Ground mesh from GLTF
+	if (false)
 	{
 		// if (!LoadModelFromGltf("assets/World.glb", groundModel))
 		std::vector<gltf::Mesh<float>> meshes;

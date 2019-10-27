@@ -12,11 +12,16 @@
 #include "Render_Horde3D.hpp"
 #include <Horde3D.h>
 
+#include <iostream>
+
 Camera::Camera(window& winOwner) : win(winOwner)
 {
 	winBase = win.getBase();
 	win.getBase()->setMouseCursorVisible(false);
 	sf::Mouse::setPosition(sf::Vector2i(win.getWidth() / 2, win.getHeight() / 2), *winBase);
+
+	prevX = winBase->getSize().x / 2;
+	prevY = win.getHeight() / 2;
 }
 
 void Camera::FreeCam(inputManager& input, float frameTime)
@@ -104,6 +109,8 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 	// camMatrix.Elements[3][1] = camPos[1];
 	// camMatrix.Elements[3][2] = camPos[2];
 	// h3dSetNodeTransMat(hordeCamera, reinterpret_cast<float*>(&camMatrix.Elements[0][0]));
+
+	std::cout << camRot[0] << ", " << camRot[1] << "\n";
 
 	h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
 	                    1.f, 1.f, 1.f);

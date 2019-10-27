@@ -56,7 +56,9 @@ private:
 	// float chassisHeight = 0.5f;
 	// float chassisLength = 2.f;
 
-	float chassisWidth = 1.418f;
+	// Double width of the chassis to approximate wheel collision, and increase balance
+	float chassisWidth = 3.0f;
+	// float chassisWidth = 1.418f;
 	// Use the height at the middle of the chassis until we get nonrectangular collision set up
 	float chassisHeight = 1.3725f;
 	// float chassisHeight = 0.5f;

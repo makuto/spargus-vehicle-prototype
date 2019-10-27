@@ -16,7 +16,8 @@ LINK = clang++ ;
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
-HDRS = src bullet3/src base2.0 tinygltf Horde3D/Horde3D/Bindings/C++ Handmade-Math linalg glm ;
+HDRS = src bullet3/src bullet3/Extras/Serialize/BulletWorldImporter
+base2.0 tinygltf Horde3D/Horde3D/Bindings/C++ Handmade-Math linalg glm ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
@@ -49,11 +50,13 @@ LINKLIBS =
 -L$(BULLET3_BUILD_DIR)/src/BulletCollision
 -L$(BULLET3_BUILD_DIR)/src/Bullet3Common
 -L$(BULLET3_BUILD_DIR)/src/LinearMath
+-L$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter
 
 -lBullet3Common
 -lBulletDynamics
 -lBulletCollision
 -lLinearMath
+-lBulletWorldImporter
 
 # Stuff I'm not using, but could use
 # -L$(BULLET3_BUILD_DIR)/src/BulletSoftBody
@@ -73,7 +76,7 @@ LINKLIBS =
 
 # TODO: Copy libs to better directory, or static link?
 LINKFLAGS = -g
--Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:Horde3D/build/Horde3D/Source/Horde3DEngine:Horde3D/build/Horde3D/Source/Horde3DUtils ;
+-Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:Horde3D/build/Horde3D/Source/Horde3DEngine:Horde3D/build/Horde3D/Source/Horde3DUtils ;
 
 ##
 ## Jam stuff

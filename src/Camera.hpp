@@ -8,13 +8,13 @@ class inputManager;
 struct Camera
 {
 private:
-	float camPos[3] = {0, 10, 0};
-	float camRot[3] = {0, 0, 0};
-	float camTranslate[3] = {0, 0, 0};
+	float camPos[3] = {0.f, 10.f, 0.f};
+	float camRot[3] = {0.f, 0.f, 0.f};
+	float camTranslate[3] = {0.f, 0.f, 0.f};
 	window& win;
-	float add = 1;
-	float prevY = 0;
-	float prevX = 0;
+	float add = 1.f;
+	float prevY = 0.f;
+	float prevX = 0.f;
 	sf::RenderWindow* winBase = nullptr;
 
 public:
