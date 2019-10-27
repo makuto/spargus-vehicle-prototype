@@ -274,6 +274,9 @@ int main()
 	Camera cam(mainWindow);
 	bool useChaseCam = true;
 	// bool useChaseCam = false;
+	
+	bool debugPhysicsDraw = true;
+	// bool debugPhysicsDraw = false;
 
 	mainWindow.shouldClear(false);
 
@@ -324,6 +327,7 @@ int main()
 
 		// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
 		// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
+		if (debugPhysicsDraw)
 		{
 			const float* cameraTranslationMat = 0;
 			// Retrieve camera position...
@@ -358,8 +362,7 @@ int main()
 				// glMultMatrixf(nodeTransform);  // Load scene node matrix
 
 				// ... draw code
-				if (false)
-					physicsWorld.DebugRender();
+				physicsWorld.DebugRender();
 
 				// glPopMatrix();
 			}

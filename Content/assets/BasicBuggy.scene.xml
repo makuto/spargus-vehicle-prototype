@@ -6,4 +6,5 @@
 		<Mesh name="Chassis_RollCage" material="assets/BasicBuggy_Material.001.material.xml" tx="0" ty="0.163561" tz="-1.65471" batchStart="16194" batchCount="27060" vertRStart="14104" vertREnd="39684" />
 		<Mesh name="Seat" material="assets/BasicBuggy_Material.002.material.xml" tx="0" ty="-0.552563" tz="-1.08555" rx="0.0351758" ry="87.7048" rz="-4.41618" sx="1.00129" sy="1.00001" sz="1.61802" batchStart="43254" batchCount="324" vertRStart="39685" vertREnd="39902" />
 	</Mesh>
+	<Mesh name="AdultMaleReference" material="assets/BasicBuggy_.material.xml" tx="-0.412669" ty="0" tz="0" batchStart="43578" batchCount="36" vertRStart="39903" vertREnd="39926" />
 </Model>
