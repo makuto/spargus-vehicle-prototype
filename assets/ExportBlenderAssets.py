@@ -13,8 +13,10 @@ def exportBulletObj():
     # print(outputFilename)
 
     # use_mesh_modifiers = apply modifiers
+    # use_materials = (false) Don't export materials. We only use the .objs for collision
     # use_triangles = triangulate. Bullet expects triangle meshes
-    bpy.ops.export_scene.obj(filepath=outputFilename, check_existing=False, use_mesh_modifiers=True, use_triangles=True)
+    bpy.ops.export_scene.obj(filepath=outputFilename, check_existing=False,
+                             use_mesh_modifiers=True, use_materials=False, use_triangles=True)
 
 def exportHordeCollada():
     outputFilename = makeRelativeFilename("dae")
