@@ -17,7 +17,7 @@ LINK = clang++ ;
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
 HDRS = src bullet3/src bullet3/Extras/Serialize/BulletWorldImporter
-base2.0 tinygltf Horde3D/Horde3D/Bindings/C++ Handmade-Math linalg glm tinyobjloader ;
+base2.0 tinygltf Horde3D/Horde3D/Bindings/C++ glm tinyobjloader ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }

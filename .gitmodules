@@ -10,12 +10,6 @@
 [submodule "Horde3D"]
 	path = Horde3D
 	url = https://github.com/horde3d/Horde3D
-[submodule "Handmade-Math"]
-	path = Handmade-Math
-	url = https://github.com/HandmadeMath/Handmade-Math
-[submodule "linalg"]
-	path = linalg
-	url = https://github.com/sgorsten/linalg
 [submodule "glm"]
 	path = glm
 	url = https://github.com/g-truc/glm

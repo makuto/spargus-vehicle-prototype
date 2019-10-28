@@ -22,8 +22,6 @@
 #include <Horde3D.h>
 #include "Render_Horde3D.hpp"
 
-#include "linalg.h"
-
 // Window variables
 // int WindowWidth = 1200;
 // int WindowHeight = 700;
@@ -136,6 +134,7 @@ struct WindowScopedContextActivate
 	}
 };
 
+// TODO Remove
 // Copy pasted :(
 bool macoyGluInvertMatrix(const float m[16], float invOut[16])
 {
@@ -350,10 +349,6 @@ int main()
 				// TODO remove!
 				float inverseCameraMat[16];
 				macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
-				// linalg::aliases::float4x4* transMat =
-				// (linalg::aliases::float4x4*)&cameraTranslationMat;
-				// linalg::aliases::float4x4 inverseCameraMat = linalg::inverse(*transMat);
-				// glLoadMatrixf(&inverseCameraMat[0][0]);
 				glLoadMatrixf(inverseCameraMat);
 
 				// then later in e.g. drawGizmo
