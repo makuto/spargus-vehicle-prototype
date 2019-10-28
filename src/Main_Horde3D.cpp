@@ -215,8 +215,8 @@ int main()
 	PhysicsVehicle vehicle(physicsWorld);
 
 	// objTest();
-	// objToBulletTriangleMesh(physicsWorld, "assets/Plane.obj");
-	objToBulletTriangleMesh(physicsWorld, "assets/World.obj");
+	// objToBulletTriangleMesh(physicsWorld, "Collision/Plane.obj");
+	objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 
 	// Test bullet serialization
 	if (false)
@@ -275,8 +275,8 @@ int main()
 	bool useChaseCam = true;
 	// bool useChaseCam = false;
 	
-	bool debugPhysicsDraw = true;
-	// bool debugPhysicsDraw = false;
+	// bool debugPhysicsDraw = true;
+	bool debugPhysicsDraw = false;
 
 	mainWindow.shouldClear(false);
 
@@ -315,7 +315,7 @@ int main()
 		{
 			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
 			float vehicleFloatMat[16];
-			hordeMatrixFromBulletTransform(vehicleTransform, vehicleFloatMat);
+			BulletTransformToHordeMatrix(vehicleTransform, vehicleFloatMat);
 			h3dSetNodeTransMat(buggyNode, vehicleFloatMat);
 			// First person camera
 			// h3dSetNodeTransMat(hordeCamera, vehicleFloatMat);
@@ -347,6 +347,7 @@ int main()
 				glLoadMatrixf(projectionMat);
 				// apply camera transformation
 				glMatrixMode(GL_MODELVIEW);
+				// TODO remove!
 				float inverseCameraMat[16];
 				macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
 				// linalg::aliases::float4x4* transMat =

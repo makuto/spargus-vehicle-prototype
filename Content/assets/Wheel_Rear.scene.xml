@@ -1,0 +1,4 @@
+<Model name="Wheel_Rear" geometry="assets/Wheel_Rear.geo">
+
+	<Mesh name="Wheel_Rear" material="assets/Wheel_Rear_Material.003.material.xml" batchStart="0" batchCount="6132" vertRStart="0" vertREnd="5103" />
+</Model>

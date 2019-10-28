@@ -7,6 +7,8 @@
 H3DNode model = 0;
 H3DNode hordeCamera = 0;
 H3DNode buggyNode = 0;
+H3DNode buggyWheelNodes[4];
+H3DRes buggyWheelRes = 0;
 H3DRes fontMaterialRes = 0;
 
 void hordeInitialize(int winWidth, int winHeight)
@@ -18,7 +20,9 @@ void hordeInitialize(int winWidth, int winHeight)
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0);
 	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
-	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
+	// H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
+	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy_Chassis.scene.xml", 0);
+	buggyWheelRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Wheel_Rear.scene.xml", 0);
 
 	// Scale reference
 	if (false)
@@ -52,6 +56,9 @@ void hordeInitialize(int winWidth, int winHeight)
 
 	buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
 	h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
+
+	for (int i = 0; i < sizeof(buggyWheelNodes) / sizeof(buggyWheelNodes[0]); ++i)
+		buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);		
 
 	// Add model to scene
 	// model = h3dAddNodes(H3DRootNode, modelRes);

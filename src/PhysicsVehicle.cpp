@@ -2,6 +2,11 @@
 
 #include "PhysicsWorld.hpp"
 
+// For wheels
+#include "Render_Horde3D.hpp"
+#include "Math.hpp"
+#include <Horde3D.h>
+
 #include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,12 +178,29 @@ void PhysicsVehicle::Update(float deltaTime)
 		vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 	}
 
-	// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
-	// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
-	// << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
+	// Wheels
+	for (int i = 0; i < vehicle->getNumWheels(); i++)
+	{
+		// synchronize the wheels with the (interpolated) chassis worldtransform
+		vehicle->updateWheelTransform(i, true);
 
+		if (buggyWheelNodes[0])
+		{
+			btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
+			btVector3 pos = tr.getOrigin();
+			btQuaternion orn = tr.getRotation();
+			float wheelGraphicsMatrix[16];
+			BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
+			h3dSetNodeTransMat(buggyWheelNodes[i], wheelGraphicsMatrix);
+		}
+	}
+
+	// Debug prints
 	if (false)
 	{
+		// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
+		// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
+		// << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
 		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
 		std::cout << "Vehicle location: " << vehicleTransform.getOrigin().getX() << ", "
 		          << vehicleTransform.getOrigin().getY() << ", "

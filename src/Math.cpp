@@ -19,7 +19,7 @@ void openGlMatrixToGlmMat4(const double* openGlMatrix, glm::mat4& matOut)
 	}
 }
 
-void hordeMatrixFromBulletTransform(const btTransform& transform, float* hordeMatrixOut)
+void BulletTransformToHordeMatrix(const btTransform& transform, float* hordeMatrixOut)
 {
 	btScalar bulletMat[16];
 	transform.getOpenGLMatrix(bulletMat);

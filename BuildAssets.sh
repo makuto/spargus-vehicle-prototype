@@ -11,6 +11,17 @@ do
 done
 echo "Done\n"
 
+echo "============================================="
+echo "Copying obj output to Collision..."
+rsync -a --stats *.obj ../Collision/
+echo "Done\n"
+
+echo "============================================="
+echo "Copying textures to Content..."
+rsync -a --stats *.png ../Content/textures/
+rsync -a --stats *.jpg ../Content/textures/
+echo "Done\n"
+
 cd ..
 
 echo "============================================="

@@ -1,0 +1,12 @@
+<Model name="BasicBuggy_Rig" geometry="assets/BasicBuggy_Rig.geo">
+	<Joint name="Bone" tx="2.33154" ty="1.19776" tz="-1.47677e-07" rx="-19.989" ry="-90" rz="-90" jointIndex="1" />
+
+	<Mesh name="Chassis" material="assets/BasicBuggy_Rig_.material.xml" tx="1.80757" ty="0.827908" tz="-2.98023e-08" batchStart="0" batchCount="66" vertRStart="0" vertREnd="47">
+		<Mesh name="Wheel_Rear.LR" material="assets/BasicBuggy_Rig_.material.xml" tx="1.53702" ty="0" tz="0" batchStart="66" batchCount="8064" vertRStart="48" vertREnd="7075" />
+		<Mesh name="Wheel_Front.LR" material="assets/BasicBuggy_Rig_.material.xml" tx="1.47884" ty="-0.178" tz="3.13595" sx="0.785" sy="0.785" sz="0.785" batchStart="8130" batchCount="8064" vertRStart="7076" vertREnd="14103" />
+		<Mesh name="Suspension_ShockAbsorber_Rear" material="assets/BasicBuggy_Rig_.material.xml" batchStart="16194" batchCount="21600" vertRStart="14104" vertREnd="17871" />
+		<Mesh name="Chassis_RollCage" material="assets/BasicBuggy_Rig_.material.xml" batchStart="37794" batchCount="27060" vertRStart="17872" vertREnd="43452" />
+		<Mesh name="Seat" material="assets/BasicBuggy_Rig_.material.xml" tx="0" ty="-0.716124" tz="0.569162" rx="0.0351764" ry="87.7048" rz="-4.41618" sx="1.00129" sy="1.00001" sz="1.61802" batchStart="64854" batchCount="324" vertRStart="43453" vertREnd="43670" />
+	</Mesh>
+	<Mesh name="AdultMaleReference" material="assets/BasicBuggy_Rig_.material.xml" tx="-0.412669" ty="0" tz="0" batchStart="65178" batchCount="36" vertRStart="43671" vertREnd="43694" />
+</Model>
