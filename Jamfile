@@ -16,6 +16,7 @@ Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
 src/Render_Horde3D.cpp
 src/Camera.cpp
 src/Math.cpp
+src/Joystick.cpp
 src/ModelUtilities/ModelLoader.cpp
 src/ModelUtilities/ObjLoader.cpp
 src/ModelUtilities/ModelToBullet.cpp

@@ -11,6 +11,7 @@
 
 #include <map>
 
+#include "Joystick.hpp"
 #include "Camera.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
@@ -202,6 +203,15 @@ bool macoyGluInvertMatrix(const float m[16], float invOut[16])
 	return true;
 }
 
+bool useChaseCam = true;
+// bool useChaseCam = false;
+
+// bool debugPhysicsDraw = true;
+bool debugPhysicsDraw = false;
+
+bool useJoystick = true;
+// bool useJoystick = false;
+
 int main()
 {
 	std::cout << "Spargus Vehicle Prototype\n";
@@ -271,11 +281,6 @@ int main()
 	frameTimer.start();
 
 	Camera cam(mainWindow);
-	bool useChaseCam = true;
-	// bool useChaseCam = false;
-	
-	// bool debugPhysicsDraw = true;
-	bool debugPhysicsDraw = false;
 
 	mainWindow.shouldClear(false);
 
@@ -283,7 +288,10 @@ int main()
 	{
 		mainWindow.getBase()->setActive(true);
 
-		processVehicleInput(input, vehicle);
+		if (useJoystick)
+			processVehicleInputJoystick(vehicle);
+		else
+			processVehicleInput(input, vehicle);
 
 		vehicle.Update(previousFrameTime);
 		physicsWorld.Update(previousFrameTime);
