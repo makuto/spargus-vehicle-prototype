@@ -66,13 +66,16 @@ void hordeInitialize(int winWidth, int winHeight)
 	// Apply animation
 	// h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
 
-	// Add light source
-	if (false)
+	// Add headlight source
+	// if (false)
 	{
-		H3DNode light = h3dAddLightNode(H3DRootNode, "Light1", 0, "LIGHTING", "SHADOWMAP");
+		H3DNode light = h3dAddLightNode(buggyNode, "Headlight", 0, "LIGHTING", "SHADOWMAP");
 		// Set light position and radius
-		h3dSetNodeTransform(light, 0, 20, 0, 0, 0, 0, 1, 1, 1);
-		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 500.0f);
+		h3dSetNodeTransform(light, /*transform=*/0, 0, 5.f, /*rotation=*/0, 180.f, 0.f,
+		                    /*scale=*/1, 1, 1);
+		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 50.0f);
+		H3DNode matRes = h3dFindResource(H3DResTypes::Material, "pipelines/postHDR.material.xml");
+		h3dSetMaterialUniform(matRes, "hdrExposure", 2.5f, 0, 0, 0);
 	}
 
 	// Add camera
