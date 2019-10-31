@@ -32,7 +32,8 @@
 *.app
 spargus_vehicle_prototype
 spargus_vehicle_prototype_ogre
-spargus_vehicle_prototype_opengl
+spargus_vehicle_prototype_opengl	
+spargus_vehicle_prototype_horde3D
 
 # Blender backups
 *.blend1
@@ -48,3 +49,8 @@ hlmsDiskCache*
 100000000VertexShader_vs.glsl
 300000000PixelShader_ps.glsl
 300000000VertexShader_vs.glsl
+
+# Ignore generated assets
+*.obj
+*.dae	
+!Collision/*.obj
