@@ -58,7 +58,7 @@ float interpolateRange(float startA, float endA, float startB, float endB, float
 
 void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 {
-	// printJoystickInput();
+	bool debugPrint = false;
 	
 	bool useGameSteering = true;
 	// Reset steering and forces immediately
@@ -102,8 +102,10 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 	                                        -joystickRange, joystickRange, brakePosition);
 
 	btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
-	std::cout << "speedKmHour = " << speedKmHour << " throttle = " << vehicle.EngineForce
-	          << " brake = " << vehicle.BrakingForce << "\n";
+
+	if (debugPrint)
+		std::cout << "speedKmHour = " << speedKmHour << " throttle = " << vehicle.EngineForce
+		          << " brake = " << vehicle.BrakingForce << "\n";
 
 	// Auto reverse on brake, if going slow enough (and throttle isn't pressed)
 	const float autoReverseThresholdKmHour = 1.f;
@@ -117,9 +119,10 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 			vehicle.EngineForce = interpolateRange(0.f, -vehicle.maxEngineForce, 0.f,
 			                                       vehicle.maxBrakingForce, vehicle.BrakingForce);
 			vehicle.BrakingForce = 0.f;
-			
-			std::cout << "now throttle = " << vehicle.EngineForce
-	          << " brake = " << vehicle.BrakingForce << "\n";
+
+			if (debugPrint)
+				std::cout << "now throttle = " << vehicle.EngineForce
+				          << " brake = " << vehicle.BrakingForce << "\n";
 		}
 	}
 
@@ -130,7 +133,9 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 	{
 		if (speedKmHour < autoReverseAccelerateBrakingThresholdKmHour)
 			vehicle.BrakingForce = vehicle.maxBrakingForce;
-		std::cout << "now throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce
-		          << "\n";
+
+		if (debugPrint)
+			std::cout << "now throttle = " << vehicle.EngineForce
+			          << " brake = " << vehicle.BrakingForce << "\n";
 	}
 }

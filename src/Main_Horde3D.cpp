@@ -11,14 +11,14 @@
 
 #include <map>
 
-#include "Joystick.hpp"
 #include "Camera.hpp"
+#include "Joystick.hpp"
+#include "Math.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
 #include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
-#include "Math.hpp"
 
 #include <Horde3D.h>
 #include "Render_Horde3D.hpp"
@@ -212,6 +212,18 @@ bool debugPhysicsDraw = false;
 bool useJoystick = true;
 // bool useJoystick = false;
 
+void handleConfigurationInput(inputManager& input)
+{
+	bool enableKeyRepeat = false;
+
+	if (input.WasTapped(inputCode::Num1, enableKeyRepeat))
+		debugPhysicsDraw = !debugPhysicsDraw;
+	if (input.WasTapped(inputCode::Num2, enableKeyRepeat))
+		useChaseCam = !useChaseCam;
+	if (input.WasTapped(inputCode::Num3, enableKeyRepeat))
+		useJoystick = !useJoystick;
+}
+
 int main()
 {
 	std::cout << "Spargus Vehicle Prototype\n";
@@ -288,11 +300,14 @@ int main()
 	{
 		mainWindow.getBase()->setActive(true);
 
+		// Input
+		handleConfigurationInput(input);
 		if (useJoystick)
 			processVehicleInputJoystick(vehicle);
 		else
 			processVehicleInput(input, vehicle);
 
+		// Physics
 		vehicle.Update(previousFrameTime);
 		physicsWorld.Update(previousFrameTime);
 
@@ -318,64 +333,67 @@ int main()
 			cam.UpdateEnd();
 		}
 
-		// Place buggy model at vehicle position
+		// Rendering
 		{
-			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-			float vehicleFloatMat[16];
-			BulletTransformToHordeMatrix(vehicleTransform, vehicleFloatMat);
-			h3dSetNodeTransMat(buggyNode, vehicleFloatMat);
-			// First person camera
-			// h3dSetNodeTransMat(hordeCamera, vehicleFloatMat);
-		}
-
-		// glCallList(groundCallList);
-
-		hordeUpdate(previousFrameTime);
-
-		// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
-		// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
-		if (debugPhysicsDraw)
-		{
-			const float* cameraTranslationMat = 0;
-			// Retrieve camera position...
-			h3dGetNodeTransMats(hordeCamera, 0, &cameraTranslationMat);
-
-			// In case of an invalid camera (e.g. pipeline not set) return
-			if (cameraTranslationMat)
+			// Place buggy model at vehicle position
 			{
-				// ... and projection matrix
-				float projectionMat[16];
-				h3dGetCameraProjMat(hordeCamera, projectionMat);
-
-				// ...
-
-				// Set projection matrix
-				glMatrixMode(GL_PROJECTION);
-				glLoadMatrixf(projectionMat);
-				// apply camera transformation
-				glMatrixMode(GL_MODELVIEW);
-				// TODO remove!
-				float inverseCameraMat[16];
-				macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
-				glLoadMatrixf(inverseCameraMat);
-
-				// then later in e.g. drawGizmo
-
-				// Uncomment for local transform, if necessary
-				// glPushMatrix();
-				// glMultMatrixf(nodeTransform);  // Load scene node matrix
-
-				// ... draw code
-				physicsWorld.DebugRender();
-
-				// glPopMatrix();
+				const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
+				float vehicleFloatMat[16];
+				BulletTransformToHordeMatrix(vehicleTransform, vehicleFloatMat);
+				h3dSetNodeTransMat(buggyNode, vehicleFloatMat);
+				// First person camera
+				// h3dSetNodeTransMat(hordeCamera, vehicleFloatMat);
 			}
+
+			// glCallList(groundCallList);
+
+			hordeUpdate(previousFrameTime);
+
+			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
+			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
+			if (debugPhysicsDraw)
+			{
+				const float* cameraTranslationMat = 0;
+				// Retrieve camera position...
+				h3dGetNodeTransMats(hordeCamera, 0, &cameraTranslationMat);
+
+				// In case of an invalid camera (e.g. pipeline not set) return
+				if (cameraTranslationMat)
+				{
+					// ... and projection matrix
+					float projectionMat[16];
+					h3dGetCameraProjMat(hordeCamera, projectionMat);
+
+					// ...
+
+					// Set projection matrix
+					glMatrixMode(GL_PROJECTION);
+					glLoadMatrixf(projectionMat);
+					// apply camera transformation
+					glMatrixMode(GL_MODELVIEW);
+					// TODO remove!
+					float inverseCameraMat[16];
+					macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
+					glLoadMatrixf(inverseCameraMat);
+
+					// then later in e.g. drawGizmo
+
+					// Uncomment for local transform, if necessary
+					// glPushMatrix();
+					// glMultMatrixf(nodeTransform);  // Load scene node matrix
+
+					// ... draw code
+					physicsWorld.DebugRender();
+
+					// glPopMatrix();
+				}
+			}
+
+			// Finished physics update and drawing; send it on its way
+			mainWindow.update();
+
+			mainWindow.getBase()->setActive(false);
 		}
-
-		// Finished physics update and drawing; send it on its way
-		mainWindow.update();
-
-		mainWindow.getBase()->setActive(false);
 
 		previousFrameTime = frameTimer.getTime();
 		frameTimer.start();
