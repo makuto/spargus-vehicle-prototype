@@ -5,10 +5,14 @@
 
 #include "PhysicsVehicle.hpp"
 
+#include "DebugDisplay.hpp"
+#include "Math.hpp"
+
 // For abs
 #include "glm/common.hpp"
 
 #include <iostream>
+#include <sstream>
 
 const float joystickRange = 100.f;
 
@@ -103,9 +107,13 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 
 	btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
 
-	if (debugPrint)
-		std::cout << "speedKmHour = " << speedKmHour << " throttle = " << vehicle.EngineForce
-		          << " brake = " << vehicle.BrakingForce << "\n";
+	{
+		std::ostringstream output;
+		output << "speedKmHour = " << speedKmHour << " (mph = " << KilometersToMiles(speedKmHour)
+		       << ") throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce
+		       << "\n";
+		DebugDisplay::print(output.str());
+	}
 
 	// Auto reverse on brake, if going slow enough (and throttle isn't pressed)
 	const float autoReverseThresholdKmHour = 1.f;

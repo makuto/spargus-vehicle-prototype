@@ -14,7 +14,9 @@ SubDir . ;
 
 Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
 src/Render_Horde3D.cpp
+src/DebugDisplay.cpp
 src/Camera.cpp
+src/Audio.cpp
 src/Math.cpp
 src/Joystick.cpp
 src/ModelUtilities/ModelLoader.cpp

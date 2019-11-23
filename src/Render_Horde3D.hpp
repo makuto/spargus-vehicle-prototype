@@ -9,5 +9,6 @@ extern H3DNode buggyWheelNodes[4];
 void hordeInitialize(int winWidth, int winHeight);
 void hordeTestInitialize(int winWidth, int winHeight);
 
+void hordeResize(int winWidth, int winHeight);
 void hordeUpdate(float fps);
 void hordeRelease();

@@ -13,12 +13,14 @@
 
 #include "Camera.hpp"
 #include "Joystick.hpp"
+#include "Audio.hpp"
 #include "Math.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
 #include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
+#include "DebugDisplay.hpp"
 
 #include <Horde3D.h>
 #include "Render_Horde3D.hpp"
@@ -58,7 +60,9 @@ void windowResizeCB(float width, float height)
 	WindowHeight = height;
 
 	// Is this necessary?
-	glViewport(0, 0, width, height);
+	// glViewport(0, 0, width, height);
+	
+	hordeResize(width, height);
 }
 
 void processVehicleInput(inputManager& input, PhysicsVehicle& vehicle)
@@ -216,12 +220,15 @@ void handleConfigurationInput(inputManager& input)
 {
 	bool enableKeyRepeat = false;
 
-	if (input.WasTapped(inputCode::Num1, enableKeyRepeat))
-		debugPhysicsDraw = !debugPhysicsDraw;
-	if (input.WasTapped(inputCode::Num2, enableKeyRepeat))
+	if (input.WasTapped(inputCode::F1, enableKeyRepeat))
+		std::cout << "TODO: Reset vehicle\n";
+		// vehicle.
+	if (input.WasTapped(inputCode::F2, enableKeyRepeat))
 		useChaseCam = !useChaseCam;
-	if (input.WasTapped(inputCode::Num3, enableKeyRepeat))
+	if (input.WasTapped(inputCode::F3, enableKeyRepeat))
 		useJoystick = !useJoystick;
+	if (input.WasTapped(inputCode::F4, enableKeyRepeat))
+		debugPhysicsDraw = !debugPhysicsDraw;
 }
 
 int main()
@@ -257,11 +264,14 @@ int main()
 
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
 	initializeWindow(mainWindow);
-
+	DebugDisplay::initialize(&mainWindow);
+	
 	{
 		WindowScopedContextActivate activate(mainWindow);
 		hordeInitialize(WindowWidth, WindowHeight);
 	}
+
+	loadAudio();
 
 	inputManager input(&mainWindow);
 
@@ -311,6 +321,9 @@ int main()
 		vehicle.Update(previousFrameTime);
 		physicsWorld.Update(previousFrameTime);
 
+		// Audio
+		updateAudio(vehicle);
+
 		// Camera
 		{
 			if (!useChaseCam)
@@ -346,7 +359,7 @@ int main()
 			}
 
 			// glCallList(groundCallList);
-
+			
 			hordeUpdate(previousFrameTime);
 
 			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
@@ -384,14 +397,24 @@ int main()
 
 					// ... draw code
 					physicsWorld.DebugRender();
-
+					
 					// glPopMatrix();
 				}
 			}
 
+			// 2D overlays
+			{
+				// Required for 2D drawing
+				mainWindow.getBase()->resetGLStates();
+
+				debugPrintAudio();
+
+				DebugDisplay::endFrame();
+			}
+
 			// Finished physics update and drawing; send it on its way
 			mainWindow.update();
-
+			
 			mainWindow.getBase()->setActive(false);
 		}
 

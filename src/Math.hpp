@@ -9,3 +9,8 @@ void openGlMatrixToGlmMat4(const float* openGlMatrix, glm::mat4& matOut);
 void openGlMatrixToGlmMat4(const double* openGlMatrix, glm::mat4& matOut);
 class btTransform;
 void BulletTransformToHordeMatrix(const btTransform& transform, float* hordeMatrixOut);
+
+inline float KilometersToMiles(float kilometers)
+{
+	return kilometers / 1.609344f;
+}

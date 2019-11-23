@@ -10,6 +10,11 @@ H3DNode buggyNode = 0;
 H3DNode buggyWheelNodes[4];
 H3DRes buggyWheelRes = 0;
 H3DRes fontMaterialRes = 0;
+H3DRes pipeRes = 0;
+
+const float cameraFov = 60.f;
+const float cameraNearPlane = 0.5f;
+const float cameraFarPlane = 2048.0f;
 
 void hordeInitialize(int winWidth, int winHeight)
 {
@@ -21,7 +26,8 @@ void hordeInitialize(int winWidth, int winHeight)
 	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
 	// H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
-	H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy_Chassis.scene.xml", 0);
+	H3DRes buggyRes =
+	    h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy_Chassis.scene.xml", 0);
 	buggyWheelRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Wheel_Rear.scene.xml", 0);
 
 	// Scale reference
@@ -44,7 +50,7 @@ void hordeInitialize(int winWidth, int winHeight)
 	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 
 	// Add pipeline resource
-	H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);
+	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);
 	// Add font
 	fontMaterialRes = h3dAddResource(H3DResTypes::Material, "overlays/font.material.xml", 0);
 	// Load added resources
@@ -58,7 +64,7 @@ void hordeInitialize(int winWidth, int winHeight)
 	h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
 
 	for (int i = 0; i < sizeof(buggyWheelNodes) / sizeof(buggyWheelNodes[0]); ++i)
-		buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);		
+		buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);
 
 	// Add model to scene
 	// model = h3dAddNodes(H3DRootNode, modelRes);
@@ -86,7 +92,8 @@ void hordeInitialize(int winWidth, int winHeight)
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, 0);
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, winWidth);
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, winHeight);
-	h3dSetupCameraView(hordeCamera, 60.0f, (float)winWidth / winHeight, 0.5f, 2048.0f);
+	h3dSetupCameraView(hordeCamera, 60.0f, (float)winWidth / winHeight, cameraNearPlane,
+	                   cameraFarPlane);
 	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 
 	// h3dSetOption(H3DOptions::DebugViewMode, 1.0f);
@@ -130,7 +137,7 @@ void hordeTestInitialize(int winWidth, int winHeight)
 	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
 
 	// Add pipeline resource
-	H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);
+	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);
 	// H3DRes pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/forward.pipeline.xml", 0);
 	// Add model resource
 	H3DRes modelRes = h3dAddResource(H3DResTypes::SceneGraph, "models/knight/knight.scene.xml", 0);
@@ -170,7 +177,7 @@ void hordeTestInitialize(int winWidth, int winHeight)
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, 0);
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, winWidth);
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, winHeight);
-	h3dSetupCameraView(hordeCamera, 60.0f, (float)winWidth / winHeight, 0.5f, 2048.0f);
+	h3dSetupCameraView(hordeCamera, cameraFov, (float)winWidth / winHeight, 0.5f, 2048.0f);
 	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 
 	// h3dSetOption(H3DOptions::DebugViewMode, 1.0f);
@@ -201,6 +208,24 @@ void hordeTestInitialize(int winWidth, int winHeight)
 		h3dSetMaterialUniform(matRes, "hdrBrightThres", 0.5f, 0, 0, 0);
 		h3dSetMaterialUniform(matRes, "hdrBrightOffset", 0.08f, 0, 0, 0);
 	}
+}
+
+void hordeResize(int winWidth, int winHeight)
+{
+	if (!hordeCamera || !pipeRes)
+		return;
+
+	// Resize viewport
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportXI, 0);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, 0);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, winWidth);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, winHeight);
+
+	// Set virtual camera parameters
+	h3dSetupCameraView(hordeCamera, cameraFov, (float)winWidth / winHeight, cameraNearPlane,
+	                   cameraFarPlane);
+	// TODO: Fix buffer resize
+	// h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 }
 
 void hordeUpdate(float fps)
