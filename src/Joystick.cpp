@@ -107,14 +107,6 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 
 	btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
 
-	{
-		std::ostringstream output;
-		output << "speedKmHour = " << speedKmHour << " (mph = " << KilometersToMiles(speedKmHour)
-		       << ") throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce
-		       << "\n";
-		DebugDisplay::print(output.str());
-	}
-
 	// Auto reverse on brake, if going slow enough (and throttle isn't pressed)
 	const float autoReverseThresholdKmHour = 1.f;
 	const float autoReverseForceTreshold = 1.f;

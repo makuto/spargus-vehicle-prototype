@@ -9,18 +9,22 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
-#include <map>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>  // mat4
 
-#include "Camera.hpp"
-#include "Joystick.hpp"
+#include <map>
+#include <sstream>
+
 #include "Audio.hpp"
+#include "Camera.hpp"
+#include "DebugDisplay.hpp"
+#include "Joystick.hpp"
 #include "Math.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
 #include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
-#include "DebugDisplay.hpp"
 
 #include <Horde3D.h>
 #include "Render_Horde3D.hpp"
@@ -61,7 +65,7 @@ void windowResizeCB(float width, float height)
 
 	// Is this necessary?
 	// glViewport(0, 0, width, height);
-	
+
 	hordeResize(width, height);
 }
 
@@ -139,74 +143,6 @@ struct WindowScopedContextActivate
 	}
 };
 
-// TODO Remove
-// Copy pasted :(
-bool macoyGluInvertMatrix(const float m[16], float invOut[16])
-{
-	float inv[16], det;
-	int i;
-
-	inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] +
-	         m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
-
-	inv[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] -
-	         m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
-
-	inv[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] +
-	         m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
-
-	inv[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] -
-	          m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
-
-	inv[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] -
-	         m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
-
-	inv[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] +
-	         m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
-
-	inv[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] -
-	         m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
-
-	inv[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] +
-	          m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
-
-	inv[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] + m[5] * m[3] * m[14] +
-	         m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
-
-	inv[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] -
-	         m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
-
-	inv[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] +
-	          m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
-
-	inv[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] -
-	          m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
-
-	inv[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] -
-	         m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
-
-	inv[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] + m[4] * m[3] * m[10] +
-	         m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
-
-	inv[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] - m[4] * m[3] * m[9] -
-	          m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
-
-	inv[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] + m[4] * m[2] * m[9] +
-	          m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
-
-	det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
-
-	if (det == 0)
-		return false;
-
-	det = 1.0 / det;
-
-	for (i = 0; i < 16; i++)
-		invOut[i] = inv[i] * det;
-
-	return true;
-}
-
 bool useChaseCam = true;
 // bool useChaseCam = false;
 
@@ -216,19 +152,28 @@ bool debugPhysicsDraw = false;
 bool useJoystick = true;
 // bool useJoystick = false;
 
-void handleConfigurationInput(inputManager& input)
-{
-	bool enableKeyRepeat = false;
+float timeStepScale = 1.f;
 
-	if (input.WasTapped(inputCode::F1, enableKeyRepeat))
-		std::cout << "TODO: Reset vehicle\n";
-		// vehicle.
-	if (input.WasTapped(inputCode::F2, enableKeyRepeat))
+void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
+{
+	bool noKeyRepeat = false;
+
+	if (input.WasTapped(inputCode::F1, noKeyRepeat))
+		mainVehicle.Reset();
+	if (input.WasTapped(inputCode::F2, noKeyRepeat))
 		useChaseCam = !useChaseCam;
-	if (input.WasTapped(inputCode::F3, enableKeyRepeat))
+	if (input.WasTapped(inputCode::F3, noKeyRepeat))
 		useJoystick = !useJoystick;
-	if (input.WasTapped(inputCode::F4, enableKeyRepeat))
+	if (input.WasTapped(inputCode::F4, noKeyRepeat))
 		debugPhysicsDraw = !debugPhysicsDraw;
+	if (input.WasTapped(inputCode::F5, true))
+		timeStepScale -= 0.1f;
+	if (input.WasTapped(inputCode::F6, true))
+		timeStepScale += 0.1f;
+	if (input.WasTapped(inputCode::F7, noKeyRepeat))
+		timeStepScale = 1.f;
+	if (input.WasTapped(inputCode::F8, noKeyRepeat))
+		timeStepScale = 0.f;
 }
 
 int main()
@@ -265,7 +210,7 @@ int main()
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
 	initializeWindow(mainWindow);
 	DebugDisplay::initialize(&mainWindow);
-	
+
 	{
 		WindowScopedContextActivate activate(mainWindow);
 		hordeInitialize(WindowWidth, WindowHeight);
@@ -311,15 +256,15 @@ int main()
 		mainWindow.getBase()->setActive(true);
 
 		// Input
-		handleConfigurationInput(input);
+		handleConfigurationInput(input, vehicle);
 		if (useJoystick)
 			processVehicleInputJoystick(vehicle);
 		else
 			processVehicleInput(input, vehicle);
 
 		// Physics
-		vehicle.Update(previousFrameTime);
-		physicsWorld.Update(previousFrameTime);
+		vehicle.Update(previousFrameTime * timeStepScale);
+		physicsWorld.Update(previousFrameTime * timeStepScale);
 
 		// Audio
 		updateAudio(vehicle);
@@ -359,7 +304,7 @@ int main()
 			}
 
 			// glCallList(groundCallList);
-			
+
 			hordeUpdate(previousFrameTime);
 
 			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
@@ -384,10 +329,11 @@ int main()
 					glLoadMatrixf(projectionMat);
 					// apply camera transformation
 					glMatrixMode(GL_MODELVIEW);
-					// TODO remove!
-					float inverseCameraMat[16];
-					macoyGluInvertMatrix(cameraTranslationMat, inverseCameraMat);
-					glLoadMatrixf(inverseCameraMat);
+					glm::mat4 inverseCameraMat;
+					glm::mat4 cameraMat;
+					openGlMatrixToGlmMat4(cameraTranslationMat, cameraMat);
+					inverseCameraMat = glm::inverse(cameraMat);
+					glLoadMatrixf(&inverseCameraMat[0][0]);
 
 					// then later in e.g. drawGizmo
 
@@ -397,24 +343,61 @@ int main()
 
 					// ... draw code
 					physicsWorld.DebugRender();
-					
+
 					// glPopMatrix();
 				}
 			}
 
 			// 2D overlays
 			{
-				// Required for 2D drawing
-				mainWindow.getBase()->resetGLStates();
+				// Time
+				{
+					std::ostringstream output;
+					output << "Time scaling: " << timeStepScale << "x"
+					       << " (F5 = -0.1x "
+					       << "F6 = +0.1x "
+					       << "F7 = 1x "
+					       << "F8 = 0x)";
+					DebugDisplay::print(output.str());
+					std::ostringstream controls;
+					controls << "F1 = reset vehicle "
+					         << "F2 = free/chase camera "
+					         << "F3 = joystick/keyboard "
+					         << "F4 = physics drawing ";
+					DebugDisplay::print(controls.str());
+				}
+				// Vehicle
+				{
+					btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
+					std::ostringstream output;
+					output << "speedKmHour = " << speedKmHour
+					       << " (mph = " << KilometersToMiles(speedKmHour)
+					       << ") throttle = " << vehicle.EngineForce
+					       << " brake = " << vehicle.BrakingForce << "\n";
+					DebugDisplay::print(output.str());
+
+					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)
+					{
+						const btWheelInfo& wheelInfo = vehicle.vehicle->getWheelInfo(i);
+						// std::cout << "Wheel " << i << " skid " << wheelInfo.m_skidInfo << "\n";
+
+						std::ostringstream outputSuspension;
+						outputSuspension << "Wheel [" << i << "] skid " << wheelInfo.m_skidInfo
+						                 << " suspension " << wheelInfo.m_wheelsSuspensionForce;
+						DebugDisplay::print(outputSuspension.str());
+					}
+				}
 
 				debugPrintAudio();
 
+				// Required for 2D drawing
+				mainWindow.getBase()->resetGLStates();
 				DebugDisplay::endFrame();
 			}
 
 			// Finished physics update and drawing; send it on its way
 			mainWindow.update();
-			
+
 			mainWindow.getBase()->setActive(false);
 		}
 

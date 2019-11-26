@@ -6,7 +6,7 @@ namespace DebugDisplay
 {
 window* outputWindow = nullptr;
 text displayText;
-const float displayTextSize = 32.f;
+const float displayTextSize = 28.f;
 const float lineSpacing = 2.f;
 const float startOffset = 5.f;
 

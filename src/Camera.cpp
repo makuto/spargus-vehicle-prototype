@@ -8,6 +8,7 @@
 
 #include <glm/mat4x4.hpp>  // mat4
 #include <glm/vec3.hpp>    // vec3
+#include <glm/gtc/quaternion.hpp>
 #include <glm/trigonometric.hpp>  //radians
 #include <glm/ext/matrix_transform.hpp>
 
@@ -30,14 +31,14 @@ Camera::Camera(window& winOwner) : win(winOwner)
 
 void Camera::FreeCam(inputManager& input, float frameTime)
 {
-	float horizontalSpeed = 20.f;
-	float verticalSpeed = 20.f;
+	float freeCamHorizontalSpeed = 30.f;
+	float freeCamVerticalSpeed = 30.f;
 
 	// Slow camera motion while holding shift
 	if (input.isPressed(inputCode::RShift) || input.isPressed(inputCode::LShift))
 	{
-		horizontalSpeed = 2.f;
-		verticalSpeed = 2.f;
+		freeCamHorizontalSpeed = 2.f;
+		freeCamVerticalSpeed = 2.f;
 	}
 
 	if (input.isPressed(inputCode::W))
@@ -48,42 +49,42 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 		    zpos -= float(cos(yrotrad)) ;
 		 * */
 		camTranslate[0] +=
-		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 		camTranslate[2] -=
-		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		// camPos[1]=-10;
 	}
 	if (input.isPressed(inputCode::S))
 	{
 		camTranslate[0] -=
-		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 		camTranslate[2] +=
-		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		// camTranslate[2]=50*win.GetFrameTime();
 		// camPos[1]=-10;
 	}
 	if (input.isPressed(inputCode::A))
 	{
 		camTranslate[0] -=
-		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		camTranslate[2] -=
-		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 	}
 	if (input.isPressed(inputCode::D))
 	{
 		camTranslate[0] +=
-		    (horizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(cos(camRot[1] / 180 * 3.141592654));
 		camTranslate[2] +=
-		    (horizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
+		    (freeCamHorizontalSpeed * frameTime) * float(sin(camRot[1] / 180 * 3.141592654));
 	}
 
 	if (input.isPressed(inputCode::Q))
 	{
-		camTranslate[1] -= verticalSpeed * frameTime;
+		camTranslate[1] -= freeCamVerticalSpeed * frameTime;
 	}
 	if (input.isPressed(inputCode::E))
 	{
-		camTranslate[1] += verticalSpeed * frameTime;
+		camTranslate[1] += freeCamVerticalSpeed * frameTime;
 	}
 
 	// camRot[1]=(10*(in->GetMouseX()*win.GetWidth()/10) + 400)/win.GetWidth();
@@ -150,8 +151,17 @@ void Camera::ChaseCamera(double* openGlMatrix)
 	// Pull camera up and back
 	glm::vec3 translateVec = {0.f, -cameraHeight, -cameraPullback};
 	camMatrix = glm::translate(camMatrix, translateVec);
+	
+	glm::quat vehicleRotation = glm::quat_cast(carMatrix);
+	glm::vec3 vehicleRotationEuler = glm::eulerAngles(vehicleRotation);
+
+	glm::vec4 translateRow = carMatrix[3];
+	glm::vec3 translateCarVec = {translateRow[0], translateRow[1], translateRow[2]};
+	// std::cout << translateRow[0] << ", " << translateRow[1] << ", " << translateRow[2] << std::endl;
+	glm::mat4 translateMat = glm::translate(glm::mat4(1.f), translateCarVec);
 
 	camMatrix = camMatrix * rotationMatrix * carMatrix;
+	// camMatrix = camMatrix * translateMat;
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);

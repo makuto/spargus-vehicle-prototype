@@ -1,11 +1,15 @@
 #include "Audio.hpp"
 
-#include "PhysicsVehicle.hpp"
+#include "Utilities.hpp"
 #include "DebugDisplay.hpp"
+#include "PhysicsVehicle.hpp"
 
 #include "btBulletDynamicsCommon.h"
-#include "sound/sound.hpp"
 #include "graphics/graphics.hpp"
+#include "sound/sound.hpp"
+
+// For abs
+#include "glm/common.hpp"
 
 // #include <SFML/Sound.hpp>
 #include <SFML/System.hpp>
@@ -78,15 +82,12 @@ static SoundEffect soundFxFilePairs[] = {
 
 void loadAudio()
 {
-	for (size_t i = 0; i < sizeof(soundFxFilePairs) / sizeof(SoundEffect); ++i)
+	for (size_t i = 0; i < ArraySize(soundFxFilePairs); ++i)
 	{
 		if (!soundFxFilePairs[i].soundFx->load(soundFxFilePairs[i].filename))
 			std::cout << "Failed to load " << soundFxFilePairs[i].filename << "\n";
 	}
 }
-
-template <typename T,unsigned Length>
-inline unsigned ArraySize(const T (&v)[Length]) { return Length; }
 
 void debugPrintAudio()
 {
@@ -163,14 +164,10 @@ void updateAudio(PhysicsVehicle& vehicle)
 
 			if (wheelInfo.m_skidInfo < 1.f)
 				sfxVehicleSkidDirt.play();
-			
-			std::ostringstream outputSuspension;
-			outputSuspension << "Wheel [" << i << "] skid " << wheelInfo.m_skidInfo << " suspension " << wheelInfo.m_wheelsSuspensionForce;
-			DebugDisplay::print(outputSuspension.str());
 		}
 
 		// Engine noise
-		if (vehicle.EngineForce > 5.f)
+		if (glm::abs(vehicle.EngineForce) > 5.f)
 		{
 			sfxVehicleIdle.stop();
 			sfxVehicleAccelerate.loop(true);

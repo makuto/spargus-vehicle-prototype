@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
+
 // TODO: Find out what this means
 bool bulletUseMCLPSolver = true;
 
@@ -38,14 +40,15 @@ PhysicsWorld::PhysicsWorld()
 	                                    collisionConfiguration);
 
 	// debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	debugDrawer.setDebugMode(
-		btIDebugDraw::DBG_DrawWireframe //|
-		// btIDebugDraw::DBG_DrawAabb |
-		// btIDebugDraw::DBG_DrawContactPoints
-		// btIDebugDraw::DBG_DrawNormals
-		);
+	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe  //|
+	                         // btIDebugDraw::DBG_DrawAabb |
+	                         // btIDebugDraw::DBG_DrawContactPoints
+	                         // btIDebugDraw::DBG_DrawNormals
+	);
 
 	world->setDebugDrawer(&debugDrawer);
+
+	world->setInternalTickCallback(SimulationTickCallback);
 
 	if (bulletUseMCLPSolver)
 	{
@@ -59,8 +62,8 @@ PhysicsWorld::PhysicsWorld()
 		world->getSolverInfo().m_minimumSolverBatchSize = 128;
 	}
 	world->getSolverInfo().m_globalCfm = 0.00001;
-	
-	//world->setGravity(btVector3(0,0,0));	
+
+	// world->setGravity(btVector3(0,0,0));
 
 	// Ground (for testing only)
 	if (false)
@@ -102,9 +105,8 @@ void PhysicsWorld::Update(float deltaTime)
 
 	if (world)
 	{
-		
 		world->updateAabbs();
-		
+
 		// during idle mode, just run 1 simulation step maximum
 		int maxSimSubSteps = 2;
 
@@ -181,4 +183,36 @@ btRigidBody* PhysicsWorld::localCreateRigidBody(btScalar mass, const btTransform
 
 	world->addRigidBody(body);
 	return body;
+}
+
+void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep)
+{
+	int numManifolds = world->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++)
+	{
+		const btPersistentManifold* contactManifold =
+		    world->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject* obA =
+		    static_cast<const btCollisionObject*>(contactManifold->getBody0());
+		const btCollisionObject* obB =
+		    static_cast<const btCollisionObject*>(contactManifold->getBody1());
+		
+		const btCollisionShape* aShape = obA->getCollisionShape();
+
+		void* aUserPointer = aShape->getUserPointer();
+		void* bUserPointer = obB->getUserPointer();
+		if (aUserPointer)
+		{
+			const CollisionShapeOwnerReference* aShapeOwnerReference =
+			    static_cast<const CollisionShapeOwnerReference*>(aUserPointer);
+			std::cout << aShapeOwnerReference->shapeCreator << "\n";
+		}
+		if (bUserPointer)
+		{
+			const CollisionShapeOwnerReference* bShapeOwnerReference =
+			    static_cast<const CollisionShapeOwnerReference*>(bUserPointer);
+			std::cout << bShapeOwnerReference->shapeCreator << "\n";
+		}
+		// std::cout << "Collision!\n";
+	}
 }

@@ -2,6 +2,8 @@
 
 #include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
+#include "PhysicsWorld.hpp"
+
 #include <vector>
 
 struct PhysicsWorld;
@@ -33,6 +35,9 @@ private:
 
 	// For cleanup only
 	std::vector<btCollisionShape*> collisionShapes;
+	
+	// Used to get from a collision shape to this structure
+	CollisionShapeOwnerReference shapeReference;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
@@ -64,13 +69,14 @@ private:
 	// float chassisHeight = 0.5f;
 	float chassisLength = 4.12349f;
 
-	float defaultBrakingForce = 10.f;
+	float defaultBrakingForce = 20.f;
 
 	// The axle height relative to the vehicle (I think)
-	float connectionHeight = 0.827f;  // 1.2f;
+	// float connectionHeight = 0.827f;  // 1.2f;
+	float connectionHeight = 0.727f;  // 1.2f;
 	// Use same radius wheels for now
 	// TODO add support for different rear/front wheel sizes
-	float wheelRadius = 1.64f;
+	float wheelRadius = 1.64f / 2.f;
 	// Tread width
 	float wheelWidth = 0.5f;
 	float wheelFriction = 1000;  // BT_LARGE_FLOAT;

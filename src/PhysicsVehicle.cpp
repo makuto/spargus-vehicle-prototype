@@ -31,6 +31,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		    new btBoxShape(btVector3(chassisWidthHalfExtents, chassisHeight / 2, chassisLengthHalfExtents));
 		collisionShapes.push_back(chassisShape);
 
+		// Make it possible to go from the chassis shape to the vehicle
+		shapeReference.type = CollisionShapeOwnerType::Vehicle;
+		shapeReference.shapeCreator = this;
+		chassisShape->setUserPointer(&shapeReference);
+
 		btCompoundShape* compound = new btCompoundShape();
 		collisionShapes.push_back(compound);
 		btTransform localTransform;
@@ -75,22 +80,22 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
 
 		btVector3 connectionPointCS0(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                             2 * chassisLengthHalfExtents - wheelRadius);
+									 chassisLengthHalfExtents);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               2 * chassisLengthHalfExtents - wheelRadius);
+		                               chassisLengthHalfExtents);
 
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               -2 * chassisLengthHalfExtents + wheelRadius);
+		                               -chassisLengthHalfExtents);
 		isFrontWheel = false;
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                               -2 * chassisLengthHalfExtents + wheelRadius);
+		                               -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 
@@ -187,8 +192,6 @@ void PhysicsVehicle::Update(float deltaTime)
 		if (buggyWheelNodes[0])
 		{
 			btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
-			btVector3 pos = tr.getOrigin();
-			btQuaternion orn = tr.getRotation();
 			float wheelGraphicsMatrix[16];
 			BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
 			h3dSetNodeTransMat(buggyWheelNodes[i], wheelGraphicsMatrix);

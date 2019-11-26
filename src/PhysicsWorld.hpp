@@ -38,4 +38,18 @@ struct PhysicsWorld
 
 	btRigidBody* localCreateRigidBody(btScalar mass, const btTransform& startTransform,
 	                                  btCollisionShape* shape);
+
+	// void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
+};
+
+enum class CollisionShapeOwnerType : int
+{
+	None = 0,
+	Vehicle
+};
+
+struct CollisionShapeOwnerReference
+{
+	CollisionShapeOwnerType type;
+	void* shapeCreator;
 };
