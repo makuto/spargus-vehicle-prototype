@@ -3,6 +3,10 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
+const glm::vec3 UpAxis = {0.f, 1.f, 0.f};
+const glm::vec3 LeftAxis = {1.f, 0.f, 0.f};
+const glm::vec3 ForwardAxis = {0.f, 0.f, 1.f};
+
 void openGlMatrixToGlmMat4(const float* openGlMatrix, glm::mat4& matOut)
 {
 	for (int i = 0; i < 16; i++)
@@ -27,4 +31,14 @@ void BulletTransformToHordeMatrix(const btTransform& transform, float* hordeMatr
 	{
 		hordeMatrixOut[i] = bulletMat[i];
 	}
+}
+
+glm::mat4 BulletTransformToGlmMat4(const btTransform& transform)
+{
+	glm::mat4 convertedMatrix;
+
+	btScalar bulletMat[16];
+	transform.getOpenGLMatrix(bulletMat);
+	openGlMatrixToGlmMat4(bulletMat, convertedMatrix);
+	return convertedMatrix;
 }

@@ -17,8 +17,10 @@
 
 #include "Audio.hpp"
 #include "Camera.hpp"
+#include "Color.hpp"
 #include "DebugDisplay.hpp"
 #include "Joystick.hpp"
+#include "Logging.hpp"
 #include "Math.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
@@ -36,16 +38,17 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
+Logging::Logger globalLogger(Logging::Severity::verbose, Logging::MinimalLogOutput);
+
 void initializeWindow(window& win)
 {
 	{
 		sf::ContextSettings settings = win.getBase()->getSettings();
 
-		std::cout << "depth bits:" << settings.depthBits << std::endl;
-		std::cout << "stencil bits:" << settings.stencilBits << std::endl;
-		std::cout << "antialiasing level:" << settings.antialiasingLevel << std::endl;
-		std::cout << "version:" << settings.majorVersion << "." << settings.minorVersion
-		          << std::endl;
+		LOGI << "depth bits:" << settings.depthBits;
+		LOGI << "stencil bits:" << settings.stencilBits;
+		LOGI << "antialiasing level:" << settings.antialiasingLevel;
+		LOGI << "version:" << settings.majorVersion << "." << settings.minorVersion;
 	}
 	win.setBackgroundColor(WIN_BACKGROUND_COLOR);
 
@@ -69,7 +72,7 @@ void windowResizeCB(float width, float height)
 	hordeResize(width, height);
 }
 
-void processVehicleInput(inputManager& input, PhysicsVehicle& vehicle)
+void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
 {
 	bool useGameSteering = true;
 	// Reset steering and forces immediately
@@ -149,6 +152,11 @@ bool useChaseCam = true;
 // bool debugPhysicsDraw = true;
 bool debugPhysicsDraw = false;
 
+bool debugDraw3D = true;
+// bool debugDraw3D = false;
+bool debugDraw2D = true;
+// bool debugDraw2D = false;
+
 bool useJoystick = true;
 // bool useJoystick = false;
 
@@ -166,6 +174,11 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 		useJoystick = !useJoystick;
 	if (input.WasTapped(inputCode::F4, noKeyRepeat))
 		debugPhysicsDraw = !debugPhysicsDraw;
+	if (input.WasTapped(inputCode::F9, noKeyRepeat))
+	{
+		debugDraw3D = !debugDraw3D;
+		debugDraw2D = !debugDraw2D;
+	}
 	if (input.WasTapped(inputCode::F5, true))
 		timeStepScale -= 0.1f;
 	if (input.WasTapped(inputCode::F6, true))
@@ -178,7 +191,7 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 
 int main()
 {
-	std::cout << "Spargus Vehicle Prototype\n";
+	LOGI << "Spargus Vehicle Prototype";
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Initialization
@@ -247,7 +260,7 @@ int main()
 	timer frameTimer;
 	frameTimer.start();
 
-	Camera cam(mainWindow);
+	Camera camera(mainWindow);
 
 	mainWindow.shouldClear(false);
 
@@ -256,11 +269,16 @@ int main()
 		mainWindow.getBase()->setActive(true);
 
 		// Input
-		handleConfigurationInput(input, vehicle);
-		if (useJoystick)
-			processVehicleInputJoystick(vehicle);
-		else
-			processVehicleInput(input, vehicle);
+		{
+			handleConfigurationInput(input, vehicle);
+
+			handleCameraInput(camera, previousFrameTime);
+
+			if (useJoystick)
+				processVehicleInputJoystick(vehicle);
+			else
+				processVehicleInputKeyboard(input, vehicle);
+		}
 
 		// Physics
 		vehicle.Update(previousFrameTime * timeStepScale);
@@ -272,23 +290,33 @@ int main()
 		// Camera
 		{
 			if (!useChaseCam)
-				cam.FreeCam(input, previousFrameTime);
-			cam.UpdateStart();
+				camera.FreeCam(input, previousFrameTime);
+			camera.UpdateStart();
 			// Use vehicle transform to position camera
 			if (useChaseCam)
 			{
 				const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-				btTransform camTransform = vehicleTransform.inverse();
+				// btTransform camTransform = vehicleTransform.inverse();
 				btScalar vehicleMat[16];
-				// vehicleTransform.getOpenGLMatrix(vehicleMat);
-				camTransform.getOpenGLMatrix(vehicleMat);
-				// h3dSetNodeTransform(hordeCam, 0, 20, 0, /*rotationEuler=*/0, 0, 0, /*scaling=*/1,
-				// 1, 1);
-
-				// TODO: There's definitely something wrong with this function
-				cam.ChaseCamera(vehicleMat);
+				vehicleTransform.getOpenGLMatrix(vehicleMat);
+				camera.ChaseCamera(vehicleMat);
 			}
-			cam.UpdateEnd();
+			camera.UpdateEnd();
+
+			// Debug lines for camera
+			{
+				glm::vec3 scaledWorldCameraTargetDirection = camera.targetCameraDirection * 3.f;
+				glm::vec3 vehiclePosition = vehicle.GetPosition();
+				scaledWorldCameraTargetDirection += vehiclePosition;
+				DebugDraw::addLine(vehiclePosition, scaledWorldCameraTargetDirection, Color::Blue,
+				                   Color::Blue, DebugDraw::Lifetime_OneFrame);
+
+				glm::vec4 vehicleFacingIntermediate(0.f, 0.f, 3.f, 1.f);
+				vehicleFacingIntermediate = vehicle.GetTransform() * vehicleFacingIntermediate;
+				glm::vec3 vehicleFacing(vehicleFacingIntermediate);
+				DebugDraw::addLine(vehicle.GetPosition(), vehicleFacing, Color::Green, Color::Green,
+				                   DebugDraw::Lifetime_OneFrame);
+			}
 		}
 
 		// Rendering
@@ -309,7 +337,7 @@ int main()
 
 			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
 			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
-			if (debugPhysicsDraw)
+			if (debugDraw3D)
 			{
 				const float* cameraTranslationMat = 0;
 				// Retrieve camera position...
@@ -333,7 +361,7 @@ int main()
 					glm::mat4 cameraMat;
 					openGlMatrixToGlmMat4(cameraTranslationMat, cameraMat);
 					inverseCameraMat = glm::inverse(cameraMat);
-					glLoadMatrixf(&inverseCameraMat[0][0]);
+					glLoadMatrixf(glmMatrixToHordeMatrixRef(inverseCameraMat));
 
 					// then later in e.g. drawGizmo
 
@@ -341,14 +369,23 @@ int main()
 					// glPushMatrix();
 					// glMultMatrixf(nodeTransform);  // Load scene node matrix
 
+					DebugDraw::render(previousFrameTime);
+
 					// ... draw code
-					physicsWorld.DebugRender();
+					if (debugPhysicsDraw)
+						physicsWorld.DebugRender();
 
 					// glPopMatrix();
 				}
 			}
+			else
+			{
+				// Make sure lines expire even when not being viewed
+				DebugDraw::updateLifetimesOnly(previousFrameTime);
+			}
 
 			// 2D overlays
+			if (debugDraw2D)
 			{
 				// Time
 				{
@@ -363,9 +400,11 @@ int main()
 					controls << "F1 = reset vehicle "
 					         << "F2 = free/chase camera "
 					         << "F3 = joystick/keyboard "
-					         << "F4 = physics drawing ";
+							 << "F4 = physics drawing "
+							 << "F9 = debug drawing ";
 					DebugDisplay::print(controls.str());
 				}
+
 				// Vehicle
 				{
 					btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
@@ -379,20 +418,36 @@ int main()
 					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)
 					{
 						const btWheelInfo& wheelInfo = vehicle.vehicle->getWheelInfo(i);
-						// std::cout << "Wheel " << i << " skid " << wheelInfo.m_skidInfo << "\n";
+						// LOGD << "Wheel " << i << " skid " << wheelInfo.m_skidInfo << "\n";
 
 						std::ostringstream outputSuspension;
 						outputSuspension << "Wheel [" << i << "] skid " << wheelInfo.m_skidInfo
 						                 << " suspension " << wheelInfo.m_wheelsSuspensionForce;
 						DebugDisplay::print(outputSuspension.str());
 					}
+
+					const btTransform& vehicleTransform =
+					    vehicle.vehicle->getChassisWorldTransform();
+					btScalar vehicleMat[16];
+					vehicleTransform.getOpenGLMatrix(vehicleMat);
+					std::ostringstream outputPosition;
+					outputPosition << vehicleMat[12] << ", " << vehicleMat[13] << ", "
+					               << vehicleMat[14];
+					DebugDisplay::print(outputPosition.str());
 				}
 
 				debugPrintAudio();
 
 				// Required for 2D drawing
 				mainWindow.getBase()->resetGLStates();
-				DebugDisplay::endFrame();
+				{
+					DebugDisplay::endFrame();
+				}
+			}
+			else
+			{
+				// Make sure things don't pile up if not displaying normally
+				DebugDisplay::clear();
 			}
 
 			// Finished physics update and drawing; send it on its way

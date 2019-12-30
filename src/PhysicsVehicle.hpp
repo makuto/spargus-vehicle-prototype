@@ -4,6 +4,8 @@
 
 #include "PhysicsWorld.hpp"
 
+#include <glm/vec3.hpp>    // vec3
+
 #include <vector>
 
 struct PhysicsWorld;
@@ -23,6 +25,9 @@ struct PhysicsVehicle
 
 	btRaycastVehicle* vehicle;
 
+	glm::vec3 GetPosition() const;
+	glm::mat4 GetTransform() const;
+	
 private:
 	btRigidBody* carChassis;
 	/// btRaycastVehicle is the interface for the constraint that implements the raycast vehicle
@@ -46,7 +51,7 @@ private:
 public:
 	// Control constants
 	float maxEngineForce = 1000.f;  // this should be engine/velocity dependent
-	float maxBrakingForce = 100.f;
+	float maxBrakingForce = 400.f;
 
 	float steeringIncrement = 0.04f;
 	float steeringClamp = 0.3f;

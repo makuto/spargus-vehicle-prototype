@@ -3,12 +3,15 @@
 #include "LinearMath/btIDebugDraw.h"
 #include "btBulletDynamicsCommon.h"
 
-class DebugDraw : public btIDebugDraw
+#include <glm/mat4x4.hpp>  // mat4
+#include "Color.hpp"
+
+class BulletDebugDraw : public btIDebugDraw
 {
 	int debugMode;
 
 public:
-	virtual ~DebugDraw() = default;
+	virtual ~BulletDebugDraw() = default;
 	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor,
 	                      const btVector3& toColor);
 	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
@@ -21,3 +24,13 @@ public:
 	virtual void setDebugMode(int debugMode);
 	virtual int getDebugMode() const;
 };
+
+namespace DebugDraw
+{
+void render(float frameTime);
+void updateLifetimesOnly(float frameTime);
+
+extern const float Lifetime_OneFrame;
+void addLine(const glm::vec3& from, const glm::vec3& to, const Color4<float>& fromColor,
+             const Color4<float>& toColor, float lifetimeSeconds);
+}  // namespace DebugDraw

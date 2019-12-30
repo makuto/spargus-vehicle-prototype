@@ -133,7 +133,46 @@ void Camera::UpdateStart()
 	camPos[2] += camTranslate[2];
 }
 
-void Camera::ChaseCamera(double* openGlMatrix)
+// void Camera::ChaseCamera(double* openGlMatrix)
+// {
+// 	const double cameraHeight = 4.0;
+// 	const double cameraPullback = 15.0;
+// 	// const double cameraPitch = 30.0;
+
+// 	// Copy opengl matrix into something we can manipulate easily
+// 	glm::mat4 carMatrix;
+// 	openGlMatrixToGlmMat4(openGlMatrix, carMatrix);
+	
+// 	// Invert direction for camera
+// 	glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
+// 	glm::mat4 camMatrix(1.f);
+	
+// 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
+// 	// Pull camera up and back
+// 	glm::vec3 translateVec = {0.f, -cameraHeight, -cameraPullback};
+// 	camMatrix = glm::translate(camMatrix, translateVec);
+	
+// 	glm::quat vehicleRotation = glm::quat_cast(carMatrix);
+// 	glm::vec3 vehicleRotationEuler = glm::eulerAngles(vehicleRotation);
+
+// 	glm::vec4 translateRow = carMatrix[3];
+// 	glm::vec3 translateCarVec = {translateRow[0], translateRow[1], translateRow[2]};
+// 	// std::cout << translateRow[0] << ", " << translateRow[1] << ", " << translateRow[2] << std::endl;
+// 	glm::mat4 translateMat = glm::translate(glm::mat4(1.f), translateCarVec);
+
+// 	camMatrix = camMatrix * rotationMatrix * carMatrix;
+// 	// camMatrix = camMatrix * translateMat;
+
+// 	// Pitch camera
+// 	// glRotated(cameraPitch, 1, 0, 0);
+
+// 	camMatrix = glm::inverse(camMatrix);
+	
+// 	// Not sure if this cast is necessary (just use .Elements?)
+// 	h3dSetNodeTransMat(hordeCamera, glmMatrixToHordeMatrixRef(camMatrix));
+// }
+
+void Camera::ChaseCamera(double* openGlTargetMatrix)
 {
 	const double cameraHeight = 4.0;
 	const double cameraPullback = 15.0;
@@ -141,35 +180,58 @@ void Camera::ChaseCamera(double* openGlMatrix)
 
 	// Copy opengl matrix into something we can manipulate easily
 	glm::mat4 carMatrix;
-	openGlMatrixToGlmMat4(openGlMatrix, carMatrix);
-	
+	openGlMatrixToGlmMat4(openGlTargetMatrix, carMatrix);
+
 	// Invert direction for camera
+	glm::vec3 rotateXAxis = {1.f, 0.f, 0.f};
 	glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
+	glm::vec3 rotateZAxis = {0.f, 0.f, 1.f};
 	glm::mat4 camMatrix(1.f);
-	
+
 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
 	// Pull camera up and back
-	glm::vec3 translateVec = {0.f, -cameraHeight, -cameraPullback};
-	camMatrix = glm::translate(camMatrix, translateVec);
-	
+	glm::vec3 translateCameraVec = {0.f, cameraHeight, cameraPullback};
+	camMatrix = glm::translate(camMatrix, translateCameraVec);
+
 	glm::quat vehicleRotation = glm::quat_cast(carMatrix);
 	glm::vec3 vehicleRotationEuler = glm::eulerAngles(vehicleRotation);
+	// std::cout << vehicleRotationEuler[0] << ", " << vehicleRotationEuler[1] << ", "
+	          // << vehicleRotationEuler[2] << std::endl;
+	vehicleRotationEuler[2] = 0.f;
+	glm::mat4 limitedVehicleRotation = glm::rotate(glm::mat4(1.f), vehicleRotationEuler[1], rotateYAxis);
+	// limitedVehicleRotation = limitedVehicleRotation * glm::rotate(glm::mat4(1.f), vehicleRotationEuler[0], rotateXAxis);
 
 	glm::vec4 translateRow = carMatrix[3];
 	glm::vec3 translateCarVec = {translateRow[0], translateRow[1], translateRow[2]};
 	// std::cout << translateRow[0] << ", " << translateRow[1] << ", " << translateRow[2] << std::endl;
 	glm::mat4 translateMat = glm::translate(glm::mat4(1.f), translateCarVec);
 
-	camMatrix = camMatrix * rotationMatrix * carMatrix;
+	// camMatrix = camMatrix * translateMat * rotationMatrix;
+	// camMatrix = carMatrix;
+	// First person
+	// camMatrix = rotationMatrix * carMatrix;
+	// camMatrix = translateMat * limitedVehicleRotation;
+	// camMatrix = translateMat;
+	glm::vec3 upVector = {0.f, 1.f, 0.f};
+	glm::vec3 camPos = translateCameraVec + translateCarVec;
+	glm::vec3 targetPos = translateCarVec;
+	camMatrix = glm::lookAt(camPos, targetPos, upVector);
+
+	// +x = to the left of the car
+	// +y = up
+	// +z = forwards
+
+	// "Working"
+	// camMatrix = camMatrix * rotationMatrix * carMatrix;
 	// camMatrix = camMatrix * translateMat;
 
 	// Pitch camera
 	// glRotated(cameraPitch, 1, 0, 0);
 
 	camMatrix = glm::inverse(camMatrix);
-	
+
 	// Not sure if this cast is necessary (just use .Elements?)
-	h3dSetNodeTransMat(hordeCamera, &camMatrix[0][0]);
+	h3dSetNodeTransMat(hordeCamera, glmMatrixToHordeMatrixRef(camMatrix));
 }
 
 void Camera::UpdateEnd()

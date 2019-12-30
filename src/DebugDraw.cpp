@@ -3,12 +3,79 @@
 #include <GL/glu.h>
 #include <SFML/OpenGL.hpp>
 #include <iostream>
+#include <vector>
 
-#include "Render_Horde3D.hpp"
 #include "Horde3D.h"
+#include "Logging.hpp"
+#include "Render_Horde3D.hpp"
 
-void DebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor,
-                         const btVector3& toColor)
+namespace DebugDraw
+{
+void drawLine(const glm::vec3& from, const glm::vec3& to, const Color4<float>& fromColor,
+              const Color4<float>& toColor)
+{
+	glBegin(GL_LINES);
+	glColor3d(fromColor.components[0], fromColor.components[1], fromColor.components[2]);
+	glVertex3d(from[0], from[1], from[2]);
+	glColor3d(toColor.components[0], toColor.components[1], toColor.components[2]);
+	glVertex3d(to[0], to[1], to[2]);
+	glEnd();
+}
+
+struct Line
+{
+	glm::vec3 from;
+	glm::vec3 to;
+	Color4<float> fromColor;
+	Color4<float> toColor;
+	float lifetimeSeconds;
+};
+
+struct DebugDrawState
+{
+	std::vector<Line> lines;
+};
+DebugDrawState g_DebugDrawState;
+const float Lifetime_OneFrame = 0.f;
+
+void render(float frameTime)
+{
+	for (std::vector<Line>::iterator lineIt = g_DebugDrawState.lines.begin();
+	     lineIt != g_DebugDrawState.lines.end();)
+	{
+		drawLine(lineIt->from, lineIt->to, lineIt->fromColor, lineIt->toColor);
+
+		lineIt->lifetimeSeconds -= frameTime;
+		if (lineIt->lifetimeSeconds < 0.f)
+			lineIt = g_DebugDrawState.lines.erase(lineIt);
+		else
+			++lineIt;
+	}
+}
+
+void updateLifetimesOnly(float frameTime)
+{
+	for (std::vector<Line>::iterator lineIt = g_DebugDrawState.lines.begin();
+	     lineIt != g_DebugDrawState.lines.end();)
+	{
+		lineIt->lifetimeSeconds -= frameTime;
+		if (lineIt->lifetimeSeconds < 0.f)
+			lineIt = g_DebugDrawState.lines.erase(lineIt);
+		else
+			++lineIt;
+	}
+}
+
+void addLine(const glm::vec3& from, const glm::vec3& to, const Color4<float>& fromColor,
+             const Color4<float>& toColor, float lifetimeSeconds)
+{
+	Line newLine{from, to, fromColor, toColor, lifetimeSeconds};
+	g_DebugDrawState.lines.push_back(newLine);
+}
+}  // namespace DebugDraw
+
+void BulletDebugDraw::drawLine(const btVector3& from, const btVector3& to,
+                               const btVector3& fromColor, const btVector3& toColor)
 {
 	glBegin(GL_LINES);
 	glColor3d(fromColor.getX(), fromColor.getY(), fromColor.getZ());
@@ -18,12 +85,12 @@ void DebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVec
 	glEnd();
 }
 
-void DebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+void BulletDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
 {
 	drawLine(from, to, color, color);
 }
 
-void DebugDraw::drawSphere(const btVector3& p, btScalar radius, const btVector3& color)
+void BulletDebugDraw::drawSphere(const btVector3& p, btScalar radius, const btVector3& color)
 {
 	glColor3d(color.getX(), color.getY(), color.getZ());
 	int slices = 16;
@@ -34,7 +101,8 @@ void DebugDraw::drawSphere(const btVector3& p, btScalar radius, const btVector3&
 	// p.getX(), p.getY(), p.getZ()
 }
 
-void DebugDraw::drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color)
+void BulletDebugDraw::drawBox(const btVector3& bbMin, const btVector3& bbMax,
+                              const btVector3& color)
 {
 	glColor3d(color.getX(), color.getY(), color.getZ());
 	// TODO
@@ -42,8 +110,8 @@ void DebugDraw::drawBox(const btVector3& bbMin, const btVector3& bbMax, const bt
 	// Vec3f(bbMax.getX(), bbMax.getY(), bbMax.getZ())));
 }
 
-void DebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB,
-                                 btScalar distance, int lifeTime, const btVector3& color)
+void BulletDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB,
+                                       btScalar distance, int lifeTime, const btVector3& color)
 {
 	glColor3d(color.getX(), color.getY(), color.getZ());
 	glBegin(GL_LINES);
@@ -51,16 +119,16 @@ void DebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& nor
 	glVertex3d(PointOnB.getX(), PointOnB.getY(), PointOnB.getZ());
 	// To
 	glVertex3d(normalOnB.getX() + PointOnB.getX(), normalOnB.getY() + PointOnB.getY(),
-	         normalOnB.getZ() + PointOnB.getZ());
+	           normalOnB.getZ() + PointOnB.getZ());
 	glEnd();
 }
 
-void DebugDraw::reportErrorWarning(const char* warningString)
+void BulletDebugDraw::reportErrorWarning(const char* warningString)
 {
 	std::cout << warningString << std::endl;
 }
 
-void DebugDraw::draw3dText(const btVector3& location, const char* textString)
+void BulletDebugDraw::draw3dText(const btVector3& location, const char* textString)
 {
 	// TODO
 	// TextLayout textDraw;
@@ -71,12 +139,12 @@ void DebugDraw::draw3dText(const btVector3& location, const char* textString)
 	// glDraw(glTexture(textDraw.render()), Vec2f(location.getX(), location.getY()));
 }
 
-void DebugDraw::setDebugMode(int newDebugMode)
+void BulletDebugDraw::setDebugMode(int newDebugMode)
 {
 	debugMode = newDebugMode;
 }
 
-int DebugDraw::getDebugMode() const
+int BulletDebugDraw::getDebugMode() const
 {
 	return debugMode;
 }

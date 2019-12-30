@@ -26,7 +26,7 @@ struct PhysicsWorld
 
 	btDiscreteDynamicsWorld* world;
 	
-	DebugDraw debugDrawer;
+	BulletDebugDraw debugDrawer;
 
 	PhysicsWorld();
 

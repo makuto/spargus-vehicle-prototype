@@ -3,12 +3,19 @@
 // Device Joystick
 #include <SFML/Window.hpp>
 
+#include "Camera.hpp"
 #include "PhysicsVehicle.hpp"
 
 #include "DebugDisplay.hpp"
+#include "Logging.hpp"
 #include "Math.hpp"
 
 // For abs
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/mat4x4.hpp>         // mat4
+#include <glm/trigonometric.hpp>  //radians
+#include <glm/vec3.hpp>           // vec3
 #include "glm/common.hpp"
 
 #include <iostream>
@@ -16,25 +23,35 @@
 
 const float joystickRange = 100.f;
 
-void printJoystickButtonPresses()
+int getPlayerJoystickId()
 {
 	int playerJoystickId = 0;
-	bool connected = sf::Joystick::isConnected(playerJoystickId);
-	if (!connected)
+	if (!sf::Joystick::isConnected(playerJoystickId))
+		return -1;
+	else
+		return playerJoystickId;
+}
+
+void printJoystickButtonPresses()
+{
+	int playerJoystickId = getPlayerJoystickId();
+	if (playerJoystickId < 0)
 		return;
 	// How many buttons does joystick #0 support?
 	unsigned int buttons = sf::Joystick::getButtonCount(playerJoystickId);
-	for (int i = 0; i < buttons; ++i)
+	for (unsigned int i = 0; i < buttons; ++i)
 	{
 		bool buttonPressed = sf::Joystick::isButtonPressed(playerJoystickId, i);
 		if (buttonPressed)
-			std::cout << "Pressed button " << i << "\n";
+			LOGD << "Pressed button " << i;
 	}
 }
 
 void printJoystickInput()
 {
-	int playerJoystickId = 0;
+	int playerJoystickId = getPlayerJoystickId();
+	if (playerJoystickId < 0)
+		return;
 
 	// Is joystick #0 connected?
 	bool connected = sf::Joystick::isConnected(playerJoystickId);
@@ -56,10 +73,10 @@ void printJoystickInput()
 	// Right joystick Y forward -100
 	float positionV = sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::V);
 
-	std::cout << "connected = " << connected << " buttons = " << buttons << " hasX = " << hasX
-	          << " \npositionX = " << positionX << " positionY = " << positionY
-	          << " positionZ = " << positionZ << " positionR = " << positionR
-	          << " positionU = " << positionU << " positionV = " << positionV << "\n";
+	LOGD << "connected = " << connected << " buttons = " << buttons << " hasX = " << hasX
+	     << " \npositionX = " << positionX << " positionY = " << positionY
+	     << " positionZ = " << positionZ << " positionR = " << positionR
+	     << " positionU = " << positionU << " positionV = " << positionV;
 
 	printJoystickButtonPresses();
 }
@@ -83,11 +100,8 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 
 	// printJoystickButtonPresses();
 
-	// Is joystick #0 connected?
-	int playerJoystickId = 0;
-	bool controllerConnected = sf::Joystick::isConnected(playerJoystickId);
-	// TODO Support controller select (later in project)
-	if (!controllerConnected)
+	int playerJoystickId = getPlayerJoystickId();
+	if (playerJoystickId < 0)
 		return;
 
 	// Start button resets vehicle
@@ -99,12 +113,12 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 	if (sf::Joystick::isButtonPressed(playerJoystickId, 5))
 	{
 		vehicle.maxEngineForce += 100.f;
-		std::cout << "Set maxEngineForce to " << vehicle.maxEngineForce << "\n";
+		LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
 	}
 	else if (sf::Joystick::isButtonPressed(playerJoystickId, 4))
 	{
 		vehicle.maxEngineForce -= 100.f;
-		std::cout << "Set maxEngineForce to " << vehicle.maxEngineForce << "\n";
+		LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
 	}
 
 	if (vehicle.maxEngineForce < 0.f)
@@ -158,8 +172,8 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 			vehicle.BrakingForce = 0.f;
 
 			if (debugPrint)
-				std::cout << "now throttle = " << vehicle.EngineForce
-				          << " brake = " << vehicle.BrakingForce << "\n";
+				LOGD << "now throttle = " << vehicle.EngineForce
+				     << " brake = " << vehicle.BrakingForce;
 		}
 	}
 
@@ -172,7 +186,30 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 			vehicle.BrakingForce = vehicle.maxBrakingForce;
 
 		if (debugPrint)
-			std::cout << "now throttle = " << vehicle.EngineForce
-			          << " brake = " << vehicle.BrakingForce << "\n";
+			LOGD << "now throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce;
 	}
+}
+
+void handleCameraInput(Camera& camera, float frameTime)
+{
+	int playerJoystickId = getPlayerJoystickId();
+	if (playerJoystickId < 0)
+		return;
+
+	// Right joystick X left -100
+	float cameraJoystickX = sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::U);
+	applyDeadzone(cameraJoystickX);
+	float deltaRotation =
+	    interpolateRange(-camera.MaxRotateSpeedXDegrees, camera.MaxRotateSpeedXDegrees,
+	                     -joystickRange, joystickRange, cameraJoystickX);
+	deltaRotation *= frameTime;
+	glm::mat4 camRotateMat = glm::rotate(glm::mat4(1.f), glm::radians(deltaRotation), UpAxis);
+	glm::vec4 targetDirection(camera.targetCameraDirection, 1.f);
+	targetDirection = targetDirection * camRotateMat;
+	for (int i = 0; i < 3; ++i)
+		camera.targetCameraDirection[i] = targetDirection[i];
+	
+	// LOGV << "Delta rotation: " << deltaRotation;
+	// LOGV << "Rotation matrix: " << camRotateMat;
+	// LOGV << "Target direction: " << camera.targetCameraDirection;
 }

@@ -55,4 +55,9 @@ void endFrame()
 
 	displayYOffset = startOffset;
 }
+
+void clear()
+{
+	outputBuffer.clear();
+}
 }  // namespace DebugDisplay

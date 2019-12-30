@@ -13,18 +13,20 @@ SubDir . ;
 
 
 Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
-src/Render_Horde3D.cpp
-src/DebugDisplay.cpp
-src/Camera.cpp
 src/Audio.cpp
-src/Math.cpp
+src/Camera.cpp
+src/Color.cpp
+src/DebugDisplay.cpp
+src/DebugDraw.cpp
 src/Joystick.cpp
+src/Logging.cpp
+src/Math.cpp
 src/ModelUtilities/ModelLoader.cpp
-src/ModelUtilities/ObjLoader.cpp
 src/ModelUtilities/ModelToBullet.cpp
+src/ModelUtilities/ObjLoader.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
-src/DebugDraw.cpp
+src/Render_Horde3D.cpp
 ;
 
 # Use horde assets to text horde features

@@ -1,9 +1,13 @@
 #pragma once
 
-#include <SFML/Graphics/RenderWindow.hpp>
+#include <glm/vec3.hpp>  // vec3
 
 class window;
 class inputManager;
+namespace sf
+{
+class RenderWindow;
+}
 
 struct Camera
 {
@@ -21,7 +25,10 @@ public:
 	Camera(window& winOwner);
 
 	void FreeCam(inputManager& input, float frameTime);
-	void ChaseCamera(double* openGlMatrix);
+
+	const float MaxRotateSpeedXDegrees = 45.f;
+	glm::vec3 targetCameraDirection = {0.f, 0.f, 1.f};
+	void ChaseCamera(double* openGlTargetMatrix);
 
 	void UpdateStart();
 	void UpdateEnd();

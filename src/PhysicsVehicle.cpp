@@ -2,10 +2,17 @@
 
 #include "PhysicsWorld.hpp"
 
+#include "Logging.hpp"
+
 // For wheels
-#include "Render_Horde3D.hpp"
-#include "Math.hpp"
 #include <Horde3D.h>
+#include "Math.hpp"
+#include "Render_Horde3D.hpp"
+
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>         // mat4
+#include <glm/trigonometric.hpp>  //radians
+#include <glm/vec3.hpp>           // vec3
 
 #include <iostream>
 
@@ -27,8 +34,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 	// Create chassis
 	{
-		btCollisionShape* chassisShape =
-		    new btBoxShape(btVector3(chassisWidthHalfExtents, chassisHeight / 2, chassisLengthHalfExtents));
+		btCollisionShape* chassisShape = new btBoxShape(
+		    btVector3(chassisWidthHalfExtents, chassisHeight / 2, chassisLengthHalfExtents));
 		collisionShapes.push_back(chassisShape);
 
 		// Make it possible to go from the chassis shape to the vehicle
@@ -80,22 +87,23 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
 
 		btVector3 connectionPointCS0(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
-									 chassisLengthHalfExtents);
-
+		                             chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               chassisLengthHalfExtents);
 
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
+		                               connectionHeight, chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth), connectionHeight,
-		                               -chassisLengthHalfExtents);
+
 		isFrontWheel = false;
+		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth),
+		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
-		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                               -chassisLengthHalfExtents);
+
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
+		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
 
@@ -194,7 +202,18 @@ void PhysicsVehicle::Update(float deltaTime)
 			btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
 			float wheelGraphicsMatrix[16];
 			BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
-			h3dSetNodeTransMat(buggyWheelNodes[i], wheelGraphicsMatrix);
+			glm::mat4 wheelMatrix;
+			openGlMatrixToGlmMat4(wheelGraphicsMatrix, wheelMatrix);
+			// Rotate wheels 1 and 3 (right side) so hubcap faces outwards
+			if (i % 2 != 0)
+			{
+				glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
+
+				glm::mat4 rotateTireY =
+				    glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
+				wheelMatrix = wheelMatrix * rotateTireY;
+			}
+			h3dSetNodeTransMat(buggyWheelNodes[i], glmMatrixToHordeMatrixRef(wheelMatrix));
 		}
 	}
 
@@ -205,8 +224,20 @@ void PhysicsVehicle::Update(float deltaTime)
 		// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
 		// << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
 		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
-		std::cout << "Vehicle location: " << vehicleTransform.getOrigin().getX() << ", "
-		          << vehicleTransform.getOrigin().getY() << ", "
-		          << vehicleTransform.getOrigin().getZ() << "\n";
+		LOGD << "Vehicle location: " << vehicleTransform.getOrigin().getX() << ", "
+		     << vehicleTransform.getOrigin().getY() << ", " << vehicleTransform.getOrigin().getZ();
 	}
+}
+
+glm::mat4 PhysicsVehicle::GetTransform() const
+{
+	const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
+	return BulletTransformToGlmMat4(vehicleTransform);
+}
+
+glm::vec3 PhysicsVehicle::GetPosition() const
+{
+	const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
+	return glm::vec3(vehicleTransform.getOrigin().getX(), vehicleTransform.getOrigin().getY(),
+	                 vehicleTransform.getOrigin().getZ());
 }
