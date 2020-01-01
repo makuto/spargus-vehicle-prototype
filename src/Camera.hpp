@@ -27,7 +27,7 @@ public:
 	void FreeCam(inputManager& input, float frameTime);
 
 	const float MaxRotateSpeedXDegrees = 90.f;
-	glm::vec3 targetCameraDirection = {0.f, 0.f, 1.f};
+	glm::vec3 targetCameraDirection = {0.f, 0.f, -1.f};
 	void ChaseCamera(double* openGlTargetMatrix);
 	// Like chase, but don't constrain the rotation
 	void OrbitCamera(double* openGlTargetMatrix);

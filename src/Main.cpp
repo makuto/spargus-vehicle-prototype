@@ -9,11 +9,23 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
-#include <map>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>  // mat4
 
+#include <map>
+#include <sstream>
+
+#include "Audio.hpp"
 #include "Camera.hpp"
+#include "Color.hpp"
+#include "DebugDisplay.hpp"
+#include "GraphicsInterface.hpp"
+#include "Joystick.hpp"
+#include "Logging.hpp"
+#include "Math.hpp"
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
+#include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 
@@ -24,8 +36,18 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
+Logging::Logger globalLogger(Logging::Severity::verbose, Logging::MinimalLogOutput);
+
 void initializeWindow(window& win)
 {
+	{
+		sf::ContextSettings settings = win.getBase()->getSettings();
+
+		LOGI << "depth bits:" << settings.depthBits;
+		LOGI << "stencil bits:" << settings.stencilBits;
+		LOGI << "antialiasing level:" << settings.antialiasingLevel;
+		LOGI << "version:" << settings.majorVersion << "." << settings.minorVersion;
+	}
 	win.setBackgroundColor(WIN_BACKGROUND_COLOR);
 
 	// shouldClose manages some state
@@ -34,7 +56,7 @@ void initializeWindow(window& win)
 
 	win.shouldClear(true);
 	win.getBase()->setVerticalSyncEnabled(true);
-	win.getBase()->setFramerateLimit(30);
+	win.getBase()->setFramerateLimit(60);
 }
 
 void windowResizeCB(float width, float height)
@@ -43,10 +65,12 @@ void windowResizeCB(float width, float height)
 	WindowHeight = height;
 
 	// Is this necessary?
-	glViewport(0, 0, width, height);
+	// glViewport(0, 0, width, height);
+
+	Graphics::OnWindowResized(width, height);
 }
 
-void processInput(inputManager& input, PhysicsVehicle& vehicle)
+void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
 {
 	bool useGameSteering = true;
 	// Reset steering and forces immediately
@@ -105,148 +129,321 @@ void processInput(inputManager& input, PhysicsVehicle& vehicle)
 	}
 }
 
+// See https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
+struct WindowScopedContextActivate
+{
+	window& win;
+	WindowScopedContextActivate(window& newWin) : win(newWin)
+	{
+		win.getBase()->setActive(true);
+	}
+
+	~WindowScopedContextActivate()
+	{
+		win.getBase()->setActive(false);
+	}
+};
+
+bool useChaseCam = true;
+// bool useChaseCam = false;
+
+// bool debugPhysicsDraw = true;
+bool debugPhysicsDraw = false;
+
+bool debugDraw3D = true;
+// bool debugDraw3D = false;
+bool debugDraw2D = true;
+// bool debugDraw2D = false;
+
+bool useJoystick = true;
+// bool useJoystick = false;
+
+float timeStepScale = 1.f;
+
+void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
+{
+	bool noKeyRepeat = false;
+
+	if (input.WasTapped(inputCode::F1, noKeyRepeat))
+		mainVehicle.Reset();
+	if (input.WasTapped(inputCode::F2, noKeyRepeat))
+		useChaseCam = !useChaseCam;
+	if (input.WasTapped(inputCode::F3, noKeyRepeat))
+		useJoystick = !useJoystick;
+	if (input.WasTapped(inputCode::F4, noKeyRepeat))
+		debugPhysicsDraw = !debugPhysicsDraw;
+	if (input.WasTapped(inputCode::F9, noKeyRepeat))
+	{
+		debugDraw3D = !debugDraw3D;
+		debugDraw2D = !debugDraw2D;
+	}
+	if (input.WasTapped(inputCode::F5, true))
+		timeStepScale -= 0.1f;
+	if (input.WasTapped(inputCode::F6, true))
+		timeStepScale += 0.1f;
+	if (input.WasTapped(inputCode::F7, noKeyRepeat))
+		timeStepScale = 1.f;
+	if (input.WasTapped(inputCode::F8, noKeyRepeat))
+		timeStepScale = 0.f;
+}
+
 int main()
 {
-	std::cout << "Spargus Vehicle Prototype\n";
+	LOGI << "Spargus Vehicle Prototype";
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Initialization
 	//
 
-	PhysicsWorld physicsWorld;
-	PhysicsVehicle vehicle(physicsWorld);
-
+	// Window/rendering
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
-	initializeWindow(mainWindow);
+	{
+		initializeWindow(mainWindow);
+		DebugDisplay::initialize(&mainWindow);
+
+		{
+			WindowScopedContextActivate activate(mainWindow);
+			Graphics::Initialize(WindowWidth, WindowHeight);
+		}
+	}
 
 	inputManager input(&mainWindow);
 
-	// Ground mesh from GLTF
+	// World/meshes
+	PhysicsWorld physicsWorld;
+	PhysicsVehicle vehicle(physicsWorld);
 	{
-		// if (!LoadModelFromGltf("assets/World.glb", groundModel))
-		std::vector<gltf::Mesh<float>> meshes;
-		std::vector<gltf::Material> materials;
-		std::vector<gltf::Texture> textures;
-		bool debugOutput = false;
-		const char* groundModelFilename = "assets/World.glb";
-		// const char* groundModelFilename = "assets/Plane.glb";
-		// const char* groundModelFilename = "assets/Mountain.glb";
-		if (!gltf::LoadGLTF(groundModelFilename, /*scale=*/1.f, &meshes, &materials, &textures,
-		                    debugOutput))
-			return 1;
-		for (const gltf::Mesh<float>& mesh : meshes)
-			BulletMeshFromGltfMesh(mesh, physicsWorld);
-	}
+		// objTest();
+		// objToBulletTriangleMesh(physicsWorld, "Collision/Plane.obj");
+		objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 
-	// initModel(groundModel);
-
-	// GLCallListIndex groundModelCallList = buildCallListFromModel(groundModel);
-	// GLCallListIndex groundModelCallList = buildCallListFromModel2(groundModel);
-
-	// OpenGL world setup
-	int groundCallList = -1;
-	{
-		glEnable(GL_DEPTH_TEST);
-		// glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-		float pos[4] = {5, 0, -1, 1};
-		glLightfv(GL_LIGHT0, GL_POSITION, pos);
-		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1f);
-		// glEnable(GL_CULL_FACE);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-
-		float fieldOfView = 60.f;
-		gluPerspective(fieldOfView, mainWindow.getWidth() / mainWindow.getHeight(), 1, 500);
-		glRotatef(0, 0, 1, 0);
-
-		// Floor
-		glMatrixMode(GL_MODELVIEW);
+		// Test bullet serialization
+		if (false)
 		{
-			groundCallList = glGenLists(1);
-			glNewList(groundCallList, GL_COMPILE);
-			glBegin(GL_QUADS);
+			serializeConcaveMesh();
 
-			// Ground
-			float groundExtent = 100.f;
-			float groundHalfExtent = groundExtent;
-			glNormal3f(0, 1, 0);
-			glVertex3f(-groundHalfExtent, -0.f, groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(groundHalfExtent, -0.f, groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(groundHalfExtent, -0.f, -groundHalfExtent);
-			glNormal3f(0, 1, 0);
-			glVertex3f(-groundHalfExtent, -0.f, -groundHalfExtent);
-
-			glEnd();
-			glEndList();
+			btCollisionShape* concaveTestShape = importConcaveMesh();
+			if (concaveTestShape)
+			{
+				btTransform startTransform;
+				startTransform.setIdentity();
+				startTransform.setOrigin(btVector3(0, -1, 0));
+				physicsWorld.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, startTransform,
+				                                  concaveTestShape);
+			}
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Lighting
-		// float col[4] = {1, 1, 1, 0.0};
-		float col[4] = {34 / 255.f, 34 / 255.f, 34 / 255.f, 0.0};
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
-		// glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 25);
-
-		// Fog
-		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_LINEAR);
-		glFogfv(GL_FOG_COLOR, col);
-		glFogf(GL_FOG_START, 100.f);
-		glFogf(GL_FOG_END, 200.);
+		// Ground mesh from GLTF
+		if (false)
+		{
+			// if (!LoadModelFromGltf("assets/World.glb", groundModel))
+			std::vector<gltf::Mesh<float>> meshes;
+			std::vector<gltf::Material> materials;
+			std::vector<gltf::Texture> textures;
+			bool debugOutput = false;
+			// const char* groundModelFilename = "assets/World.glb";
+			const char* groundModelFilename = "assets/Plane.glb";
+			// const char* groundModelFilename = "assets/Mountain.glb";
+			if (!gltf::LoadGLTF(groundModelFilename, /*scale=*/1.f, &meshes, &materials, &textures,
+			                    debugOutput))
+				return 1;
+			for (const gltf::Mesh<float>& mesh : meshes)
+				BulletMeshFromGltfMesh(mesh, physicsWorld);
+		}
 	}
+
+	loadAudio();
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Game loop
 	//
 
 	// A made up but sane first frame
-	float lastFrameTime = 0.016f;
+	float previousFrameTime = 0.016f;
 	timer frameTimer;
 	frameTimer.start();
 
-	Camera cam(mainWindow);
-	// bool useChaseCam = true;
-	bool useChaseCam = false;
+	Camera camera(mainWindow);
+
+	mainWindow.shouldClear(false);
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
-		if (!useChaseCam)
-			cam.FreeCam(input, lastFrameTime);
-		cam.UpdateStart();
+		mainWindow.getBase()->setActive(true);
 
-		processInput(input, vehicle);
-
-		vehicle.Update(lastFrameTime);
-		physicsWorld.Update(lastFrameTime);
-
-		// Use vehicle transform to position camera
-		if (useChaseCam)
+		// Input
 		{
-			const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-			btTransform camTransform = vehicleTransform.inverse();
-			btScalar vehicleMat[16];
-			// vehicleTransform.getOpenGLMatrix(vehicleMat);
-			camTransform.getOpenGLMatrix(vehicleMat);
+			handleConfigurationInput(input, vehicle);
 
-			cam.ChaseCamera(vehicleMat);
+			handleCameraInput(camera, previousFrameTime);
+
+			if (useJoystick)
+				processVehicleInputJoystick(vehicle);
+			else
+				processVehicleInputKeyboard(input, vehicle);
 		}
 
-		// glCallList(groundCallList);
+		// Physics
+		vehicle.Update(previousFrameTime * timeStepScale);
+		physicsWorld.Update(previousFrameTime * timeStepScale);
 
-		physicsWorld.DebugRender();
+		// Audio
+		updateAudio(vehicle);
 
-		cam.UpdateEnd();
+		// Camera
+		{
+			if (!useChaseCam)
+				camera.FreeCam(input, previousFrameTime);
+			camera.UpdateStart();
+			// Use vehicle transform to position camera
+			if (useChaseCam)
+			{
+				const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
+				// btTransform camTransform = vehicleTransform.inverse();
+				btScalar vehicleMat[16];
+				vehicleTransform.getOpenGLMatrix(vehicleMat);
+				camera.ChaseCamera(vehicleMat);
+			}
+			camera.UpdateEnd();
 
-		// Finished physics update and drawing; send it on its way
-		mainWindow.update();
+			// Debug lines for camera
+			{
+				glm::vec3 scaledWorldCameraTargetDirection = camera.targetCameraDirection * 3.f;
+				glm::vec3 vehiclePosition = vehicle.GetPosition();
+				scaledWorldCameraTargetDirection += vehiclePosition;
+				DebugDraw::addLine(vehiclePosition, scaledWorldCameraTargetDirection, Color::Blue,
+				                   Color::Blue, DebugDraw::Lifetime_OneFrame);
 
-		lastFrameTime = frameTimer.getTime();
+				glm::vec4 vehicleFacingIntermediate(0.f, 0.f, 3.f, 1.f);
+				vehicleFacingIntermediate = vehicle.GetTransform() * vehicleFacingIntermediate;
+				glm::vec3 vehicleFacing(vehicleFacingIntermediate);
+				DebugDraw::addLine(vehicle.GetPosition(), vehicleFacing, Color::Green, Color::Green,
+				                   DebugDraw::Lifetime_OneFrame);
+			}
+		}
+
+		// Rendering
+		{
+			// glCallList(groundCallList);
+
+			Graphics::Update(previousFrameTime);
+
+			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
+			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
+			if (debugDraw3D)
+			{
+				// ... and projection matrix
+				glm::mat4 projectionMatrix = Graphics::GetCameraProjectionMatrixCopy();
+
+				// ...
+
+				// Set projection matrix
+				glMatrixMode(GL_PROJECTION);
+				glLoadMatrixf(glmMatrixToHordeMatrixRef(projectionMatrix));
+				// apply camera transformation
+				glMatrixMode(GL_MODELVIEW);
+				glm::mat4 inverseCameraMat;
+				glm::mat4 cameraMat = Graphics::GetCameraTransformCopy();
+				inverseCameraMat = glm::inverse(cameraMat);
+				glLoadMatrixf(glmMatrixToHordeMatrixRef(inverseCameraMat));
+
+				// then later in e.g. drawGizmo
+
+				// Uncomment for local transform, if necessary
+				// glPushMatrix();
+				// glMultMatrixf(nodeTransform);  // Load scene node matrix
+
+				DebugDraw::render(previousFrameTime);
+
+				// ... draw code
+				if (debugPhysicsDraw)
+					physicsWorld.DebugRender();
+
+				// glPopMatrix();
+			}
+			else
+			{
+				// Make sure lines expire even when not being viewed
+				DebugDraw::updateLifetimesOnly(previousFrameTime);
+			}
+
+			// 2D overlays
+			if (debugDraw2D)
+			{
+				// Time
+				{
+					std::ostringstream output;
+					output << "Time scaling: " << timeStepScale << "x"
+					       << " (F5 = -0.1x "
+					       << "F6 = +0.1x "
+					       << "F7 = 1x "
+					       << "F8 = 0x)";
+					DebugDisplay::print(output.str());
+					std::ostringstream controls;
+					controls << "F1 = reset vehicle "
+					         << "F2 = free/chase camera "
+					         << "F3 = joystick/keyboard "
+					         << "F4 = physics drawing "
+					         << "F9 = debug drawing ";
+					DebugDisplay::print(controls.str());
+				}
+
+				// Vehicle
+				{
+					btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
+					std::ostringstream output;
+					output << "speedKmHour = " << speedKmHour
+					       << " (mph = " << KilometersToMiles(speedKmHour)
+					       << ") throttle = " << vehicle.EngineForce
+					       << " brake = " << vehicle.BrakingForce << "\n";
+					DebugDisplay::print(output.str());
+
+					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)
+					{
+						const btWheelInfo& wheelInfo = vehicle.vehicle->getWheelInfo(i);
+						// LOGD << "Wheel " << i << " skid " << wheelInfo.m_skidInfo << "\n";
+
+						std::ostringstream outputSuspension;
+						outputSuspension << "Wheel [" << i << "] skid " << wheelInfo.m_skidInfo
+						                 << " suspension " << wheelInfo.m_wheelsSuspensionForce;
+						DebugDisplay::print(outputSuspension.str());
+					}
+
+					const btTransform& vehicleTransform =
+					    vehicle.vehicle->getChassisWorldTransform();
+					btScalar vehicleMat[16];
+					vehicleTransform.getOpenGLMatrix(vehicleMat);
+					std::ostringstream outputPosition;
+					outputPosition << vehicleMat[12] << ", " << vehicleMat[13] << ", "
+					               << vehicleMat[14];
+					DebugDisplay::print(outputPosition.str());
+				}
+
+				debugPrintAudio();
+
+				// Required for 2D drawing
+				mainWindow.getBase()->resetGLStates();
+				{
+					DebugDisplay::endFrame();
+				}
+			}
+			else
+			{
+				// Make sure things don't pile up if not displaying normally
+				DebugDisplay::clear();
+			}
+
+			// Finished physics update and drawing; send it on its way
+			mainWindow.update();
+
+			mainWindow.getBase()->setActive(false);
+		}
+
+		previousFrameTime = frameTimer.getTime();
 		frameTimer.start();
 	}
+
+	Graphics::Destroy();
 
 	return 0;
 }

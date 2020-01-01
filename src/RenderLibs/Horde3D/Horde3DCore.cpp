@@ -1,8 +1,10 @@
+#include "GraphicsInterface.hpp"
+
 // From http://www.horde3d.org/docs/html/_tutorial.html
 #include <Horde3D.h>
 #include <Horde3DUtils.h>
 
-#include <iostream>
+#include "Math.hpp"
 
 H3DNode model = 0;
 H3DNode hordeCamera = 0;
@@ -16,7 +18,9 @@ const float cameraFov = 60.f;
 const float cameraNearPlane = 0.5f;
 const float cameraFarPlane = 2048.0f;
 
-void hordeInitialize(int winWidth, int winHeight)
+namespace Graphics
+{
+void Initialize(int winWidth, int winHeight)
 {
 	// Initialize engine
 	h3dInit(H3DRenderDevice::OpenGL4);
@@ -60,11 +64,11 @@ void hordeInitialize(int winWidth, int winHeight)
 	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
 	h3dSetNodeTransform(env, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
 
-	buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
-	h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
+	// buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
+	// h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
 
-	for (int i = 0; i < sizeof(buggyWheelNodes) / sizeof(buggyWheelNodes[0]); ++i)
-		buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);
+	// for (int i = 0; i < sizeof(buggyWheelNodes) / sizeof(buggyWheelNodes[0]); ++i)
+	// 	buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);
 
 	// Add model to scene
 	// model = h3dAddNodes(H3DRootNode, modelRes);
@@ -73,7 +77,8 @@ void hordeInitialize(int winWidth, int winHeight)
 	// h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
 
 	// Add headlight source
-	// if (false)
+	// TODO Figure out graphics layer for this
+	if (false)
 	{
 		H3DNode light = h3dAddLightNode(buggyNode, "Headlight", 0, "LIGHTING", "SHADOWMAP");
 		// Set light position and radius
@@ -126,7 +131,7 @@ void hordeInitialize(int winWidth, int winHeight)
 	}
 }
 
-void hordeTestInitialize(int winWidth, int winHeight)
+static void hordeTestInitialize(int winWidth, int winHeight)
 {
 	// Initialize engine
 	h3dInit(H3DRenderDevice::OpenGL4);
@@ -210,7 +215,7 @@ void hordeTestInitialize(int winWidth, int winHeight)
 	}
 }
 
-void hordeResize(int winWidth, int winHeight)
+void OnWindowResized(int winWidth, int winHeight)
 {
 	if (!hordeCamera || !pipeRes)
 		return;
@@ -228,7 +233,7 @@ void hordeResize(int winWidth, int winHeight)
 	// h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 }
 
-void hordeUpdate(float fps)
+void Update(float fps)
 {
 	if (model)
 	{
@@ -237,7 +242,6 @@ void hordeUpdate(float fps)
 		// Increase animation time
 		t += fps;
 
-		// std::cout << t << "\n";
 		// Play animation
 		h3dSetModelAnimParams(model, 0, t * 24.f, 1.0f);
 		h3dUpdateModel(model, H3DModelUpdateFlags::Animation | H3DModelUpdateFlags::Geometry);
@@ -257,8 +261,41 @@ void hordeUpdate(float fps)
 	h3dFinalizeFrame();
 }
 
-void hordeRelease()
+void Destroy()
 {
 	// Release engine
 	h3dRelease();
 }
+
+void SetCameraTransform(const glm::mat4& newTransform)
+{
+	h3dSetNodeTransMat(hordeCamera, glmMatrixToHordeMatrixRef(newTransform));
+}
+
+glm::mat4 GetCameraTransformCopy()
+{
+	glm::mat4 cameraMat(1.f);
+	const float* cameraTranslationMat = 0;
+	h3dGetNodeTransMats(hordeCamera, 0, &cameraTranslationMat);
+
+	// In case of an invalid camera (e.g. pipeline not set) return identity matrix
+	if (cameraTranslationMat)
+	{
+		openGlMatrixToGlmMat4(cameraTranslationMat, cameraMat);
+	}
+
+	return cameraMat;
+}
+
+glm::mat4 GetCameraProjectionMatrixCopy()
+{
+	glm::mat4 projectionMat(1.f);
+	if (hordeCamera)
+	{
+		float hordeProjectionMat[16];
+		h3dGetCameraProjMat(hordeCamera, hordeProjectionMat);
+		openGlMatrixToGlmMat4(hordeProjectionMat, projectionMat);
+	}
+	return projectionMat;
+}
+}  // namespace Graphics

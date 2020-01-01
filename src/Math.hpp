@@ -28,6 +28,10 @@ inline float* glmMatrixToHordeMatrixRef(glm::mat4& mat)
 	return &mat[0][0];
 }
 
+inline const float* glmMatrixToHordeMatrixRef(const glm::mat4& mat)
+{
+	return &mat[0][0];
+}
 //
 // Unit conversions
 //

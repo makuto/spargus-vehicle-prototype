@@ -5,9 +5,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Horde3D.h"
 #include "Logging.hpp"
-#include "Render_Horde3D.hpp"
 
 namespace DebugDraw
 {

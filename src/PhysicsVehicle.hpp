@@ -3,6 +3,7 @@
 #include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
 #include "PhysicsWorld.hpp"
+#include "GraphicsNode.hpp"
 
 #include <glm/vec3.hpp>    // vec3
 
@@ -43,6 +44,10 @@ private:
 	
 	// Used to get from a collision shape to this structure
 	CollisionShapeOwnerReference shapeReference;
+
+	// Rendering
+	Graphics::Node chassisRender;
+	std::vector<Graphics::Node> wheelRender;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

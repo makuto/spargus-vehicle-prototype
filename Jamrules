@@ -16,8 +16,12 @@ LINK = clang++ ;
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
-HDRS = src bullet3/src bullet3/Extras/Serialize/BulletWorldImporter
-base2.0 tinygltf Horde3D/Horde3D/Bindings/C++ glm tinyobjloader ;
+HDRS = src
+bullet3/src bullet3/Extras/Serialize/BulletWorldImporter
+base2.0
+tinygltf tinyobjloader
+glm
+Horde3D/Horde3D/Bindings/C++ ;
 
 if $(DEBUG_BUILD)
 { BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }

@@ -1,0 +1,4 @@
+SubDir . src RenderLibs Horde3D ;
+
+Library libRenderHorde3D : Horde3DCore.cpp
+GraphicsNode_Horde3D.cpp ;

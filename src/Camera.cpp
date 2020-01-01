@@ -12,10 +12,8 @@
 #include <glm/trigonometric.hpp>  //radians
 #include <glm/ext/matrix_transform.hpp>
 
-#include "Render_Horde3D.hpp"
-#include <Horde3D.h>
-
 #include "Math.hpp"
+#include "GraphicsInterface.hpp"
 
 #include <iostream>
 
@@ -105,8 +103,9 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 		prevY = win.getHeight() / 2;
 	}
 
-	h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
-	                    1.f, 1.f, 1.f);
+	// TODO!
+	// h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
+	                    // 1.f, 1.f, 1.f);
 }
 
 void Camera::UpdateStart()
@@ -153,7 +152,7 @@ void Camera::OrbitCamera(double* openGlTargetMatrix)
 
 	camMatrix = glm::inverse(camMatrix);
 
-	h3dSetNodeTransMat(hordeCamera, glmMatrixToHordeMatrixRef(camMatrix));
+	Graphics::SetCameraTransform(camMatrix);
 }
 
 void Camera::ChaseCamera(double* openGlTargetMatrix)
@@ -176,7 +175,7 @@ void Camera::ChaseCamera(double* openGlTargetMatrix)
 
 	camMatrix = glm::inverse(camMatrix);
 
-	h3dSetNodeTransMat(hordeCamera, glmMatrixToHordeMatrixRef(camMatrix));
+	Graphics::SetCameraTransform(camMatrix);
 }
 
 void Camera::UpdateEnd()

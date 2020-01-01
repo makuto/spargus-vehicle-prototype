@@ -18,6 +18,7 @@ src/Camera.cpp
 src/Color.cpp
 src/DebugDisplay.cpp
 src/DebugDraw.cpp
+src/GraphicsNode.cpp
 src/Joystick.cpp
 src/Logging.cpp
 src/Math.cpp
@@ -26,8 +27,9 @@ src/ModelUtilities/ModelToBullet.cpp
 src/ModelUtilities/ObjLoader.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
-src/Render_Horde3D.cpp
 ;
+
+LinkLibraries spargus_vehicle_prototype_horde3D : libRenderHorde3D ;
 
 # Use horde assets to text horde features
 # Main spargus_vehicle_prototype_testHorde3D : src/Main_HordeTest.cpp
@@ -37,5 +39,5 @@ src/Render_Horde3D.cpp
 
 # LinkLibraries spargus_vehicle_prototype : libBase20 ;
 
-# SubInclude . base2.0 ;
+SubInclude . src RenderLibs Horde3D ;
 

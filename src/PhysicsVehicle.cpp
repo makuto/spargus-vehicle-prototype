@@ -3,11 +3,8 @@
 #include "PhysicsWorld.hpp"
 
 #include "Logging.hpp"
-
-// For wheels
-#include <Horde3D.h>
+#include "Utilities.hpp"
 #include "Math.hpp"
-#include "Render_Horde3D.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>         // mat4
@@ -119,6 +116,14 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	}
 
 	Reset();
+
+	// Initialize graphics
+	chassisRender.Initialize("BasicBuggy_Chassis");
+	wheelRender.resize(vehicle->getNumWheels());
+	for (Graphics::Node& wheelNode : wheelRender)
+	{
+		wheelNode.Initialize("Wheel_Rear");
+	}
 }
 
 void PhysicsVehicle::Reset()
@@ -191,30 +196,30 @@ void PhysicsVehicle::Update(float deltaTime)
 		vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 	}
 
-	// Wheels
+	// Chassis rendering
+	chassisRender.SetTransform(GetTransform());
+
+	// Wheel rendering
 	for (int i = 0; i < vehicle->getNumWheels(); i++)
 	{
 		// synchronize the wheels with the (interpolated) chassis worldtransform
 		vehicle->updateWheelTransform(i, true);
 
-		if (buggyWheelNodes[0])
+		btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
+		float wheelGraphicsMatrix[16];
+		BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
+		glm::mat4 wheelMatrix;
+		openGlMatrixToGlmMat4(wheelGraphicsMatrix, wheelMatrix);
+		// Rotate wheels 1 and 3 (right side) so hubcap faces outwards
+		if (i % 2 != 0)
 		{
-			btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
-			float wheelGraphicsMatrix[16];
-			BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
-			glm::mat4 wheelMatrix;
-			openGlMatrixToGlmMat4(wheelGraphicsMatrix, wheelMatrix);
-			// Rotate wheels 1 and 3 (right side) so hubcap faces outwards
-			if (i % 2 != 0)
-			{
-				glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
+			glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
 
-				glm::mat4 rotateTireY =
-				    glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
-				wheelMatrix = wheelMatrix * rotateTireY;
-			}
-			h3dSetNodeTransMat(buggyWheelNodes[i], glmMatrixToHordeMatrixRef(wheelMatrix));
+			glm::mat4 rotateTireY = glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
+			wheelMatrix = wheelMatrix * rotateTireY;
 		}
+
+		wheelRender[i].SetTransform(wheelMatrix);
 	}
 
 	// Debug prints
