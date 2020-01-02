@@ -12,7 +12,7 @@ SubDir . ;
 # ;
 
 
-Main spargus_vehicle_prototype_horde3D : src/Main_Horde3D.cpp
+Main spargus_vehicle_prototype : src/Main.cpp
 src/Audio.cpp
 src/Camera.cpp
 src/Color.cpp
@@ -29,7 +29,7 @@ src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 ;
 
-LinkLibraries spargus_vehicle_prototype_horde3D : libRenderHorde3D ;
+LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
 
 # Use horde assets to text horde features
 # Main spargus_vehicle_prototype_testHorde3D : src/Main_HordeTest.cpp
