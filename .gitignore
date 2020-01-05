@@ -52,5 +52,7 @@ hlmsDiskCache*
 
 # Ignore generated assets
 *.obj
-*.dae	
-!Collision/*.obj
+*.dae
+#Content/**/*.geo
+*.gltf
+Collision/
