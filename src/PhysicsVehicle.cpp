@@ -3,8 +3,8 @@
 #include "PhysicsWorld.hpp"
 
 #include "Logging.hpp"
-#include "Utilities.hpp"
 #include "Math.hpp"
+#include "Utilities.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>         // mat4
@@ -120,7 +120,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	// Initialize graphics
 	chassisRender.Initialize("BasicBuggy_Chassis");
 	wheelRender.resize(vehicle->getNumWheels());
-	for (Graphics::Node& wheelNode : wheelRender)
+	for (Graphics::Object& wheelNode : wheelRender)
 	{
 		wheelNode.Initialize("Wheel_Rear");
 	}
@@ -147,7 +147,7 @@ void PhysicsVehicle::Reset()
 		}
 	}
 
-	// Macoy: forklift stuff. Commented out.
+	// Macoy: forklift stuff. Commented out, but may be useful later
 	// btTransform liftTrans;
 	// liftTrans.setIdentity();
 	// liftTrans.setOrigin(m_liftStartPos);
@@ -221,28 +221,39 @@ void PhysicsVehicle::Update(float deltaTime)
 
 		wheelRender[i].SetTransform(wheelMatrix);
 	}
-
-	// Debug prints
-	if (false)
-	{
-		// const btVector3& carLinearVelocity = carChassis->getLinearVelocity();
-		// std::cout << "Vehicle linear velocity: " << carLinearVelocity.getX() << ", "
-		// << carLinearVelocity.getY() << ", " << carLinearVelocity.getZ() << "\n";
-		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
-		LOGD << "Vehicle location: " << vehicleTransform.getOrigin().getX() << ", "
-		     << vehicleTransform.getOrigin().getY() << ", " << vehicleTransform.getOrigin().getZ();
-	}
 }
 
 glm::mat4 PhysicsVehicle::GetTransform() const
 {
-	const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
-	return BulletTransformToGlmMat4(vehicleTransform);
+	const btMotionState* motionState = carChassis->getMotionState();
+	if (motionState)
+	{
+		btTransform chassisWorldTransform;
+		motionState->getWorldTransform(chassisWorldTransform);
+		return BulletTransformToGlmMat4(chassisWorldTransform);
+	}
+	else
+	{
+		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
+		return BulletTransformToGlmMat4(vehicleTransform);
+	}
 }
 
 glm::vec3 PhysicsVehicle::GetPosition() const
 {
-	const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
-	return glm::vec3(vehicleTransform.getOrigin().getX(), vehicleTransform.getOrigin().getY(),
-	                 vehicleTransform.getOrigin().getZ());
+	const btMotionState* motionState = carChassis->getMotionState();
+	if (motionState)
+	{
+		btTransform chassisWorldTransform;
+		motionState->getWorldTransform(chassisWorldTransform);
+		return glm::vec3(chassisWorldTransform.getOrigin().getX(),
+		                 chassisWorldTransform.getOrigin().getY(),
+		                 chassisWorldTransform.getOrigin().getZ());
+	}
+	else
+	{
+		const btTransform& vehicleTransform = vehicle->getChassisWorldTransform();
+		return glm::vec3(vehicleTransform.getOrigin().getX(), vehicleTransform.getOrigin().getY(),
+		                 vehicleTransform.getOrigin().getZ());
+	}
 }

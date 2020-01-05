@@ -7,7 +7,7 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
-#include <iostream>
+#include "Logging.hpp"
 
 void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
 
@@ -121,8 +121,8 @@ void PhysicsWorld::Update(float deltaTime)
 			{
 				static int totalFailures = 0;
 				totalFailures += numFallbacks;
-				std::cout << "MLCP solver failed " << totalFailures
-				          << " times, falling back to btSequentialImpulseSolver (SI)\n";
+				LOGV << "MLCP solver failed " << totalFailures
+				     << " times, falling back to btSequentialImpulseSolver (SI)";
 			}
 			sol->setNumFallbacks(0);
 		}
@@ -130,18 +130,18 @@ void PhysicsWorld::Update(float deltaTime)
 // #define VERBOSE_FEEDBACK
 #ifdef VERBOSE_FEEDBACK
 		if (!numSimSteps)
-			std::cout << "Interpolated transforms\n";
+			LOGV << "Interpolated transforms";
 		else
 		{
 			if (numSimSteps > maxSimSubSteps)
 			{
 				// detect dropping frames
-				std::cout << "Dropped (" << numSimSteps - maxSimSubSteps
-				          << ") simulation steps out of " << numSimSteps << "\n";
+				LOGV << "Dropped (" << numSimSteps - maxSimSubSteps << ") simulation steps out of "
+				     << numSimSteps;
 			}
 			else
 			{
-				std::cout << "Simulated (" << numSimSteps << ") steps\n";
+				LOGV << "Simulated (" << numSimSteps << ") steps";
 			}
 		}
 #endif  // VERBOSE_FEEDBACK
@@ -205,13 +205,13 @@ void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep)
 		{
 			const CollisionShapeOwnerReference* aShapeOwnerReference =
 			    static_cast<const CollisionShapeOwnerReference*>(aUserPointer);
-			std::cout << aShapeOwnerReference->shapeCreator << "\n";
+			LOGD << aShapeOwnerReference->shapeCreator;
 		}
 		if (bUserPointer)
 		{
 			const CollisionShapeOwnerReference* bShapeOwnerReference =
 			    static_cast<const CollisionShapeOwnerReference*>(bUserPointer);
-			std::cout << bShapeOwnerReference->shapeCreator << "\n";
+			LOGD << bShapeOwnerReference->shapeCreator;
 		}
 		// std::cout << "Collision!\n";
 	}

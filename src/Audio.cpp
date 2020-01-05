@@ -113,10 +113,11 @@ void debugPrintAudio()
 
 void updateAudio(PhysicsVehicle& vehicle)
 {
-	const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-	const btVector3 vehiclePosition = vehicleTransform.getOrigin();
-	audioListener.setPosition(vehiclePosition.getX(), vehiclePosition.getY(),
-	                          vehiclePosition.getZ());
+	const glm::vec3 vehiclePosition = vehicle.GetPosition();
+	audioListener.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
+
+	// Temporarily disable audio
+	return;
 
 	static bool worldAudioStarted = false;
 	if (!worldAudioStarted)
@@ -143,11 +144,11 @@ void updateAudio(PhysicsVehicle& vehicle)
 		{
 			case SoundLocation::World:
 				soundFxFilePairs[i].soundFx->setPosition(
-				    vehiclePosition.getX(), vehiclePosition.getY(), vehiclePosition.getZ());
+				    vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 				break;
 			case SoundLocation::Vehicle:
 				soundFxFilePairs[i].soundFx->setPosition(
-				    vehiclePosition.getX(), vehiclePosition.getY(), vehiclePosition.getZ());
+				    vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 				break;
 			default:
 				break;

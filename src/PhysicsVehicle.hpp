@@ -3,7 +3,7 @@
 #include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
 #include "PhysicsWorld.hpp"
-#include "GraphicsNode.hpp"
+#include "GraphicsObject.hpp"
 
 #include <glm/vec3.hpp>    // vec3
 
@@ -46,8 +46,8 @@ private:
 	CollisionShapeOwnerReference shapeReference;
 
 	// Rendering
-	Graphics::Node chassisRender;
-	std::vector<Graphics::Node> wheelRender;
+	Graphics::Object chassisRender;
+	std::vector<Graphics::Object> wheelRender;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

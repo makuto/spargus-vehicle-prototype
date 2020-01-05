@@ -18,7 +18,7 @@ src/Camera.cpp
 src/Color.cpp
 src/DebugDisplay.cpp
 src/DebugDraw.cpp
-src/GraphicsNode.cpp
+src/GraphicsObject.cpp
 src/Joystick.cpp
 src/Logging.cpp
 src/Math.cpp
@@ -29,6 +29,7 @@ src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 ;
 
+# This is all that is needed to select Render library
 LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
 
 # Use horde assets to text horde features

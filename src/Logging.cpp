@@ -20,6 +20,12 @@ Record& Record::operator<<(char data)
 	return *this;
 }
 
+Record& Record::operator<<(void* data)
+{
+	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%p", data);
+	return *this;
+}
+
 Record& Record::operator<<(const char* data)
 {
 	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%s", data);

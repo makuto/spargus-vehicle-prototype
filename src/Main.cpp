@@ -203,6 +203,7 @@ int main()
 
 		{
 			WindowScopedContextActivate activate(mainWindow);
+
 			Graphics::Initialize(WindowWidth, WindowHeight);
 		}
 	}
@@ -212,10 +213,17 @@ int main()
 	// World/meshes
 	PhysicsWorld physicsWorld;
 	PhysicsVehicle vehicle(physicsWorld);
+	Graphics::Object worldRender;
 	{
+		{
+			// Drawing the world
+			worldRender.Initialize("World");
+			// World collision
+			objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
+		}
+
 		// objTest();
 		// objToBulletTriangleMesh(physicsWorld, "Collision/Plane.obj");
-		objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 
 		// Test bullet serialization
 		if (false)
@@ -298,11 +306,8 @@ int main()
 			// Use vehicle transform to position camera
 			if (useChaseCam)
 			{
-				const btTransform& vehicleTransform = vehicle.vehicle->getChassisWorldTransform();
-				// btTransform camTransform = vehicleTransform.inverse();
-				btScalar vehicleMat[16];
-				vehicleTransform.getOpenGLMatrix(vehicleMat);
-				camera.ChaseCamera(vehicleMat);
+				glm::mat4 vehicleTransform = vehicle.GetTransform();
+				camera.ChaseCamera(vehicleTransform);
 			}
 			camera.UpdateEnd();
 
@@ -332,15 +337,11 @@ int main()
 			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
 			if (debugDraw3D)
 			{
-				// ... and projection matrix
 				glm::mat4 projectionMatrix = Graphics::GetCameraProjectionMatrixCopy();
-
-				// ...
-
-				// Set projection matrix
 				glMatrixMode(GL_PROJECTION);
 				glLoadMatrixf(glmMatrixToHordeMatrixRef(projectionMatrix));
-				// apply camera transformation
+
+				// Apply camera transformation
 				glMatrixMode(GL_MODELVIEW);
 				glm::mat4 inverseCameraMat;
 				glm::mat4 cameraMat = Graphics::GetCameraTransformCopy();
@@ -348,17 +349,16 @@ int main()
 				glLoadMatrixf(glmMatrixToHordeMatrixRef(inverseCameraMat));
 
 				// then later in e.g. drawGizmo
-
 				// Uncomment for local transform, if necessary
 				// glPushMatrix();
 				// glMultMatrixf(nodeTransform);  // Load scene node matrix
 
 				DebugDraw::render(previousFrameTime);
 
-				// ... draw code
 				if (debugPhysicsDraw)
 					physicsWorld.DebugRender();
 
+				// If local transform, then
 				// glPopMatrix();
 			}
 			else

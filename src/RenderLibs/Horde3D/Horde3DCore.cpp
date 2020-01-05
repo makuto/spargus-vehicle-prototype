@@ -18,6 +18,8 @@ const float cameraFov = 60.f;
 const float cameraNearPlane = 0.5f;
 const float cameraFarPlane = 2048.0f;
 
+bool g_graphicsIntialized = false;
+
 namespace Graphics
 {
 void Initialize(int winWidth, int winHeight)
@@ -26,9 +28,7 @@ void Initialize(int winWidth, int winHeight)
 	h3dInit(H3DRenderDevice::OpenGL4);
 
 	// Environment
-	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "models/sphere/sphere.scene.xml", 0);
 	H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
-	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/Plane.scene.xml", 0);
 	// H3DRes buggyRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy.scene.xml", 0);
 	H3DRes buggyRes =
 	    h3dAddResource(H3DResTypes::SceneGraph, "assets/BasicBuggy_Chassis.scene.xml", 0);
@@ -61,18 +61,9 @@ void Initialize(int winWidth, int winHeight)
 	h3dutLoadResourcesFromDisk("Content");
 
 	// Add environment
-	H3DNode env = h3dAddNodes(H3DRootNode, envRes);
-	h3dSetNodeTransform(env, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
+	// H3DNode env = h3dAddNodes(H3DRootNode, envRes);
+	// h3dSetNodeTransform(env, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
 
-	// buggyNode = h3dAddNodes(H3DRootNode, buggyRes);
-	// h3dSetNodeTransform(buggyNode, 0, 0, 0, 0, 0, 0, 1.f, 1.f, 1.f);
-
-	// for (int i = 0; i < sizeof(buggyWheelNodes) / sizeof(buggyWheelNodes[0]); ++i)
-	// 	buggyWheelNodes[i] = h3dAddNodes(H3DRootNode, buggyWheelRes);
-
-	// Add model to scene
-	// model = h3dAddNodes(H3DRootNode, modelRes);
-	// h3dSetNodeTransform(model, 0, -3, 0, 0, 0, 0, 0.5f, 0.5f, 0.5f);
 	// Apply animation
 	// h3dSetupModelAnimStage(model, 0, animRes, 0, "", false);
 
@@ -129,6 +120,8 @@ void Initialize(int winWidth, int winHeight)
 		h3dSetMaterialUniform(matRes, "hdrBrightThres", 0.5f, 0, 0, 0);
 		h3dSetMaterialUniform(matRes, "hdrBrightOffset", 0.08f, 0, 0, 0);
 	}
+
+	g_graphicsIntialized = true;
 }
 
 static void hordeTestInitialize(int winWidth, int winHeight)
@@ -230,7 +223,7 @@ void OnWindowResized(int winWidth, int winHeight)
 	h3dSetupCameraView(hordeCamera, cameraFov, (float)winWidth / winHeight, cameraNearPlane,
 	                   cameraFarPlane);
 	// TODO: Fix buffer resize
-	// h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
+	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 }
 
 void Update(float fps)

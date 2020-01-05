@@ -6,6 +6,8 @@
 
 // size_t
 #include <stddef.h>
+// sprintf
+#include <cstdio>
 
 // This file is based on PLog's interface but uses C strings only. See Plog:
 //  Plog - portable and simple log for C++
@@ -148,6 +150,8 @@ struct Record
 
 	Record(Severity newSeverity, const char* func, size_t line, const char* file);
 	Record& operator<<(char data);
+	// Print raw pointer
+	Record& operator<<(void* data);
 	Record& operator<<(const char* data);
 	Record& operator<<(const int data);
 	Record& operator<<(const unsigned int data);
@@ -160,12 +164,20 @@ struct Record
 	Record& operator<<(const glm::mat4& data);
 	Record& operator<<(const glm::vec3& data);
 
+	template <typename T, size_t N>
+	Record& operator<<(T (&array)[N])
+	{
+		Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%s", array);
+		return *this;
+	}
+
 	template <class T>
 	Record& operator<<(const T& data)
 	{
 		static_assert(sizeof(T) == 0,
 		              "operator<< for type T is not provided. It must be written in order to "
-		              "output correctly");
+		              "output correctly. If you are getting this on a char buffer[], do a "
+		              "static_cast<const char*>(buffer).");
 		return *this;
 	}
 };

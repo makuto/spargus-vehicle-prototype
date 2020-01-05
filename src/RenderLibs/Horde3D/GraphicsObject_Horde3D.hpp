@@ -5,7 +5,7 @@ typedef int H3DNode;
 
 namespace Graphics
 {
-class NodeResourceReference
+class ResourceReference
 {
 public:
 	H3DRes resource;

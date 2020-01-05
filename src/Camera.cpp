@@ -12,8 +12,9 @@
 #include <glm/trigonometric.hpp>  //radians
 #include <glm/ext/matrix_transform.hpp>
 
-#include "Math.hpp"
 #include "GraphicsInterface.hpp"
+#include "Logging.hpp"
+#include "Math.hpp"
 
 #include <iostream>
 
@@ -103,9 +104,15 @@ void Camera::FreeCam(inputManager& input, float frameTime)
 		prevY = win.getHeight() / 2;
 	}
 
-	// TODO!
-	// h3dSetNodeTransform(hordeCamera, camPos[0], camPos[1], camPos[2], -camRot[0], -camRot[1], 0.f,
-	                    // 1.f, 1.f, 1.f);
+	glm::mat4 camMatrix(1.f);
+	camMatrix = glm::translate(glm::mat4(1.f), -camPos);
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.f), glm::radians(camRot[1]), UpAxis);
+	glm::rotate(rotationMatrix, glm::radians(camRot[0]), LeftAxis);
+	glm::rotate(rotationMatrix, glm::radians(camRot[2]), ForwardAxis);
+	camMatrix = rotationMatrix * camMatrix;
+	// TODO Move this to graphics internals?
+	camMatrix = glm::inverse(camMatrix);
+	Graphics::SetCameraTransform(camMatrix);
 }
 
 void Camera::UpdateStart()
@@ -132,20 +139,18 @@ void Camera::UpdateStart()
 	camPos[2] += camTranslate[2];
 }
 
-void Camera::OrbitCamera(double* openGlTargetMatrix)
+// Similar to chase camera, only no angular constraints
+void Camera::OrbitCamera(const glm::mat4& targetMatrix)
 {
 	const double cameraHeight = 4.0;
 	const float pullbackRadius = 15.f;
-	
-	// Copy opengl matrix into something we can manipulate easily
-	glm::mat4 carMatrix;
-	openGlMatrixToGlmMat4(openGlTargetMatrix, carMatrix);
 
-	glm::vec3 translateCarVec(carMatrix[3]);
+	glm::vec3 targetTranslateVec(targetMatrix[3]);
 
 	glm::vec3 translateCameraVec = {0.f, cameraHeight, 0.f};
-	glm::vec3 camPos =  translateCameraVec + translateCarVec + (targetCameraDirection * pullbackRadius);
-	glm::vec3 targetPos = translateCarVec;
+	glm::vec3 camPos =
+	    translateCameraVec + targetTranslateVec + (targetCameraDirection * pullbackRadius);
+	glm::vec3 targetPos = targetTranslateVec;
 	glm::vec3 upVector = {0.f, 1.f, 0.f};
 	glm::mat4 camMatrix(1.f);
 	camMatrix = glm::lookAt(camPos, targetPos, upVector);
@@ -155,20 +160,16 @@ void Camera::OrbitCamera(double* openGlTargetMatrix)
 	Graphics::SetCameraTransform(camMatrix);
 }
 
-void Camera::ChaseCamera(double* openGlTargetMatrix)
+void Camera::ChaseCamera(const glm::mat4& targetMatrix)
 {
 	const double cameraHeight = 4.0;
 	const float pullbackRadius = 15.f;
 	
-	// Copy opengl matrix into something we can manipulate easily
-	glm::mat4 carMatrix;
-	openGlMatrixToGlmMat4(openGlTargetMatrix, carMatrix);
-
-	glm::vec3 translateCarVec(carMatrix[3]);
+	glm::vec3 targetTranslateVec(targetMatrix[3]);
 
 	glm::vec3 translateCameraVec = {0.f, cameraHeight, 0.f};
-	glm::vec3 camPos =  translateCameraVec + translateCarVec + (targetCameraDirection * pullbackRadius);
-	glm::vec3 targetPos = translateCarVec;
+	glm::vec3 camPos =  translateCameraVec + targetTranslateVec + (targetCameraDirection * pullbackRadius);
+	glm::vec3 targetPos = targetTranslateVec;
 	glm::vec3 upVector = {0.f, 1.f, 0.f};
 	glm::mat4 camMatrix(1.f);
 	camMatrix = glm::lookAt(camPos, targetPos, upVector);
