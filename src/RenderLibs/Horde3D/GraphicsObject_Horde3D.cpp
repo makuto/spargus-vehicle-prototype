@@ -36,6 +36,8 @@ void Object::Initialize(const char* requestedResource)
 		LOGE << "Resource " << resourceNameBuffer << " not found";
 		return;
 	}
+	// Hitting an assert somewhere in here? Make sure the OpenGL SFML context is active
+	// See https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
 	h3dutLoadResourcesFromDisk("Content");
 
 	// TODO: Remove node on destroy

@@ -200,12 +200,7 @@ int main()
 	{
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
-
-		{
-			WindowScopedContextActivate activate(mainWindow);
-
-			Graphics::Initialize(WindowWidth, WindowHeight);
-		}
+		Graphics::Initialize(WindowWidth, WindowHeight);
 	}
 
 	inputManager input(&mainWindow);
@@ -277,8 +272,6 @@ int main()
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
-		mainWindow.getBase()->setActive(true);
-
 		// Input
 		{
 			handleConfigurationInput(input, vehicle);
@@ -435,8 +428,6 @@ int main()
 
 			// Finished physics update and drawing; send it on its way
 			mainWindow.update();
-
-			mainWindow.getBase()->setActive(false);
 		}
 
 		previousFrameTime = frameTimer.getTime();

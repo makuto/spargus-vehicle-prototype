@@ -57,8 +57,8 @@ cd spargus-vehicle-prototype
 
 ** Asset pipeline
 *** Create the asset in your desired modeling program
-*** Export Collada and Wavefront Obj
-Collada is used by Horde3D to display the mesh, while the Obj is used to create the collision mesh. The meshes can differ if desired (e.g. for a low-poly collision mesh).
-On export, ensure *Triangulate Mesh* and *Apply Modifiers* are checked.
 *** Run ~BuildAssets.sh~
 This prepares assets for Horde3D.
+*** By hand: Export Collada and Wavefront Obj
+Collada is used by Horde3D to display the mesh, while the Obj is used to create the collision mesh. The meshes can differ if desired (e.g. for a low-poly collision mesh).
+On export, ensure *Triangulate Mesh* and *Apply Modifiers* are checked.
