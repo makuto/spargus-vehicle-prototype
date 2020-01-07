@@ -262,3 +262,15 @@ void PhysicsVehicle::ApplyTorque(const glm::vec3& torque)
 {
 	carChassis->applyTorque(glmVec3ToBulletVector(torque));
 }
+
+bool PhysicsVehicle::WheelsContactingSurface()
+{
+	for (int i = 0; i < vehicle->getNumWheels(); i++)
+	{
+		const btWheelInfo& wheelInfo = vehicle->getWheelInfo(i);
+		if (wheelInfo.m_wheelsSuspensionForce > 0.1f)
+			return true;
+	}
+
+	return false;
+}

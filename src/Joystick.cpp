@@ -190,9 +190,10 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 	}
 
 	// Air control
+	// TODO: Only allow air control if chassis is not contacting anything
+	if (!vehicle.WheelsContactingSurface())
 	{
-		float rollPosition =
-		    sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::X);
+		float rollPosition = sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::X);
 		float pitchPosition =
 		    sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::Y) * -1.f;
 		applyDeadzone(rollPosition);
@@ -205,6 +206,7 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 		    interpolateRange(-vehicle.airControlMaxRollTorque, vehicle.airControlMaxRollTorque,
 		                     -joystickRange, joystickRange, rollPosition);
 		// Make torque local to the vehicle
+		// TODO: Should this use the interpolated position?
 		glm::mat4 vehicleTransform = vehicle.GetTransform();
 		for (int i = 0; i < 3; ++i)
 			vehicleTransform[3][i] = 0.f;

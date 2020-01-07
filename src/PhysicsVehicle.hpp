@@ -29,6 +29,8 @@ struct PhysicsVehicle
 	glm::vec3 GetPosition() const;
 	glm::mat4 GetTransform() const;
 
+	bool WheelsContactingSurface();
+
 	void ApplyTorque(const glm::vec3& torque);
 private:
 	btRigidBody* carChassis;
