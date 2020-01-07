@@ -257,3 +257,8 @@ glm::vec3 PhysicsVehicle::GetPosition() const
 		                 vehicleTransform.getOrigin().getZ());
 	}
 }
+
+void PhysicsVehicle::ApplyTorque(const glm::vec3& torque)
+{
+	carChassis->applyTorque(glmVec3ToBulletVector(torque));
+}

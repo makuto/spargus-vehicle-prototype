@@ -213,6 +213,7 @@ int main()
 		{
 			// Drawing the world
 			worldRender.Initialize("World");
+			// worldRender.SetTransform(glm::translate(glm::mat4(1.f), {0.f, -100.f, 0.f}));
 			// World collision
 			objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 		}

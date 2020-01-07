@@ -28,7 +28,8 @@ struct PhysicsVehicle
 
 	glm::vec3 GetPosition() const;
 	glm::mat4 GetTransform() const;
-	
+
+	void ApplyTorque(const glm::vec3& torque);
 private:
 	btRigidBody* carChassis;
 	/// btRaycastVehicle is the interface for the constraint that implements the raycast vehicle
@@ -61,6 +62,8 @@ public:
 	float steeringIncrement = 0.04f;
 	float steeringClamp = 0.3f;
 
+	float airControlMaxPitchTorque = 700.f;
+	float airControlMaxRollTorque = 700.f;
 private:
 	// I couldn't find any hard numbers, so let's guess around 1000lbs.
 	// 1000lbs = ~453kg.

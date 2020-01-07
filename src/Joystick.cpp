@@ -188,6 +188,32 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 		if (debugPrint)
 			LOGD << "now throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce;
 	}
+
+	// Air control
+	{
+		float rollPosition =
+		    sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::X);
+		float pitchPosition =
+		    sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::Y) * -1.f;
+		applyDeadzone(rollPosition);
+		applyDeadzone(pitchPosition);
+		glm::vec3 airControlTorque(0.f);
+		airControlTorque[0] =
+		    interpolateRange(-vehicle.airControlMaxPitchTorque, vehicle.airControlMaxPitchTorque,
+		                     -joystickRange, joystickRange, pitchPosition);
+		airControlTorque[2] =
+		    interpolateRange(-vehicle.airControlMaxRollTorque, vehicle.airControlMaxRollTorque,
+		                     -joystickRange, joystickRange, rollPosition);
+		// Make torque local to the vehicle
+		glm::mat4 vehicleTransform = vehicle.GetTransform();
+		for (int i = 0; i < 3; ++i)
+			vehicleTransform[3][i] = 0.f;
+		glm::vec4 airControlRotate(airControlTorque[0], airControlTorque[1], airControlTorque[2],
+		                           1.f);
+		airControlRotate = vehicleTransform * airControlRotate;
+		glm::vec3 finalAirControl(airControlRotate);
+		vehicle.ApplyTorque(finalAirControl);
+	}
 }
 
 void handleCameraInput(Camera& camera, float frameTime)

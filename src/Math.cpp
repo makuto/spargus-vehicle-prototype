@@ -42,3 +42,9 @@ glm::mat4 BulletTransformToGlmMat4(const btTransform& transform)
 	openGlMatrixToGlmMat4(bulletMat, convertedMatrix);
 	return convertedMatrix;
 }
+
+btVector3 glmVec3ToBulletVector(const glm::vec3& vec)
+{
+	btVector3 newVector(vec[0], vec[1], vec[2]);
+	return newVector;
+}

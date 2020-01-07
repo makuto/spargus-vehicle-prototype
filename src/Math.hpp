@@ -32,6 +32,10 @@ inline const float* glmMatrixToHordeMatrixRef(const glm::mat4& mat)
 {
 	return &mat[0][0];
 }
+
+class btVector3;
+btVector3 glmVec3ToBulletVector(const glm::vec3& vec);
+
 //
 // Unit conversions
 //
