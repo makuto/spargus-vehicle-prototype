@@ -3,7 +3,7 @@ This is a 3D vehicle game prototype inspired by the gameplay and feel of the dun
 
 I created a [[https://www.youtube.com/watch?v=sUenByjCijM][reference video]] so I could emulate the Jak 3 behavior. It gives you an idea what I'm going for.
 
-Here is a [[https://youtu.be/HvuRNYoSGKU][preview of the prototype]]. It is extremely rough currently.
+Here is a [[https://www.youtube.com/watch?v=QOJyhaOVrkg][preview of the prototype]]. It is extremely rough currently.
 
 ** Setup
 Clone and init submodules for dependencies:
