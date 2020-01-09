@@ -94,7 +94,7 @@ float interpolateRange(float startA, float endA, float startB, float endB, float
 	return (interpolateTo * (endA - startA)) + startA;
 }
 
-void processVehicleInputJoystick(PhysicsVehicle& vehicle)
+void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 {
 	bool debugPrint = false;
 
@@ -199,21 +199,23 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle)
 		applyDeadzone(rollPosition);
 		applyDeadzone(pitchPosition);
 		glm::vec3 airControlTorque(0.f);
-		airControlTorque[0] =
-		    interpolateRange(-vehicle.airControlMaxPitchTorque, vehicle.airControlMaxPitchTorque,
-		                     -joystickRange, joystickRange, pitchPosition);
-		airControlTorque[2] =
-		    interpolateRange(-vehicle.airControlMaxRollTorque, vehicle.airControlMaxRollTorque,
-		                     -joystickRange, joystickRange, rollPosition);
+		airControlTorque[0] = interpolateRange(-vehicle.airControlMaxPitchTorquePerSecond,
+		                                       vehicle.airControlMaxPitchTorquePerSecond,
+		                                       -joystickRange, joystickRange, pitchPosition);
+		airControlTorque[2] = interpolateRange(-vehicle.airControlMaxRollTorquePerSecond,
+		                                       vehicle.airControlMaxRollTorquePerSecond,
+		                                       -joystickRange, joystickRange, rollPosition);
 		// Make torque local to the vehicle
 		// TODO: Should this use the interpolated position?
 		glm::mat4 vehicleTransform = vehicle.GetTransform();
+		// Clear translation
 		for (int i = 0; i < 3; ++i)
 			vehicleTransform[3][i] = 0.f;
 		glm::vec4 airControlRotate(airControlTorque[0], airControlTorque[1], airControlTorque[2],
 		                           1.f);
 		airControlRotate = vehicleTransform * airControlRotate;
 		glm::vec3 finalAirControl(airControlRotate);
+		finalAirControl *= frameTime;
 		vehicle.ApplyTorque(finalAirControl);
 	}
 }

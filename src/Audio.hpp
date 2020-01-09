@@ -6,4 +6,4 @@ void loadAudio();
 void debugPrintAudio();
 
 struct PhysicsVehicle;
-void updateAudio(PhysicsVehicle& vehicle);
+void updateAudio(PhysicsVehicle& vehicle, float frameTime);

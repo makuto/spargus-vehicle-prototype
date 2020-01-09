@@ -64,8 +64,12 @@ public:
 	float steeringIncrement = 0.04f;
 	float steeringClamp = 0.3f;
 
-	float airControlMaxPitchTorque = 700.f;
-	float airControlMaxRollTorque = 700.f;
+	// I'm not sure why this needs to be so big...need to learn more about physics
+	// Only multiply by sixty to compensate for adding framerate independence on numbers that I
+	// liked before making it rate independent
+	float airControlMaxPitchTorquePerSecond = 600.f * 60;
+	float airControlMaxRollTorquePerSecond = 600.f * 60;
+
 private:
 	// I couldn't find any hard numbers, so let's guess around 1000lbs.
 	// 1000lbs = ~453kg.

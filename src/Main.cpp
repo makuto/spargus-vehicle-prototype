@@ -280,7 +280,7 @@ int main()
 			handleCameraInput(camera, previousFrameTime);
 
 			if (useJoystick)
-				processVehicleInputJoystick(vehicle);
+				processVehicleInputJoystick(vehicle, previousFrameTime);
 			else
 				processVehicleInputKeyboard(input, vehicle);
 		}
@@ -290,7 +290,7 @@ int main()
 		physicsWorld.Update(previousFrameTime * timeStepScale);
 
 		// Audio
-		updateAudio(vehicle);
+		updateAudio(vehicle, previousFrameTime);
 
 		// Camera
 		{

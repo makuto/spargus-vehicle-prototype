@@ -22,6 +22,11 @@ private:
 	float prevX = 0.f;
 	sf::RenderWindow* winBase = nullptr;
 
+	// Broadly determines the view angle
+	const double cameraHeight = 2.0;
+	// Offsets the target down onscreen
+	const double targetAddHeight = 2.0;
+	const float pullbackRadius = 9.f;
 public:
 	Camera(window& winOwner);
 

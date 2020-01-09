@@ -142,9 +142,6 @@ void Camera::UpdateStart()
 // Similar to chase camera, only no angular constraints
 void Camera::OrbitCamera(const glm::mat4& targetMatrix)
 {
-	const double cameraHeight = 4.0;
-	const float pullbackRadius = 15.f;
-
 	glm::vec3 targetTranslateVec(targetMatrix[3]);
 
 	glm::vec3 translateCameraVec = {0.f, cameraHeight, 0.f};
@@ -162,15 +159,13 @@ void Camera::OrbitCamera(const glm::mat4& targetMatrix)
 
 void Camera::ChaseCamera(const glm::mat4& targetMatrix)
 {
-	const double cameraHeight = 4.0;
-	const float pullbackRadius = 15.f;
-	
 	glm::vec3 targetTranslateVec(targetMatrix[3]);
-
 	glm::vec3 translateCameraVec = {0.f, cameraHeight, 0.f};
 	glm::vec3 camPos =  translateCameraVec + targetTranslateVec + (targetCameraDirection * pullbackRadius);
 	glm::vec3 targetPos = targetTranslateVec;
 	glm::vec3 upVector = {0.f, 1.f, 0.f};
+	camPos[1] += targetAddHeight;
+	targetPos[1] += targetAddHeight;
 	glm::mat4 camMatrix(1.f);
 	camMatrix = glm::lookAt(camPos, targetPos, upVector);
 

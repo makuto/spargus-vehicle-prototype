@@ -111,13 +111,13 @@ void debugPrintAudio()
 	}
 }
 
-void updateAudio(PhysicsVehicle& vehicle)
+void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 {
 	const glm::vec3 vehiclePosition = vehicle.GetPosition();
 	audioListener.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 
 	// Temporarily disable audio
-	return;
+	// return;
 
 	static bool worldAudioStarted = false;
 	if (!worldAudioStarted)
@@ -143,12 +143,12 @@ void updateAudio(PhysicsVehicle& vehicle)
 		switch (soundFxFilePairs[i].location)
 		{
 			case SoundLocation::World:
-				soundFxFilePairs[i].soundFx->setPosition(
-				    vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
+				soundFxFilePairs[i].soundFx->setPosition(vehiclePosition[0], vehiclePosition[1],
+				                                         vehiclePosition[2]);
 				break;
 			case SoundLocation::Vehicle:
-				soundFxFilePairs[i].soundFx->setPosition(
-				    vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
+				soundFxFilePairs[i].soundFx->setPosition(vehiclePosition[0], vehiclePosition[1],
+				                                         vehiclePosition[2]);
 				break;
 			default:
 				break;
@@ -168,17 +168,33 @@ void updateAudio(PhysicsVehicle& vehicle)
 		}
 
 		// Engine noise
+		// TODO This is bad
+		static float inEngineStateForSeconds = 0.f;
+		static bool accelerating = false;
 		if (glm::abs(vehicle.EngineForce) > 5.f)
 		{
-			sfxVehicleIdle.stop();
-			sfxVehicleAccelerate.loop(true);
-			sfxVehicleAccelerate.play();
+			if (!accelerating)
+			{
+				accelerating = true;
+				inEngineStateForSeconds = 0;
+				sfxVehicleIdle.stop();
+				sfxVehicleAccelerate.loop(true);
+				sfxVehicleAccelerate.play();
+			}
+
+			inEngineStateForSeconds += frameTime;
 		}
 		else
 		{
-			sfxVehicleAccelerate.stop();
-			sfxVehicleIdle.loop(true);
-			sfxVehicleIdle.play();
+			if (accelerating)
+			{
+				accelerating = false;
+				inEngineStateForSeconds = 0;
+				sfxVehicleAccelerate.stop();
+				sfxVehicleIdle.loop(true);
+				sfxVehicleIdle.play();
+			}
+			inEngineStateForSeconds += frameTime;
 		}
 
 		// const btRigidBody* getRigidBody
