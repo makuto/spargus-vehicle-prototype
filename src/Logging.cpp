@@ -69,6 +69,12 @@ Record& Record::operator<<(const size_t data)
 	return *this;
 }
 
+Record& Record::operator<<(const std::string& data)
+{
+	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%s", data.c_str());
+	return *this;
+}
+
 Record& Record::operator<<(const glm::mat4& data)
 {
 	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset,

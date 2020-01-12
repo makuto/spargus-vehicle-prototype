@@ -39,6 +39,8 @@ sound sfxWorldWindAtSpeed;
 sound sfxWorldWindStationary;
 sound sfxWorldSpaciousness;
 
+sound sfxObjectiveGet;
+
 listener audioListener;
 
 enum class SoundLocation : int
@@ -78,6 +80,8 @@ static SoundEffect soundFxFilePairs[] = {
     {"audio/MouthFX_WorldWindAtSpeed.ogg", &sfxWorldWindAtSpeed, SoundLocation::World},
     {"audio/MouthFX_WorldWindIdle.ogg", &sfxWorldWindStationary, SoundLocation::World},
     {"audio/MouthFX_WorldSpaciousness.ogg", &sfxWorldSpaciousness, SoundLocation::World},
+
+    {"audio/MouthFX_ObjectiveGet.ogg", &sfxObjectiveGet, SoundLocation::World},
 };
 
 void loadAudio()
@@ -199,4 +203,9 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 
 		// const btRigidBody* getRigidBody
 	}
+}
+
+void playObjectiveGet()
+{
+	sfxObjectiveGet.play();	
 }

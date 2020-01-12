@@ -9,11 +9,12 @@
 
 #include <vector>
 
-struct PhysicsWorld;
+class PhysicsWorld;
 
 // TODO: Add destructor
-struct PhysicsVehicle
+class PhysicsVehicle
 {
+public:
 	PhysicsVehicle(PhysicsWorld& physicsWorld);
 	void Update(float deltaTime);
 
@@ -58,7 +59,7 @@ private:
 
 public:
 	// Control constants
-	float maxEngineForce = 1000.f;  // this should be engine/velocity dependent
+	float maxEngineForce = 1600.f;  // this should be engine/velocity dependent
 	float maxBrakingForce = 400.f;
 
 	float steeringIncrement = 0.04f;
@@ -98,7 +99,11 @@ private:
 	float wheelRadius = 1.64f / 2.f;
 	// Tread width
 	float wheelWidth = 0.5f;
-	float wheelFriction = 1000;  // BT_LARGE_FLOAT;
+	// Default by bullet
+	// float wheelFriction = 1000;  // BT_LARGE_FLOAT;
+	// Pretty slidey here, with some good characteristics (reverse 180s are fun)
+	// float wheelFriction = 1.5f;  // BT_LARGE_FLOAT;
+	float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
 
 	float suspensionStiffness = 20.f;
 	float suspensionDamping = 2.3f;

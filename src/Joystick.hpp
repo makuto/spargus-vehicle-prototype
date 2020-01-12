@@ -1,6 +1,6 @@
 #pragma once
 
-struct PhysicsVehicle;
+class PhysicsVehicle;
 void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime);
 
 struct Camera;

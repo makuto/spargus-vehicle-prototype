@@ -5,5 +5,6 @@ void loadAudio();
 
 void debugPrintAudio();
 
-struct PhysicsVehicle;
+class PhysicsVehicle;
 void updateAudio(PhysicsVehicle& vehicle, float frameTime);
+void playObjectiveGet();

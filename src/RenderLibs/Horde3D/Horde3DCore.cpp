@@ -16,7 +16,7 @@ H3DRes pipeRes = 0;
 
 const float cameraFov = 60.f;
 const float cameraNearPlane = 0.5f;
-const float cameraFarPlane = 2048.0f;
+const float cameraFarPlane = 4096.0f;
 
 bool g_graphicsIntialized = false;
 
@@ -29,6 +29,9 @@ void Initialize(int winWidth, int winHeight)
 
 	// Environment
 	// H3DRes envRes = h3dAddResource(H3DResTypes::SceneGraph, "assets/World.scene.xml", 0);
+
+	// Skybox
+	H3DRes skyBoxRes = h3dAddResource(H3DResTypes::SceneGraph, "models/skybox/skybox.scene.xml", 0);
 
 	// Scale reference
 	if (false)
@@ -75,6 +78,11 @@ void Initialize(int winWidth, int winHeight)
 		H3DNode matRes = h3dFindResource(H3DResTypes::Material, "pipelines/postHDR.material.xml");
 		h3dSetMaterialUniform(matRes, "hdrExposure", 2.5f, 0, 0, 0);
 	}
+
+	// Add skybox
+	H3DNode sky = h3dAddNodes(H3DRootNode, skyBoxRes);
+	h3dSetNodeTransform(sky, 0, 0, 0, 0, 0, 0, 2100, 500, 2100);
+	h3dSetNodeFlags(sky, H3DNodeFlags::NoCastShadow, true);
 
 	// Add camera
 	hordeCamera = h3dAddCameraNode(H3DRootNode, "Camera", pipeRes);
@@ -134,7 +142,6 @@ void OnWindowResized(int winWidth, int winHeight)
 	// Set virtual camera parameters
 	h3dSetupCameraView(hordeCamera, cameraFov, (float)winWidth / winHeight, cameraNearPlane,
 	                   cameraFarPlane);
-	// TODO: Fix buffer resize
 	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
 }
 

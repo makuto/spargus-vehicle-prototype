@@ -53,10 +53,15 @@ void Object::Initialize(const char* requestedResource)
 	TransformUpdated();
 }
 
-void Object::TransformUpdated()
+void Object::Destroy()
 {
-	if (resource->node)
-		h3dSetNodeTransMat(resource->node, glmMatrixToHordeMatrixRef(transform));
+	if (resource && resource->node)
+		h3dRemoveNode(resource->node);
 }
 
+void Object::TransformUpdated()
+{
+	if (resource && resource->node)
+		h3dSetNodeTransMat(resource->node, glmMatrixToHordeMatrixRef(transform));
+}
 }  // namespace Graphics

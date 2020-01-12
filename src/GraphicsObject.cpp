@@ -21,4 +21,10 @@ void Object::SetTransform(const glm::mat4& newTransform)
 	transform = newTransform;
 	TransformUpdated();
 }
+
+glm::vec3 Object::GetPosition() const
+{
+	return transform[3];
+}
+
 }  // namespace Graphics

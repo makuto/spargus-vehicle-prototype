@@ -2,6 +2,10 @@
 
 #include "DebugDraw.hpp"
 
+#include <set>
+#include <vector>
+#include <functional>
+
 // Much of the bullet code is copied from the Forklift demo for a good starting point
 
 // extern bool bulletUseMCLPSolver;
@@ -15,18 +19,39 @@ class btCollisionDispatcher;
 class btBroadphaseInterface;
 class btConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btRigidBody;
 
-struct PhysicsWorld
+typedef std::pair<btRigidBody const*, btRigidBody const*> CollisionPair;
+typedef std::set<CollisionPair> CollisionPairs;
+
+enum class CollisionState
 {
+	NowColliding,
+	Separating
+};
+
+typedef std::function<void(const btRigidBody*, const btRigidBody*, CollisionState)>
+    CollisionListener;
+
+class PhysicsWorld
+{
+private:
 	btDefaultCollisionConfiguration* collisionConfiguration;
 	btCollisionDispatcher* collisionDispatcher;
 
 	btBroadphaseInterface* overlappingPairCache;
 	btConstraintSolver* constraintSolver;
 
-	btDiscreteDynamicsWorld* world;
-	
 	BulletDebugDraw debugDrawer;
+
+
+protected:
+	friend void SimulationTickCallback(btDynamicsWorld* const world, btScalar const timeStep);
+	CollisionPairs previousTickCollisionPairs;
+	std::vector<CollisionListener> collisionListeners;
+	
+public:
+	btDiscreteDynamicsWorld* world;
 
 	PhysicsWorld();
 
@@ -39,7 +64,7 @@ struct PhysicsWorld
 	btRigidBody* localCreateRigidBody(btScalar mass, const btTransform& startTransform,
 	                                  btCollisionShape* shape);
 
-	// void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
+	void AddCollisionListener(CollisionListener listener);
 };
 
 enum class CollisionShapeOwnerType : int

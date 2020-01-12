@@ -123,7 +123,7 @@ void BulletDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector
 
 void BulletDebugDraw::reportErrorWarning(const char* warningString)
 {
-	std::cout << warningString << std::endl;
+	LOGW << warningString;
 }
 
 void BulletDebugDraw::draw3dText(const btVector3& location, const char* textString)

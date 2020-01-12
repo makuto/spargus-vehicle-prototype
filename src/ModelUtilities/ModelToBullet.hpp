@@ -2,7 +2,7 @@
 
 #include "mesh.h"
 
-struct PhysicsWorld;
+class PhysicsWorld;
 
 void BulletMeshFromGltfMesh(const gltf::Mesh<float>& mesh, PhysicsWorld& world);
 

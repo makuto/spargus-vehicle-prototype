@@ -8,6 +8,7 @@
 #include <stddef.h>
 // sprintf
 #include <cstdio>
+#include <string>
 
 // This file is based on PLog's interface but uses C strings only. See Plog:
 //  Plog - portable and simple log for C++
@@ -159,6 +160,7 @@ struct Record
 	Record& operator<<(const double data);
 	Record& operator<<(const bool data);
 	Record& operator<<(const size_t data);
+	Record& operator<<(const std::string& data);
 
 	// TODO Clean this up
 	Record& operator<<(const glm::mat4& data);

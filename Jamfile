@@ -25,12 +25,16 @@ src/Math.cpp
 src/ModelUtilities/ModelLoader.cpp
 src/ModelUtilities/ModelToBullet.cpp
 src/ModelUtilities/ObjLoader.cpp
+src/PickUpObjective.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 ;
 
 # This is all that is needed to select Render library
 LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
+
+# ArtAssetProcess assets/World.blend :
+# assets/BasicBuggy.blend ;
 
 # Use horde assets to text horde features
 # Main spargus_vehicle_prototype_testHorde3D : src/Main_HordeTest.cpp

@@ -1,6 +1,6 @@
 #include "DebugDisplay.hpp"
 
-#include <iostream>
+#include "Logging.hpp"
 
 namespace DebugDisplay
 {
@@ -18,7 +18,7 @@ void initialize(window* newOutputWindow)
 {
 	if (!displayText.loadFont("data/fonts/UbuntuMono-R.ttf"))
 	{
-		std::cout << "Error: Cannot load default text font. Nothing will work\n";
+		LOGE << "Error: Cannot load default text font. Nothing will work";
 		return;
 	}
 
@@ -39,9 +39,9 @@ void endFrame()
 	{
 		if (!outputWindow)
 		{
-			std::cout
+			LOGE
 			    << "ERROR: DebugDisplay::print() called before output window was set!\n Message:"
-			    << "\t" << str << "\n";
+			    << "\t" << str;
 			return;
 		}
 

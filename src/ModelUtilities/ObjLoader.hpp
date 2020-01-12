@@ -1,5 +1,5 @@
 #pragma once
 
 bool objTest();
-struct PhysicsWorld;
+class PhysicsWorld;
 bool objToBulletTriangleMesh(PhysicsWorld& world, const char* filename);

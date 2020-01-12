@@ -2,6 +2,7 @@
 
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
+#include "timer/timer.hpp"
 
 #include <GL/glew.h>
 #include <GL/glu.h>
@@ -28,6 +29,7 @@
 #include "ModelUtilities/ObjLoader.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
+#include "PickUpObjective.hpp"
 
 // Window variables
 // int WindowWidth = 1200;
@@ -185,6 +187,9 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 		timeStepScale = 1.f;
 	if (input.WasTapped(inputCode::F8, noKeyRepeat))
 		timeStepScale = 0.f;
+
+	if (timeStepScale < 0.f)
+		timeStepScale = 0.f;
 }
 
 int main()
@@ -256,6 +261,8 @@ int main()
 		}
 	}
 
+	PickUpObjectives::Initialize(&physicsWorld);
+
 	loadAudio();
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -288,6 +295,8 @@ int main()
 		// Physics
 		vehicle.Update(previousFrameTime * timeStepScale);
 		physicsWorld.Update(previousFrameTime * timeStepScale);
+
+		PickUpObjectives::Update(previousFrameTime);
 
 		// Audio
 		updateAudio(vehicle, previousFrameTime);
@@ -419,6 +428,8 @@ int main()
 				mainWindow.getBase()->resetGLStates();
 				{
 					DebugDisplay::endFrame();
+
+					PickUpObjectives::RenderUI(mainWindow);
 				}
 			}
 			else

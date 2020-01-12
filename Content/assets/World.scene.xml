@@ -1,6 +1,6 @@
 <Model name="World" geometry="assets/World.geo">
 
-	<Mesh name="Cube.010" material="assets/World_Material.002.material.xml" tx="-13.7657" ty="-1.7357" tz="-212.941" rx="-2.91953" ry="-179.839" rz="-179.873" sx="-9.14516" sy="1.67537" sz="2.52904" batchStart="0" batchCount="36" vertRStart="0" vertREnd="23" />
+	<Mesh name="Cube.010" material="assets/World_Material.002.material.xml" tx="-13.7657" ty="-1.41756" tz="-212.941" rx="-2.91953" ry="-179.839" rz="-176.706" sx="-9.14516" sy="1.67537" sz="2.52904" batchStart="0" batchCount="36" vertRStart="0" vertREnd="23" />
 	<Mesh name="Cube.009" material="assets/World_Material.002.material.xml" tx="-44.0757" ty="-0.424649" tz="-212.958" rx="0" ry="-180" rz="-180" sx="-9.14516" sy="1.67537" sz="2.52905" batchStart="36" batchCount="36" vertRStart="24" vertREnd="47" />
 	<Mesh name="Cube.008" material="assets/World_Material.002.material.xml" tx="-13.7657" ty="-1.7357" tz="-32.0374" rx="-2.91953" ry="-179.839" rz="-179.873" sx="-9.14516" sy="1.67537" sz="2.52904" batchStart="72" batchCount="36" vertRStart="48" vertREnd="71" />
 	<Mesh name="Cube.007" material="assets/World_Material.002.material.xml" tx="-13.74" ty="-2.20242" tz="-22.8859" rx="-2.91953" ry="-179.839" rz="-179.873" sx="-9.14516" sy="1.67537" sz="2.52904" batchStart="108" batchCount="36" vertRStart="72" vertREnd="95" />

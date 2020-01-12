@@ -7,6 +7,7 @@
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
+#include <algorithm>
 #include "Logging.hpp"
 
 void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
@@ -97,6 +98,8 @@ PhysicsWorld::PhysicsWorld()
 
 		localCreateRigidBody(StaticRigidBodyMass, tr, shape);
 	}
+
+	world->setWorldUserInfo(this);
 }
 
 void PhysicsWorld::Update(float deltaTime)
@@ -185,34 +188,83 @@ btRigidBody* PhysicsWorld::localCreateRigidBody(btScalar mass, const btTransform
 	return body;
 }
 
-void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep)
+void PhysicsWorld::AddCollisionListener(CollisionListener listener)
 {
-	int numManifolds = world->getDispatcher()->getNumManifolds();
-	for (int i = 0; i < numManifolds; i++)
-	{
-		const btPersistentManifold* contactManifold =
-		    world->getDispatcher()->getManifoldByIndexInternal(i);
-		const btCollisionObject* obA =
-		    static_cast<const btCollisionObject*>(contactManifold->getBody0());
-		const btCollisionObject* obB =
-		    static_cast<const btCollisionObject*>(contactManifold->getBody1());
-		
-		const btCollisionShape* aShape = obA->getCollisionShape();
+	collisionListeners.push_back(listener);
+}
 
-		void* aUserPointer = aShape->getUserPointer();
-		void* bUserPointer = obB->getUserPointer();
-		if (aUserPointer)
+// From https://github.com/MikeMcShaffry/gamecode4
+// This is modified.
+// Under LGPL 3.0 - Spargus is MIT, so by extension LGPL should be met due to MIT source available?
+void SimulationTickCallback(btDynamicsWorld* const world, btScalar const timeStep)
+{
+	CollisionPairs currentTickCollisionPairs;
+
+	PhysicsWorld* const physicsWorld = static_cast<PhysicsWorld*>(world->getWorldUserInfo());
+
+	// look at all existing contacts
+	btDispatcher* const dispatcher = world->getDispatcher();
+	for (int manifoldIdx = 0; manifoldIdx < dispatcher->getNumManifolds(); ++manifoldIdx)
+	{
+		// get the "manifold", which is the set of data corresponding to a contact point
+		//   between two physics objects
+		btPersistentManifold const* const manifold =
+		    dispatcher->getManifoldByIndexInternal(manifoldIdx);
+
+		// get the two bodies used in the manifold.  Bullet stores them as void*, so we must cast
+		//  them back to btRigidBody*s.  Manipulating void* pointers is usually a bad
+		//  idea, but we have to work with the environment that we're given.  We know this
+		//  is safe because we only ever add btRigidBodys to the simulation
+		btRigidBody const* const body0 = static_cast<btRigidBody const*>(manifold->getBody0());
+		btRigidBody const* const body1 = static_cast<btRigidBody const*>(manifold->getBody1());
+
+		void* aUserPointer = body0->getUserPointer();
+		void* bUserPointer = body1->getUserPointer();
+
+		// always create the pair in a predictable order
+		bool const swapped = body0 > body1;
+
+		btRigidBody const* const sortedBodyA = swapped ? body1 : body0;
+		btRigidBody const* const sortedBodyB = swapped ? body0 : body1;
+
+		CollisionPair const thisPair = std::make_pair(sortedBodyA, sortedBodyB);
+		currentTickCollisionPairs.insert(thisPair);
+
+		if (physicsWorld->previousTickCollisionPairs.find(thisPair) ==
+		    physicsWorld->previousTickCollisionPairs.end())
 		{
-			const CollisionShapeOwnerReference* aShapeOwnerReference =
-			    static_cast<const CollisionShapeOwnerReference*>(aUserPointer);
-			LOGD << aShapeOwnerReference->shapeCreator;
+			// this is a new contact, which wasn't in our list before.  send an event to the game.
+			// physicsWorld->SendCollisionPairAddEvent(manifold, body0, body1);
+			LOGD << "Now colliding: " << (void*)body0 << (void*)body1;
+			LOGD << "\tUser pointers: " << (void*)aUserPointer << (void*)bUserPointer;
+
+			for (const CollisionListener& listener : physicsWorld->collisionListeners)
+				listener(body0, body1, CollisionState::NowColliding);
 		}
-		if (bUserPointer)
-		{
-			const CollisionShapeOwnerReference* bShapeOwnerReference =
-			    static_cast<const CollisionShapeOwnerReference*>(bUserPointer);
-			LOGD << bShapeOwnerReference->shapeCreator;
-		}
-		// std::cout << "Collision!\n";
 	}
+
+	CollisionPairs removedCollisionPairs;
+
+	// use the STL set difference function to find collision pairs that existed during the previous
+	// tick but not any more
+	std::set_difference(physicsWorld->previousTickCollisionPairs.begin(),
+	                    physicsWorld->previousTickCollisionPairs.end(),
+	                    currentTickCollisionPairs.begin(), currentTickCollisionPairs.end(),
+	                    std::inserter(removedCollisionPairs, removedCollisionPairs.begin()));
+
+	for (CollisionPairs::const_iterator it = removedCollisionPairs.begin(),
+	                                    end = removedCollisionPairs.end();
+	     it != end; ++it)
+	{
+		btRigidBody const* const body0 = it->first;
+		btRigidBody const* const body1 = it->second;
+
+		LOGD << "No longer colliding: " << (void*)body0 << (void*)body1;
+
+		for (const CollisionListener& listener : physicsWorld->collisionListeners)
+			listener(body0, body1, CollisionState::Separating);
+	}
+
+	// the current tick becomes the previous tick.  this is the way of all things.
+	physicsWorld->previousTickCollisionPairs = currentTickCollisionPairs;
 }
