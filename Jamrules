@@ -111,3 +111,42 @@ AR = ar cr ;
 #              frustratingly
 # -dx       : print commands being used
 # -n        : don't actually run commands
+
+#
+# Custom actions
+# Refer to http://david.freetype.org/jam/jam-language-3.html
+
+# $(1:S=.c) : Take $(1), strip the extension, and append ".c"
+# $(1:BS=.h) : Strip path and extension, then append ".h"
+
+Depends all : dataAssets ;
+NotFile dataAssets ;
+
+# Usage:
+# BuildAsset outputAssets/outputAsset : inputAssets/input.blend ;
+# TODO: Make output actually respected; currently ExportBlenderAssets.py determines output internally
+rule BuildAsset
+{
+  # Add 1 to list of data assets that need built
+  Depends dataAssets : $(1) ;
+  # 1 is a collection of assets, so not a file
+  NotFile $(1) ;
+
+  # 1 requires both a .obj and .dae (collision and render respectively)
+  Depends $(1) : $(1:S=.obj) $(1:S=.dae) ;
+
+  # The obj and dae require a .blend
+  # This rule ensures if the .blend is updated, the .obj and .dae are dirty (causing BuildAsset to run)
+  Depends $(1:S=.obj) : $(2) ;
+  Depends $(1:S=.dae) : $(2) ;
+  
+  Clean clean : $(1:S=.obj) $(1:S=.dae) ;
+}
+
+actions BuildAsset
+{
+  blender $(2) --background --python ExportBlenderAssets.py
+  # TODO: Add these to clean
+  cp $(1:S=.obj) Collision/
+  ./Horde3D/build/Binaries/Linux/Debug/ColladaConv $(1:S=.dae) -type model -addModelName -dest Content
+}
