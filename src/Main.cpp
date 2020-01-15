@@ -428,14 +428,17 @@ int main()
 				mainWindow.getBase()->resetGLStates();
 				{
 					DebugDisplay::endFrame();
-
-					PickUpObjectives::RenderUI(mainWindow);
 				}
 			}
 			else
 			{
 				// Make sure things don't pile up if not displaying normally
 				DebugDisplay::clear();
+			}
+
+			mainWindow.getBase()->resetGLStates();
+			{
+				PickUpObjectives::RenderUI(mainWindow);
 			}
 
 			// Finished physics update and drawing; send it on its way

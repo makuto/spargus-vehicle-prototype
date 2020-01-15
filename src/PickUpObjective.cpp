@@ -30,14 +30,21 @@ struct PickUpObjective
 	btRigidBody* physicsBody = nullptr;
 };
 
-static std::vector<PickUpObjective> g_objectives;
+struct
+{
+	std::vector<PickUpObjective> objectives;
+	// This sucks
+	PhysicsWorld* cachedPhysicsWorld = nullptr;
 
-// This sucks
-static PhysicsWorld* cachedPhysicsWorld = nullptr;
-
-static timer objectiveTimer;
-static float g_completionTime = 0.f;
-static text displayText;
+	timer objectiveTimer;
+	
+	float completionTime = 0.f;
+	
+	// UI
+	text displayText;
+	int numObjectivesHit = 0;
+	int totalNumObjectives = 0;
+} g_PickUpObjectivesState;
 
 void onCollisionListener(const btRigidBody* body0, const btRigidBody* body1, CollisionState eState)
 {
@@ -47,20 +54,21 @@ void onCollisionListener(const btRigidBody* body0, const btRigidBody* body1, Col
 
 	// Find any objective, ignoring which body
 	std::vector<PickUpObjective>::iterator findIt = std::find_if(
-	    g_objectives.begin(), g_objectives.end(), [body0, body1](const PickUpObjective& objective) {
+	    g_PickUpObjectivesState.objectives.begin(), g_PickUpObjectivesState.objectives.end(),
+	    [body0, body1](const PickUpObjective& objective) {
 		    return objective.physicsBody == body0 || objective.physicsBody == body1;
 	    });
 
 	// No objectives involved
-	if (findIt == g_objectives.end())
+	if (findIt == g_PickUpObjectivesState.objectives.end())
 		return;
 	else
 		LOGD << "Hit objective";
 
 	// Remove visible and collision parts of objective
 	findIt->renderObject.Destroy();
-	if (cachedPhysicsWorld)
-		cachedPhysicsWorld->world->removeRigidBody(findIt->physicsBody);
+	if (g_PickUpObjectivesState.cachedPhysicsWorld)
+		g_PickUpObjectivesState.cachedPhysicsWorld->world->removeRigidBody(findIt->physicsBody);
 
 	findIt->objectiveHit = true;
 	playObjectiveGet();
@@ -68,9 +76,9 @@ void onCollisionListener(const btRigidBody* body0, const btRigidBody* body1, Col
 
 void Initialize(PhysicsWorld* physicsWorld)
 {
-	cachedPhysicsWorld = physicsWorld;
+	g_PickUpObjectivesState.cachedPhysicsWorld = physicsWorld;
 
-	cachedPhysicsWorld->AddCollisionListener(onCollisionListener);
+	g_PickUpObjectivesState.cachedPhysicsWorld->AddCollisionListener(onCollisionListener);
 
 	// Blender coords to ours: swap Y and Z, then invert Z
 	glm::vec3 objectivePositions[] = {
@@ -89,17 +97,17 @@ void Initialize(PhysicsWorld* physicsWorld)
 	};
 
 	// Objectives
-	g_objectives.resize(ArraySize(objectivePositions));
+	g_PickUpObjectivesState.objectives.resize(ArraySize(objectivePositions));
 
-	for (int i = 0; i < ArraySize(objectivePositions); ++i)
+	for (unsigned int i = 0; i < ArraySize(objectivePositions); ++i)
 	{
 		glm::mat4 objectiveLocation = glm::translate(glm::mat4(1.f), objectivePositions[i]);
-		g_objectives[i].renderObject.SetTransform(objectiveLocation);
-		g_objectives[i].renderObject.Initialize("PickUp");
+		g_PickUpObjectivesState.objectives[i].renderObject.SetTransform(objectiveLocation);
+		g_PickUpObjectivesState.objectives[i].renderObject.Initialize("PickUp");
 	}
 
-	// Create bullet trigger bodies for g_objectives
-	for (PickUpObjective& objective : g_objectives)
+	// Create bullet trigger bodies for g_PickUpObjectivesState.objectives
+	for (PickUpObjective& objective : g_PickUpObjectivesState.objectives)
 	{
 		const float triggerHalfWidth = 3.15f;
 		// TODO: Leak
@@ -109,79 +117,56 @@ void Initialize(PhysicsWorld* physicsWorld)
 		btTransform startTransform;
 		startTransform.setIdentity();
 		startTransform.setOrigin(glmVec3ToBulletVector(objective.renderObject.GetPosition()));
-		objective.physicsBody = cachedPhysicsWorld->localCreateRigidBody(
+		objective.physicsBody = g_PickUpObjectivesState.cachedPhysicsWorld->localCreateRigidBody(
 		    PhysicsWorld::StaticRigidBodyMass, startTransform, triggerShape);
 		objective.physicsBody->setCollisionFlags(objective.physicsBody->getCollisionFlags() |
 		                                         btRigidBody::CF_NO_CONTACT_RESPONSE);
 		objective.physicsBody->setUserPointer((void*)&objective);
 	}
 
-	if (!displayText.loadFont("data/fonts/UbuntuMono-R.ttf"))
+	if (!g_PickUpObjectivesState.displayText.loadFont("data/fonts/UbuntuMono-R.ttf"))
 	{
 		LOGE << "Error: Cannot load default text font";
 	}
 
-	objectiveTimer.start();
+	g_PickUpObjectivesState.objectiveTimer.start();
 }
 
 void Update(float frameTime)
 {
-	int numObjectivesHit = 0;
-	for (const PickUpObjective& objective : g_objectives)
+	g_PickUpObjectivesState.numObjectivesHit = 0;
+	for (const PickUpObjective& objective : g_PickUpObjectivesState.objectives)
 	{
 		if (objective.objectiveHit)
-			++numObjectivesHit;
+			++g_PickUpObjectivesState.numObjectivesHit;
 	}
 
-	int totalNumObjectives = g_objectives.size();
-
-	std::ostringstream objectiveStatus;
-
-	if (numObjectivesHit < totalNumObjectives)
-	{
-		objectiveStatus << "Objective time: " << objectiveTimer.getTime()
-		                << " Objectives hit: " << numObjectivesHit << "/" << totalNumObjectives;
-	}
-	else
-	{
-		if (!g_completionTime)
-			g_completionTime = objectiveTimer.getTime();
-
-		objectiveStatus << "Accomplished in " << g_completionTime << " seconds";
-	}
-
-	DebugDisplay::print(objectiveStatus.str());
+	g_PickUpObjectivesState.totalNumObjectives = g_PickUpObjectivesState.objectives.size();
 }
 
 void RenderUI(window& win)
 {
-	int numObjectivesHit = 0;
-	for (const PickUpObjective& objective : g_objectives)
-	{
-		if (objective.objectiveHit)
-			++numObjectivesHit;
-	}
-
-	int totalNumObjectives = g_objectives.size();
-
 	std::ostringstream objectiveStatus;
 
-	if (numObjectivesHit < totalNumObjectives)
+	if (g_PickUpObjectivesState.numObjectivesHit < g_PickUpObjectivesState.totalNumObjectives)
 	{
-		objectiveStatus << "Objective time: " << objectiveTimer.getTime()
-		                << " Objectives hit: " << numObjectivesHit << "/" << totalNumObjectives;
+		objectiveStatus << "Objective time: " << g_PickUpObjectivesState.objectiveTimer.getTime()
+		                << " Objectives hit: " << g_PickUpObjectivesState.numObjectivesHit << "/"
+		                << g_PickUpObjectivesState.totalNumObjectives;
 	}
 	else
 	{
-		if (!g_completionTime)
-			g_completionTime = objectiveTimer.getTime();
+		if (!g_PickUpObjectivesState.completionTime)
+			g_PickUpObjectivesState.completionTime =
+			    g_PickUpObjectivesState.objectiveTimer.getTime();
 
-		objectiveStatus << "Accomplished in " << g_completionTime << " seconds";
+		objectiveStatus << "Accomplished in " << g_PickUpObjectivesState.completionTime
+		                << " seconds";
 	}
-	
-	displayText.setText(objectiveStatus.str());
-	displayText.setPosition(30.f, win.getHeight() - 100.f);
-	win.draw(&displayText);
+
+	g_PickUpObjectivesState.displayText.setText(objectiveStatus.str());
+	g_PickUpObjectivesState.displayText.setPosition(30.f, win.getHeight() - 100.f);
+	win.draw(&g_PickUpObjectivesState.displayText);
 }
 
 }  // namespace PickUpObjectives

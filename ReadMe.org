@@ -1,9 +1,13 @@
 * Spargus Vehicle Prototype
 This is a 3D vehicle game prototype inspired by the gameplay and feel of the dune buggies in [[https://en.wikipedia.org/wiki/Jak_3][Jak 3]].
 
-I created a [[https://www.youtube.com/watch?v=sUenByjCijM][reference video]] so I could emulate the Jak 3 behavior. It gives you an idea what I'm going for.
+** Videos
+Progress videos, newest to oldest:
+- [[https://www.youtube.com/watch?v=bCw-OMBP5XU][Objective system and audio]], plus improved camera and skybox
+- [[https://www.youtube.com/watch?v=QOJyhaOVrkg][First video of air control]] (applying arbitrary torque to the car in-air)
+- [[https://youtu.be/HvuRNYoSGKU][First public video]], featuring free cam and time step scaling
 
-Here is a [[https://www.youtube.com/watch?v=QOJyhaOVrkg][preview of the prototype]]. It is extremely rough currently.
+I created a [[https://www.youtube.com/watch?v=sUenByjCijM][reference video]] so I could emulate the Jak 3 behavior. It gives you an idea what the inspiration and goal behavior is
 
 ** Setup
 Clone and init submodules for dependencies:
