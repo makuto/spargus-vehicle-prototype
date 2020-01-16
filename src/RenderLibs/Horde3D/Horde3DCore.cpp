@@ -5,6 +5,7 @@
 #include <Horde3DUtils.h>
 
 #include "Math.hpp"
+#include "Utilities.hpp"
 
 H3DNode model = 0;
 H3DNode hordeCamera = 0;
@@ -22,6 +23,92 @@ bool g_graphicsIntialized = false;
 
 namespace Graphics
 {
+static void TestProceduralGeometry()
+{
+	float size = 10.f;
+	float vertices[] = {
+	    // Top fl [0]
+	    -1.f * size,
+	    1.f * size,
+	    -1.f * size,
+	    // Top fr [1]
+	    1.f * size,
+	    1.f * size,
+	    -1.f * size,
+	    // Top bl [2]
+	    -1.f * size,
+	    1.f * size,
+	    1.f * size,
+	    // Top br [3]
+	    1.f * size,
+	    1.f * size,
+	    1.f * size,
+	    // Bottom fl [4]
+	    -1.f * size,
+	    -1.f * size,
+	    -1.f * size,
+	    // Bottom fr [5]
+	    1.f * size,
+	    -1.f * size,
+	    -1.f * size,
+	    // Bottom bl [6]
+	    -1.f * size,
+	    -1.f * size,
+	    1.f * size,
+	    // Bottom br [7]
+	    1.f * size,
+	    -1.f * size,
+	    1.f * size,
+	};
+
+	unsigned int numTriangles = ArraySize(vertices) / 3;
+
+	unsigned int indices[] = {// Top
+	                            0, 2, 1, 1, 2, 3,
+	                            // Front
+	                            0, 1, 4, 4, 1, 5,
+	                            // Left
+	                            6, 2, 4, 4, 2, 0,
+	                            // Back
+	                            3, 2, 6, 6, 7, 3,
+	                            // Right
+	                            5, 1, 7, 7, 1, 3,
+	                            // Bottom
+	                            6, 4, 7, 7, 4, 5};
+
+	unsigned int numIndices = ArraySize(indices);
+
+	H3DRes proceduralCubeGeo = h3dutCreateGeometryRes(
+	    "ProceduralCube_Geo", numTriangles, numIndices, vertices, indices, /*normalData=*/nullptr,
+	    /*tangentData=*/nullptr, /*bitangentData=*/nullptr,
+	    /*texData1=*/nullptr, /*texData2=*/nullptr);
+
+	if (proceduralCubeGeo)
+	{
+		H3DNode model = h3dAddModelNode(H3DRootNode, "ProceduralCube_Model", proceduralCubeGeo);
+		// Material resource used by Mesh node
+		H3DRes materialRes = h3dAddResource(H3DResTypes::Material, "assets/World_Material.001.material.xml", 0);
+		h3dutLoadResourcesFromDisk("Content");
+
+		// first triangle index of mesh in Geometry resource of parent Model node
+		int batchStart = 0;
+		// number of triangle indices used for drawing mesh
+		int batchCount = numIndices;
+		// first vertex in Geometry resource of parent Model node
+		int vertRStart = 0;
+		// last vertex in Geometry resource of parent Model node
+		int vertREnd = numTriangles - 1;
+
+		H3DNode mesh = h3dAddMeshNode(model, "ProceduralCube_Mesh", materialRes, batchStart,
+		                              batchCount, vertRStart, vertREnd);
+
+		// H3DNode mesh = h3dAddMeshNode(model, "ProceduralCube_Mesh", 0, 0, 6, 0, 3);
+
+		// H3DNode cube = h3dAddNodes(H3DRootNode, proceduralCube);
+		// h3dSetNodeTransform(cube, 0, 0, 0, 0, 0, 0, 0, 10, 0);
+	}
+}
+
 void Initialize(int winWidth, int winHeight)
 {
 	// Initialize engine
@@ -51,6 +138,8 @@ void Initialize(int winWidth, int winHeight)
 	// // Add animation resource
 	// // H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
 	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
+
+	TestProceduralGeometry();	
 
 	// Add pipeline resource
 	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);

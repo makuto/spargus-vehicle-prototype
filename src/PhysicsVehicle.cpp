@@ -120,9 +120,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	// Initialize graphics
 	chassisRender.Initialize("BasicBuggy_Chassis");
 	wheelRender.resize(vehicle->getNumWheels());
-	for (Graphics::Object& wheelNode : wheelRender)
+	for (int i = 0; i < vehicle->getNumWheels(); ++i)
 	{
-		wheelNode.Initialize("Wheel_Rear");
+		Graphics::Object& wheelNode = wheelRender[i];
+		// Disable front wheel for now, because the model isn't ready
+		wheelNode.Initialize(i < 2 && false ? "Wheel_Front" : "Wheel_Rear");
 	}
 }
 
