@@ -17,16 +17,23 @@ LINK = clang++ ;
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
 
 HDRS = src
-bullet3/src bullet3/Extras/Serialize/BulletWorldImporter
-base2.0
-tinygltf tinyobjloader
-glm
-Horde3D/Horde3D/Bindings/C++ ;
+Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImporter
+Dependencies/base2.0
+Dependencies/tinygltf Dependencies/tinyobjloader
+Dependencies/glm
+Dependencies/Horde3D/Horde3D/Bindings/C++ ;
 
 if $(DEBUG_BUILD)
-{ BULLET3_BUILD_DIR = bullet3/build_cmake_debug ; }
+{
+  BULLET3_BUILD_DIR = Dependencies/bullet3/build_cmake_debug ;
+  # TODO: Separate Horde debug and release build directories
+  HORDE3D_BUILD_DIR = Dependencies/Horde3D/build/Horde3D ;
+}
 else
-{ BULLET3_BUILD_DIR = bullet3/build_cmake ; }
+{
+  BULLET3_BUILD_DIR = Dependencies/bullet3/build_cmake ;
+  HORDE3D_BUILD_DIR = Dependencies/Horde3D/build/Horde3D ;
+}
 
 OPTIM = -O0 ;
 
@@ -47,7 +54,7 @@ LINKLIBS =
 -lGLEW
 
 # Base
--Lbase2.0 -lBase20
+-LDependencies/base2.0 -lBase20
 
 # Bullet libraries
 -L$(BULLET3_BUILD_DIR)/src/BulletDynamics
@@ -70,8 +77,8 @@ LINKLIBS =
 # -lBulletInverseDynamics
 # -lBulletInverseDynamicsUtils
 
--LHorde3D/build/Horde3D/Source/Horde3DEngine
--LHorde3D/build/Horde3D/Source/Horde3DUtils
+-LDependencies/Horde3D/build/Horde3D/Source/Horde3DEngine
+-LDependencies/Horde3D/build/Horde3D/Source/Horde3DUtils
 -lHorde3D
 -lHorde3DUtils
 ;
@@ -80,7 +87,7 @@ LINKLIBS =
 
 # TODO: Copy libs to better directory, or static link?
 LINKFLAGS = -g
--Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:Horde3D/build/Horde3D/Source/Horde3DEngine:Horde3D/build/Horde3D/Source/Horde3DUtils ;
+-Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:$(HORDE3D_BUILD_DIR)/Source/Horde3DEngine:$(HORDE3D_BUILD_DIR)/Source/Horde3DUtils ;
 
 ##
 ## Jam stuff
@@ -139,8 +146,9 @@ rule BuildAsset
   # This rule ensures if the .blend is updated, the .obj and .dae are dirty (causing BuildAsset to run)
   Depends $(1:S=.obj) : $(2) ;
   Depends $(1:S=.dae) : $(2) ;
-  
-  Clean clean : $(1:S=.obj) $(1:S=.dae) ;
+
+  # TODO: I don't normally want to reprocess assets on clean. Make a separate CleanAssets rule
+  # Clean clean : $(1:S=.obj) $(1:S=.dae) ;
 }
 
 actions BuildAsset

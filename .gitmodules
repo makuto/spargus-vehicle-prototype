@@ -1,18 +1,18 @@
 [submodule "bullet3"]
-	path = bullet3
+	path = Dependencies/bullet3
 	url = https://github.com/bulletphysics/bullet3
 [submodule "base2.0"]
-	path = base2.0
+	path = Dependencies/base2.0
 	url = https://github.com/makuto/base2.0
 [submodule "tinygltf"]
-	path = tinygltf
+	path = Dependencies/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
 [submodule "Horde3D"]
-	path = Horde3D
+	path = Dependencies/Horde3D
 	url = https://github.com/horde3d/Horde3D
 [submodule "glm"]
-	path = glm
+	path = Dependencies/glm
 	url = https://github.com/g-truc/glm
 [submodule "tinyobjloader"]
-	path = tinyobjloader
+	path = Dependencies/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader

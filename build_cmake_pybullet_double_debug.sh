@@ -1,5 +1,5 @@
 #!/bin/sh
-cd bullet3
+cd Dependencies/bullet3
 
 if [ -e CMakeCache.txt ]; then
   rm CMakeCache.txt
