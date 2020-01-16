@@ -154,7 +154,9 @@ rule BuildAsset
 actions BuildAsset
 {
   blender $(2) --background --python ExportBlenderAssets.py
-  # TODO: Add these to clean
+  # TODO: Add these to clean and dependencies, because otherwise it will think
+  # subsequent builds are successful even if ColladaConv failed
   cp $(1:S=.obj) Collision/
-  ./Horde3D/build/Binaries/Linux/Debug/ColladaConv $(1:S=.dae) -type model -addModelName -dest Content
+  # TODO: Use build dir instead
+  ./Dependencies/Horde3D/build/Binaries/Linux/Debug/ColladaConv $(1:S=.dae) -type model -addModelName -dest Content
 }
