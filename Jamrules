@@ -159,4 +159,5 @@ actions BuildAsset
   cp $(1:S=.obj) Collision/
   # TODO: Use build dir instead
   ./Dependencies/Horde3D/build/Binaries/Linux/Debug/ColladaConv $(1:S=.dae) -type model -addModelName -dest Content
+  # TODO: Add textures
 }
