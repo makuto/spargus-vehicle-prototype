@@ -28,6 +28,7 @@ src/ModelUtilities/ObjLoader.cpp
 src/PickUpObjective.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
+src/Terrain.cpp
 ;
 
 # This is all that is needed to select Render library

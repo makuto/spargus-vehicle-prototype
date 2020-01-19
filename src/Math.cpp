@@ -48,3 +48,9 @@ btVector3 glmVec3ToBulletVector(const glm::vec3& vec)
 	btVector3 newVector(vec[0], vec[1], vec[2]);
 	return newVector;
 }
+
+glm::vec3 BulletVectorToGlmVec3(const btVector3& vec)
+{
+	glm::vec3 newVector(vec[0], vec[1], vec[2]);
+	return newVector;
+}
