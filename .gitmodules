@@ -16,3 +16,6 @@
 [submodule "tinyobjloader"]
 	path = Dependencies/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader
+[submodule "Dependencies/polyvox"]
+	path = Dependencies/polyvox
+	url = https://bitbucket.org/volumesoffun/polyvox.git

@@ -13,3 +13,7 @@ echo Finished building Base2.0!
 echo Building Horde3D...
 cd ../Horde3D && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE="Debug" && make -j4
 echo Finished building Horde3D!
+
+echo Building polyvox...
+cd Dependencies/polyvox && mkdir build_debug && cd build_debug && cmake .. -DCMAKE_BUILD_TYPE="Debug" && make -j4
+echo Finished building polyvox! 
