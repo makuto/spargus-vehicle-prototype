@@ -78,6 +78,7 @@ static void TestProceduralGeometry()
 
 	unsigned int numIndices = ArraySize(indices);
 
+	// This copies the geometry data
 	H3DRes proceduralCubeGeo = h3dutCreateGeometryRes(
 	    "ProceduralCube_Geo", numTriangles, numIndices, vertices, indices, /*normalData=*/nullptr,
 	    /*tangentData=*/nullptr, /*bitangentData=*/nullptr,
