@@ -132,7 +132,7 @@ void PhysicsVehicle::Reset()
 {
 	VehicleSteering = 0.f;
 	BrakingForce = defaultBrakingForce;
-	EngineForce = 0.f;
+	ThrottlePercent = 0.f;
 
 	carChassis->setCenterOfMassTransform(btTransform::getIdentity());
 	carChassis->setLinearVelocity(btVector3(0, 0, 0));
@@ -183,12 +183,22 @@ void PhysicsVehicle::Reset()
 	// m_loadBody->setAngularVelocity(btVector3(0, 0, 0));
 }
 
+float PhysicsVehicle::EngineForceFromThrottle(float throttlePercent)
+{
+	// Zero drivetrain
+	return maxEngineForce * throttlePercent;
+}
+
 void PhysicsVehicle::Update(float deltaTime)
 {
+	float engineForce = EngineForceFromThrottle(ThrottlePercent);
+	
+	LOGV << "Input throttle: " << ThrottlePercent << " output force: " << engineForce;
+
 	// Rear-wheel drive
 	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)
 	{
-		vehicle->applyEngineForce(EngineForce, wheelIndex);
+		vehicle->applyEngineForce(engineForce, wheelIndex);
 		vehicle->setBrake(BrakingForce, wheelIndex);
 	}
 

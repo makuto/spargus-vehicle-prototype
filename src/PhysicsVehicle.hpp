@@ -21,7 +21,7 @@ public:
 	void Reset();
 
 	// Controls
-	float EngineForce = 0.f;
+	float ThrottlePercent = 0.f;
 	float BrakingForce = 100.f;
 	float VehicleSteering = 0.f;
 
@@ -52,6 +52,9 @@ private:
 	// Rendering
 	Graphics::Object chassisRender;
 	std::vector<Graphics::Object> wheelRender;
+
+	// Drivetrain
+	float EngineForceFromThrottle(float throttlePercent);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

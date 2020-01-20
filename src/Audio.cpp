@@ -175,7 +175,7 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 		// TODO This is bad
 		static float inEngineStateForSeconds = 0.f;
 		static bool accelerating = false;
-		if (glm::abs(vehicle.EngineForce) > 5.f)
+		if (glm::abs(vehicle.ThrottlePercent) > 0.1f)
 		{
 			if (!accelerating)
 			{

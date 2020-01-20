@@ -78,7 +78,7 @@ void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
 	// Reset steering and forces immediately
 	if (useGameSteering)
 	{
-		vehicle.EngineForce = 0.f;
+		vehicle.ThrottlePercent = 0.f;
 		vehicle.BrakingForce = 0.f;
 		vehicle.VehicleSteering = 0.f;
 	}
@@ -106,7 +106,7 @@ void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
 	// For the time being, don't allow anything like left foot braking
 	if (input.isPressed(inputCode::Up))
 	{
-		vehicle.EngineForce = vehicle.maxEngineForce;
+		vehicle.ThrottlePercent = 1.f;
 		vehicle.BrakingForce = 0.f;
 	}
 	else if (input.isPressed(inputCode::Down))
@@ -114,19 +114,19 @@ void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
 		// Start going backwards if the brake is held near zero
 		if (speedKmHour < 0.1f)
 		{
-			vehicle.EngineForce = -vehicle.maxEngineForce;
+			vehicle.ThrottlePercent = -1.f;
 			vehicle.BrakingForce = 0.f;
 		}
 		else
 		{
-			vehicle.EngineForce = 0.f;
+			vehicle.ThrottlePercent = 0.f;
 			vehicle.BrakingForce = vehicle.maxBrakingForce;
 		}
 	}
 	else if (speedKmHour < 0.1f)
 	{
 		// Auto apply brakes
-		vehicle.EngineForce = 0.f;
+		vehicle.ThrottlePercent = 0.f;
 		vehicle.BrakingForce = vehicle.maxBrakingForce;
 	}
 }
@@ -397,8 +397,8 @@ int main()
 					std::ostringstream output;
 					output << "speedKmHour = " << speedKmHour
 					       << " (mph = " << KilometersToMiles(speedKmHour)
-					       << ") throttle = " << vehicle.EngineForce
-					       << " brake = " << vehicle.BrakingForce << "\n";
+					       << ") throttle = " << vehicle.ThrottlePercent * 100.f
+					       << "% brake = " << vehicle.BrakingForce << "\n";
 					DebugDisplay::print(output.str());
 
 					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)

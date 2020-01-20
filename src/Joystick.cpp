@@ -144,14 +144,14 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 	// Reset steering and forces immediately
 	if (useGameSteering)
 	{
-		vehicle.EngineForce = 0.f;
+		vehicle.ThrottlePercent = 0.f;
 		vehicle.BrakingForce = 0.f;
 		vehicle.VehicleSteering = 0.f;
 	}
 
 	vehicle.VehicleSteering = interpolateRange(-vehicle.steeringClamp, vehicle.steeringClamp,
 	                                           -joystickRange, joystickRange, turningPosition);
-	vehicle.EngineForce = interpolateRange(0.f, vehicle.maxEngineForce, -joystickRange,
+	vehicle.ThrottlePercent = interpolateRange(0.f, 1.f, -joystickRange,
 	                                       joystickRange, throttlePosition);
 	vehicle.BrakingForce = interpolateRange(0.f, vehicle.maxBrakingForce, -joystickRange,
 	                                        joystickRange, brakePosition);
@@ -161,18 +161,18 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 	// Auto reverse on brake, if going slow enough (and throttle isn't pressed)
 	const float autoReverseThresholdKmHour = 1.f;
 	const float autoReverseForceTreshold = 1.f;
-	if (vehicle.EngineForce <= 0.f && vehicle.BrakingForce > autoReverseForceTreshold)
+	if (vehicle.ThrottlePercent <= 0.f && vehicle.BrakingForce > autoReverseForceTreshold)
 	{
 		// Start going backwards if the brake is held near zero
 		if (speedKmHour < autoReverseThresholdKmHour)
 		{
 			// Convert braking input into engine input
-			vehicle.EngineForce = interpolateRange(0.f, -vehicle.maxEngineForce, 0.f,
+			vehicle.ThrottlePercent = interpolateRange(0.f, -1.f, 0.f,
 			                                       vehicle.maxBrakingForce, vehicle.BrakingForce);
 			vehicle.BrakingForce = 0.f;
 
 			if (debugPrint)
-				LOGD << "now throttle = " << vehicle.EngineForce
+				LOGD << "now throttle = " << vehicle.ThrottlePercent
 				     << " brake = " << vehicle.BrakingForce;
 		}
 	}
@@ -180,13 +180,13 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 	// After this speed, apply the brakes when trying to accelerate
 	// TODO: Figure out what Jak does for this
 	const float autoReverseAccelerateBrakingThresholdKmHour = -30.f;
-	if (vehicle.EngineForce > autoReverseForceTreshold && vehicle.BrakingForce == 0.f)
+	if (vehicle.ThrottlePercent > autoReverseForceTreshold && vehicle.BrakingForce == 0.f)
 	{
 		if (speedKmHour < autoReverseAccelerateBrakingThresholdKmHour)
 			vehicle.BrakingForce = vehicle.maxBrakingForce;
 
 		if (debugPrint)
-			LOGD << "now throttle = " << vehicle.EngineForce << " brake = " << vehicle.BrakingForce;
+			LOGD << "now throttle = " << vehicle.ThrottlePercent << " brake = " << vehicle.BrakingForce;
 	}
 
 	// Air control
