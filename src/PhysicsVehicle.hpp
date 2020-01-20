@@ -2,10 +2,10 @@
 
 #include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
-#include "PhysicsWorld.hpp"
 #include "GraphicsObject.hpp"
+#include "PhysicsWorld.hpp"
 
-#include <glm/vec3.hpp>    // vec3
+#include <glm/vec3.hpp>  // vec3
 
 #include <vector>
 
@@ -21,9 +21,17 @@ public:
 	void Reset();
 
 	// Controls
+	// Percent means 0.f through 1.f
 	float ThrottlePercent = 0.f;
+	// Clutch at 0 = fully engaged. 1 = engine disconnected from wheels
+	float ClutchPercent = 0.f;
+	// Gear 0 = neutral
+	int SelectedGear = 1;
 	float BrakingForce = 100.f;
 	float VehicleSteering = 0.f;
+
+	// Directly tie throttle percent to max possible force output
+	bool simpleDrivetrain = false;
 
 	btRaycastVehicle* vehicle;
 
@@ -33,6 +41,12 @@ public:
 	bool WheelsContactingSurface();
 
 	void ApplyTorque(const glm::vec3& torque);
+
+	// Drivetrain
+	float EngineForceFromThrottle(float throttlePercent, int selectedGear) const;
+
+	// Set in constructor. Don't change
+	int numGears;
 private:
 	btRigidBody* carChassis;
 	/// btRaycastVehicle is the interface for the constraint that implements the raycast vehicle
@@ -45,16 +59,13 @@ private:
 
 	// For cleanup only
 	std::vector<btCollisionShape*> collisionShapes;
-	
+
 	// Used to get from a collision shape to this structure
 	CollisionShapeOwnerReference shapeReference;
 
 	// Rendering
 	Graphics::Object chassisRender;
 	std::vector<Graphics::Object> wheelRender;
-
-	// Drivetrain
-	float EngineForceFromThrottle(float throttlePercent);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
@@ -113,4 +124,6 @@ private:
 	float suspensionCompression = 4.4f;
 	float rollInfluence = 0.1f;  // 1.0f;
 	btScalar suspensionRestLength = 0.6;
+
+	std::vector<float> gearboxRatios;
 };

@@ -398,7 +398,9 @@ int main()
 					output << "speedKmHour = " << speedKmHour
 					       << " (mph = " << KilometersToMiles(speedKmHour)
 					       << ") throttle = " << vehicle.ThrottlePercent * 100.f
-					       << "% brake = " << vehicle.BrakingForce << "\n";
+					       << "% brake = " << vehicle.BrakingForce
+						   << " gear = " << vehicle.SelectedGear
+						   << "\n";
 					DebugDisplay::print(output.str());
 
 					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)

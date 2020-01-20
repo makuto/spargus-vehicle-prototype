@@ -117,6 +117,18 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 	Reset();
 
+	// Initialize gearbox
+	{
+		// Gear 0 = neutral
+		gearboxRatios.push_back(0.f);
+		gearboxRatios.push_back(1.f);
+		gearboxRatios.push_back(2.f);
+		gearboxRatios.push_back(3.f);
+		gearboxRatios.push_back(4.f);
+		
+		numGears = gearboxRatios.size();
+	}
+
 	// Initialize graphics
 	chassisRender.Initialize("BasicBuggy_Chassis");
 	wheelRender.resize(vehicle->getNumWheels());
@@ -183,17 +195,48 @@ void PhysicsVehicle::Reset()
 	// m_loadBody->setAngularVelocity(btVector3(0, 0, 0));
 }
 
-float PhysicsVehicle::EngineForceFromThrottle(float throttlePercent)
+// The heavily simplified/layman drivetrain model
+// I'm pulling much of this out of my ass for a good feel (and out of ignorance)
+// Assume a transmission efficiency of 100% and an ideal differential (both wheels get the same
+// amount of force regardless of conditions)
+// See "references/A Vehicle Dynamics Model for Driving Simulators.pdf"
+float PhysicsVehicle::EngineForceFromThrottle(float throttlePercent, int selectedGear) const
 {
-	// Zero drivetrain
-	return maxEngineForce * throttlePercent;
+	// Directly control output force
+	if (simpleDrivetrain)
+		return maxEngineForce * throttlePercent;
+
+	float engineRadiansPerSecond = 0;
+
+	// While clutch is engaged, engine speed comes from the speed of the wheels
+
+	// TODO: Consider engine speed
+	float engineInput = throttlePercent;
+
+	// TODO: Define these using polynomial equations based on engine speed
+	// TODO: Handle zero negative torque force if wheels are going in reverse
+	float minEngineTorque = 0.f;
+	float maxEngineTorque = 250.f;
+	// From engine speed and throttle position, determine torque via interpolation
+	float engineTorque = glm::mix(minEngineTorque, maxEngineTorque, engineInput);
+
+	float gearboxRatio = 1.f;
+	if (selectedGear > gearboxRatios.size())
+		LOGE << "Gear " << selectedGear << " is not in range of gearbox (" << gearboxRatios.size()
+		     << "gears)";
+	else
+		gearboxRatio = gearboxRatios[selectedGear];
+
+	float gearboxOutputForce = engineTorque * gearboxRatio;
+	return gearboxOutputForce;
 }
 
 void PhysicsVehicle::Update(float deltaTime)
 {
-	float engineForce = EngineForceFromThrottle(ThrottlePercent);
-	
-	LOGV << "Input throttle: " << ThrottlePercent << " output force: " << engineForce;
+	float engineForce = EngineForceFromThrottle(ThrottlePercent, SelectedGear);
+
+	LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
+	     << " output force: " << engineForce;
 
 	// Rear-wheel drive
 	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)

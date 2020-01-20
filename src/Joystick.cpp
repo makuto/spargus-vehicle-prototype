@@ -18,10 +18,13 @@
 #include <glm/vec3.hpp>           // vec3
 #include "glm/common.hpp"
 
-#include <iostream>
 #include <sstream>
 
 const float joystickRange = 100.f;
+
+// TODO Do this better
+const int JOYSTICK_XBOX_X = 2;
+const int JOYSTICK_XBOX_B = 1;
 
 int getPlayerJoystickId()
 {
@@ -88,17 +91,11 @@ void applyDeadzone(float& joystickValue)
 		joystickValue = 0.f;
 }
 
-float interpolateRange(float startA, float endA, float startB, float endB, float bValue)
-{
-	float interpolateTo = (bValue - startB) / (endB - startB);
-	return (interpolateTo * (endA - startA)) + startA;
-}
-
 void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 {
 	bool debugPrint = false;
 
-	// printJoystickButtonPresses();
+	printJoystickButtonPresses();
 
 	int playerJoystickId = getPlayerJoystickId();
 	if (playerJoystickId < 0)
@@ -217,6 +214,32 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 		glm::vec3 finalAirControl(airControlRotate);
 		finalAirControl *= frameTime;
 		vehicle.ApplyTorque(finalAirControl);
+	}
+
+	// Gearbox/shifting
+	{
+		// TODO Destroy this code
+		static float lastGearChangeTime = 0.f;
+		const float tapTime = 0.25f;
+		if (lastGearChangeTime >= tapTime)
+		{
+			if (sf::Joystick::isButtonPressed(playerJoystickId, JOYSTICK_XBOX_X))
+			{
+				lastGearChangeTime = 0.f;
+				vehicle.SelectedGear--;
+			}
+			if (sf::Joystick::isButtonPressed(playerJoystickId, JOYSTICK_XBOX_B))
+			{
+				lastGearChangeTime = 0.f;
+				vehicle.SelectedGear++;
+			}
+		}
+		else
+		{
+			lastGearChangeTime += frameTime;
+		}
+
+		vehicle.SelectedGear = glm::clamp(vehicle.SelectedGear, 0, vehicle.numGears - 1);
 	}
 }
 

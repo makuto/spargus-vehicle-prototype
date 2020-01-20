@@ -48,3 +48,10 @@ btVector3 glmVec3ToBulletVector(const glm::vec3& vec)
 	btVector3 newVector(vec[0], vec[1], vec[2]);
 	return newVector;
 }
+
+
+float interpolateRange(float startA, float endA, float startB, float endB, float bValue)
+{
+	float interpolateTo = (bValue - startB) / (endB - startB);
+	return (interpolateTo * (endA - startA)) + startA;
+}
