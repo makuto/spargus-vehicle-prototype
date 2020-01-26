@@ -1,6 +1,6 @@
 #!/bin/sh
 echo Building Bullet3...
-./build_cmake_pybullet_double_debug.sh
+./BuildBullet_Debug.sh
 echo Finished building Bullet3!
 
 echo

@@ -13,8 +13,11 @@ LINK = clang++ ;
 ## Compiler arguments
 
 # Arguments used on all projects, regardless of any variables
+C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
-C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter -DBT_USE_DOUBLE_PRECISION -g ;
+# Disabled now that I'm compiling Bullet in single-precision
+# -DBT_USE_DOUBLE_PRECISION
+-g ;
 
 HDRS = src
 Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImporter

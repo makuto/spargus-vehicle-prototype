@@ -1,6 +1,6 @@
 #!/bin/sh
 echo Building Bullet3...
-cd Dependencies/bullet3 && ./build_cmake_pybullet_double.sh
+./BuildBullet.sh
 echo Finished building Bullet3!
 
 echo
