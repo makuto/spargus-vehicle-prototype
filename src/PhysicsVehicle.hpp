@@ -43,7 +43,8 @@ public:
 	void ApplyTorque(const glm::vec3& torque);
 
 	// Drivetrain
-	float EngineForceFromThrottle(float throttlePercent, int selectedGear) const;
+	float EngineForceFromThrottle(float deltaTime, float throttlePercent, int selectedGear,
+	                              float& engineRpmOut) const;
 
 	// Set in constructor. Don't change
 	int numGears;
@@ -82,9 +83,18 @@ public:
 	// I'm not sure why this needs to be so big...need to learn more about physics
 	// Only multiply by sixty to compensate for adding framerate independence on numbers that I
 	// liked before making it rate independent
-	float airControlMaxPitchTorquePerSecond = 600.f * 60;
-	float airControlMaxRollTorquePerSecond = 600.f * 60;
+	float airControlMaxPitchTorquePerSecond = 600.f * 60.f;
+	float airControlMaxRollTorquePerSecond = 600.f * 60.f;
 
+	// TODO Make getter?
+	float engineRpm;
+	
+	float idleEngineRpm = 100.f;
+	float maxEngineRpm = 2500.f;
+
+	// "Realistic"
+	// float idleEngineRpm = 600.f;
+	// float maxEngineRpm = 7500.f;
 private:
 	// I couldn't find any hard numbers, so let's guess around 1000lbs.
 	// 1000lbs = ~453kg.

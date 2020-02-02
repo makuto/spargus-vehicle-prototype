@@ -2,6 +2,7 @@
 
 #include "PhysicsWorld.hpp"
 
+#include "Audio.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
 #include "Utilities.hpp"
@@ -121,11 +122,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	{
 		// Gear 0 = neutral
 		gearboxRatios.push_back(0.f);
-		gearboxRatios.push_back(1.f);
-		gearboxRatios.push_back(2.f);
-		gearboxRatios.push_back(3.f);
-		gearboxRatios.push_back(4.f);
-		
+		gearboxRatios.push_back(15.f);
+		gearboxRatios.push_back(10.f);
+		gearboxRatios.push_back(7.f);
+		gearboxRatios.push_back(5.f);
+
 		numGears = gearboxRatios.size();
 	}
 
@@ -200,15 +201,54 @@ void PhysicsVehicle::Reset()
 // Assume a transmission efficiency of 100% and an ideal differential (both wheels get the same
 // amount of force regardless of conditions)
 // See "references/A Vehicle Dynamics Model for Driving Simulators.pdf"
-float PhysicsVehicle::EngineForceFromThrottle(float throttlePercent, int selectedGear) const
+float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePercent,
+                                              int selectedGear, float& engineRpmOut) const
 {
 	// Directly control output force
 	if (simpleDrivetrain)
 		return maxEngineForce * throttlePercent;
 
-	float engineRadiansPerSecond = 0;
+	float gearboxRatio = 1.f;
+	if (selectedGear >= gearboxRatios.size())
+		LOGE << "Gear " << selectedGear << " is not in range of gearbox (" << gearboxRatios.size()
+		     << "gears)";
+	else
+		gearboxRatio = gearboxRatios[selectedGear];
+
+	float engineRadiansPerStep = 0;
 
 	// While clutch is engaged, engine speed comes from the speed of the wheels
+	if (ClutchPercent < 0.3f)
+	{
+		float maxDeltaRotation = -1000000.f;
+		// Only do rear wheels, because this is a rear-wheel drive
+		for (int i = 2; i < vehicle->getNumWheels(); i++)
+		{
+			const btWheelInfo& wheelInfo = vehicle->getWheelInfo(i);
+			maxDeltaRotation = glm::max(wheelInfo.m_deltaRotation, maxDeltaRotation);
+		}
+
+		LOGD << "Rear wheel max Delta Rotation = " << maxDeltaRotation;
+
+		// TODO This isn't actually per second yet
+		engineRadiansPerStep = maxDeltaRotation * gearboxRatio;
+	}
+
+	// TODO Need to take the same step from the wheel update calculations to get the same result
+	engineRpmOut =
+	    (engineRadiansPerStep * (1 / deltaTime)) * (1.f / (2.f * glm::pi<float>())) * (60.f / 1.f);
+	LOGD << "Engine RPM = " << engineRpmOut;
+
+	// Handle idle (manuals should stall I think? need to do some research on this)
+	if (engineRpmOut < idleEngineRpm)
+		engineRpmOut = idleEngineRpm;
+
+	// Blown engine
+	if (engineRpmOut > maxEngineRpm)
+		engineRpmOut = maxEngineRpm;
+
+	// TODO: Fix reverse always using 1st gear (limit reverse speed)
+	engineRpmOut = glm::abs(engineRpmOut);
 
 	// TODO: Consider engine speed
 	float engineInput = throttlePercent;
@@ -220,20 +260,27 @@ float PhysicsVehicle::EngineForceFromThrottle(float throttlePercent, int selecte
 	// From engine speed and throttle position, determine torque via interpolation
 	float engineTorque = glm::mix(minEngineTorque, maxEngineTorque, engineInput);
 
-	float gearboxRatio = 1.f;
-	if (selectedGear > gearboxRatios.size())
-		LOGE << "Gear " << selectedGear << " is not in range of gearbox (" << gearboxRatios.size()
-		     << "gears)";
-	else
-		gearboxRatio = gearboxRatios[selectedGear];
-
 	float gearboxOutputForce = engineTorque * gearboxRatio;
 	return gearboxOutputForce;
 }
 
 void PhysicsVehicle::Update(float deltaTime)
 {
-	float engineForce = EngineForceFromThrottle(ThrottlePercent, SelectedGear);
+	float engineForce =
+	    EngineForceFromThrottle(deltaTime, ThrottlePercent, SelectedGear, engineRpm);
+
+	// Automatic transmission
+	int gearBeforeAutoShift = SelectedGear;
+	if (engineRpm < 800.f && SelectedGear > 1)
+		SelectedGear--;
+	else if (engineRpm > 1400.f)
+		SelectedGear++;
+	SelectedGear = glm::clamp<int>(SelectedGear, 0, gearboxRatios.size() - 1);
+	if (SelectedGear != gearBeforeAutoShift)
+	{
+		LOGV << "Shifted from " << gearBeforeAutoShift << " to " << SelectedGear;
+		playVehicleShifting();
+	}
 
 	LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
 	     << " output force: " << engineForce;
@@ -323,7 +370,7 @@ bool PhysicsVehicle::WheelsContactingSurface()
 	for (int i = 0; i < vehicle->getNumWheels(); i++)
 	{
 		const btWheelInfo& wheelInfo = vehicle->getWheelInfo(i);
-		if (wheelInfo.m_wheelsSuspensionForce > 0.1f)
+		if (wheelInfo.m_raycastInfo.m_isInContact > 0.1f)
 			return true;
 	}
 

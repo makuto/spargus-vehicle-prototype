@@ -18,6 +18,10 @@
 #include <iostream>
 #include <sstream>
 
+#include <limits>
+#include <stdlib.h> // rand
+#include <cmath> // sin
+
 sound sfxVehicleStartup;
 sound sfxVehicleIdle;
 sound sfxVehicleAccelerate;
@@ -115,8 +119,87 @@ void debugPrintAudio()
 	}
 }
 
+typedef short SoundSample;
+class BrownianNoiseAudioStream : public sf::SoundStream
+{
+public:
+	void initializeNoiseStream()
+	{
+		// TODO: Properly zero
+		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
+			sampleBuffer[i] = 0;
+		unsigned int channelCount = 1;
+		unsigned int sampleRate = 44100;
+		initialize(channelCount, sampleRate);
+	}
+
+private:
+	SoundSample sampleBuffer[100];
+	virtual bool onGetData(sf::SoundStream::Chunk& data)
+	{
+		const SoundSample maxMotion = 10;
+		const float pi = std::acos(-1);
+		SoundSample lastSample = sampleBuffer[ArraySize(sampleBuffer) - 1];
+		int triangleWaveDirection = 1;
+		int triangleWaveSpeed = 1000;
+		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
+		{
+			// TODO Overflow protection
+			// sampleBuffer[i] = lastSample + ((rand() % maxMotion) - maxMotion / 2);
+			
+			// Sawtooth wave
+			// sampleBuffer[i] = ((i * 7) / (float)ArraySize(sampleBuffer)) * std::numeric_limits<short>::max();
+
+			// Square wave
+			// if (i < ArraySize(sampleBuffer) / 2)
+			// 	sampleBuffer[i] = std::numeric_limits<short>::max();
+			// else
+			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
+
+			// Triangle wave
+			// if (i == 0)
+			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
+			// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() + triangleWaveSpeed)
+			// 	triangleWaveDirection = 1;
+			// else if (sampleBuffer[i - 1] >= std::numeric_limits<short>::max() - triangleWaveSpeed)
+			// 	triangleWaveDirection = -1;
+			// if (i > 0)
+			// 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection * triangleWaveSpeed);
+
+			// Sine wave - Not working
+			sampleBuffer[i] = std::sin((i / (float)ArraySize(sampleBuffer)) * pi * 2) * (std::numeric_limits<short>::max() / 2);
+			// if (i < 10)
+				// std::cout << sampleBuffer[i] << "\n";
+			
+			lastSample = sampleBuffer[i];
+		}
+
+		data.sampleCount = ArraySize(sampleBuffer);
+		data.samples = sampleBuffer;
+		
+		// Keep playing forever
+		return true;
+	}
+
+	virtual void onSeek(sf::Time timeOffset)
+	{
+	}
+};
+
 void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 {
+	// if (false)
+	{
+		static BrownianNoiseAudioStream noiseStream;
+		static bool initialized = false;
+		if (!initialized)
+		{
+			noiseStream.initializeNoiseStream();
+			initialized = true;
+		}
+		noiseStream.play();
+	}
+
 	const glm::vec3 vehiclePosition = vehicle.GetPosition();
 	audioListener.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 
@@ -208,4 +291,9 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 void playObjectiveGet()
 {
 	sfxObjectiveGet.play();	
+}
+
+void playVehicleShifting()
+{
+	sfxVehicleShifting.play();	
 }
