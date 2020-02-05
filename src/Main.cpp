@@ -400,6 +400,7 @@ int main()
 					       << ") throttle = " << vehicle.ThrottlePercent * 100.f
 					       << "% brake = " << vehicle.BrakingForce
 						   << " gear = " << vehicle.SelectedGear
+						   << " rpm = " << vehicle.engineRpm
 						   << "\n";
 					DebugDisplay::print(output.str());
 

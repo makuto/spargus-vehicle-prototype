@@ -3,6 +3,7 @@ This is a 3D vehicle game prototype inspired by the gameplay and feel of the dun
 
 ** Videos
 Progress videos, newest to oldest:
+- [[https://www.youtube.com/watch?v=JNJRJw6R5xY][Drivetrain and engine audio]]
 - [[https://www.youtube.com/watch?v=bCw-OMBP5XU][Objective system and audio]], plus improved camera and skybox
 - [[https://www.youtube.com/watch?v=QOJyhaOVrkg][First video of air control]] (applying arbitrary torque to the car in-air)
 - [[https://youtu.be/HvuRNYoSGKU][First public video]], featuring free cam and time step scaling

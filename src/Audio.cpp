@@ -197,8 +197,8 @@ private:
 				sampleBuffer[i] = std::numeric_limits<short>::min();
 			}
 
-			if (i < 10)
-				std::cout << sampleBuffer[i] << "\n";
+			// if (i < 10)
+				// std::cout << sampleBuffer[i] << "\n";
 
 			lastSample = sampleBuffer[i];
 		}

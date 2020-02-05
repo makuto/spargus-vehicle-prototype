@@ -247,7 +247,7 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 			maxDeltaRotation = glm::max(wheelInfo.m_deltaRotation, maxDeltaRotation);
 		}
 
-		LOGD << "Rear wheel max Delta Rotation = " << maxDeltaRotation;
+		// LOGD << "Rear wheel max Delta Rotation = " << maxDeltaRotation;
 
 		// TODO This isn't actually per second yet
 		engineRadiansPerStep = maxDeltaRotation * gearboxRatio;
@@ -257,13 +257,14 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 	engineRpmOut =
 	    (engineRadiansPerStep * (1 / deltaTime)) * (1.f / (2.f * glm::pi<float>())) * (60.f / 1.f);
 
+	// TODO This is not good
 	// Handle idle (manuals should stall I think? need to do some research on this)
-	if (engineRpmOut < idleEngineRpm)
-		engineRpmOut = idleEngineRpm;
+	if (glm::abs(engineRpmOut) < idleEngineRpm)
+		engineRpmOut = engineRpmOut < 0.f ? -idleEngineRpm : idleEngineRpm;
 
 	// Blown engine
-	if (engineRpmOut > maxEngineRpm)
-		engineRpmOut = maxEngineRpm;
+	if (glm::abs(engineRpmOut) > maxEngineRpm)
+		engineRpmOut = engineRpmOut < 0.f ? -maxEngineRpm : maxEngineRpm;
 
 	// TODO: Fix reverse always using 1st gear (limit reverse speed)
 	engineRpmOut = glm::abs(engineRpmOut);
