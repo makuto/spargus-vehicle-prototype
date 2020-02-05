@@ -128,20 +128,29 @@ public:
 		// TODO: Properly zero
 		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
 			sampleBuffer[i] = 0;
+
+		bufferOffset = 0;
+
 		unsigned int channelCount = 1;
-		unsigned int sampleRate = 44100;
+		sampleRate = 44100;
 		initialize(channelCount, sampleRate);
 	}
 
 private:
 	SoundSample sampleBuffer[100];
+	unsigned int bufferOffset;
+	unsigned int sampleRate;
+	
 	virtual bool onGetData(sf::SoundStream::Chunk& data)
 	{
+		float engineRpm = GetPlayerVehicleEngineRpmThreadSafe();
+
 		const SoundSample maxMotion = 10;
 		const float pi = std::acos(-1);
 		SoundSample lastSample = sampleBuffer[ArraySize(sampleBuffer) - 1];
 		int triangleWaveDirection = 1;
 		int triangleWaveSpeed = 1000;
+		unsigned int engineUpSquareNextNSamples = 0;
 		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
 		{
 			// TODO Overflow protection
@@ -167,15 +176,37 @@ private:
 			// 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection * triangleWaveSpeed);
 
 			// Sine wave - Not working
-			sampleBuffer[i] = std::sin((i / (float)ArraySize(sampleBuffer)) * pi * 2) * (std::numeric_limits<short>::max() / 2);
-			// if (i < 10)
-				// std::cout << sampleBuffer[i] << "\n";
-			
+			// sampleBuffer[i] =
+			//     std::sin(((i % ArraySize(sampleBuffer)) * pi * 2 * (engineRpm / 1000.f)) *
+			//              (std::numeric_limits<short>::max() / 2));
+
+			// Engine rpm
+			if (i + bufferOffset % 100 == 0)
+			// if (i + bufferOffset % (int)(sampleRate / (engineRpm / 60.f)) == 0)
+			{
+				engineUpSquareNextNSamples = 10;
+			}
+
+			if (engineUpSquareNextNSamples > 0)
+			{
+				engineUpSquareNextNSamples--;
+				sampleBuffer[i] = std::numeric_limits<short>::max();
+			}
+			else
+			{
+				sampleBuffer[i] = std::numeric_limits<short>::min();
+			}
+
+			if (i < 10)
+				std::cout << sampleBuffer[i] << "\n";
+
 			lastSample = sampleBuffer[i];
 		}
 
 		data.sampleCount = ArraySize(sampleBuffer);
 		data.samples = sampleBuffer;
+
+		bufferOffset += data.sampleCount;
 		
 		// Keep playing forever
 		return true;
@@ -188,6 +219,8 @@ private:
 
 void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 {
+	const glm::vec3 vehiclePosition = vehicle.GetPosition();
+	
 	// if (false)
 	{
 		static BrownianNoiseAudioStream noiseStream;
@@ -196,11 +229,15 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 		{
 			noiseStream.initializeNoiseStream();
 			initialized = true;
+			noiseStream.play();
 		}
-		noiseStream.play();
+
+		noiseStream.setPitch(vehicle.engineRpm / 10000.f);
+		noiseStream.setVolume(40.f);
+		
+		noiseStream.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 	}
 
-	const glm::vec3 vehiclePosition = vehicle.GetPosition();
 	audioListener.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 
 	// Temporarily disable audio
@@ -254,34 +291,37 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 				sfxVehicleSkidDirt.play();
 		}
 
-		// Engine noise
-		// TODO This is bad
-		static float inEngineStateForSeconds = 0.f;
-		static bool accelerating = false;
-		if (glm::abs(vehicle.ThrottlePercent) > 0.1f)
+		// Sample-based Engine noise
+		if (false)
 		{
-			if (!accelerating)
+			// TODO This is bad
+			static float inEngineStateForSeconds = 0.f;
+			static bool accelerating = false;
+			if (glm::abs(vehicle.ThrottlePercent) > 0.1f)
 			{
-				accelerating = true;
-				inEngineStateForSeconds = 0;
-				sfxVehicleIdle.stop();
-				sfxVehicleAccelerate.loop(true);
-				sfxVehicleAccelerate.play();
-			}
+				if (!accelerating)
+				{
+					accelerating = true;
+					inEngineStateForSeconds = 0;
+					sfxVehicleIdle.stop();
+					sfxVehicleAccelerate.loop(true);
+					sfxVehicleAccelerate.play();
+				}
 
-			inEngineStateForSeconds += frameTime;
-		}
-		else
-		{
-			if (accelerating)
-			{
-				accelerating = false;
-				inEngineStateForSeconds = 0;
-				sfxVehicleAccelerate.stop();
-				sfxVehicleIdle.loop(true);
-				sfxVehicleIdle.play();
+				inEngineStateForSeconds += frameTime;
 			}
-			inEngineStateForSeconds += frameTime;
+			else
+			{
+				if (accelerating)
+				{
+					accelerating = false;
+					inEngineStateForSeconds = 0;
+					sfxVehicleAccelerate.stop();
+					sfxVehicleIdle.loop(true);
+					sfxVehicleIdle.play();
+				}
+				inEngineStateForSeconds += frameTime;
+			}
 		}
 
 		// const btRigidBody* getRigidBody

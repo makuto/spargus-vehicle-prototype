@@ -12,7 +12,13 @@
 #include <glm/trigonometric.hpp>  //radians
 #include <glm/vec3.hpp>           // vec3
 
+#include <algorithm>
+#include <vector>
 #include <iostream>
+
+// TODO This is messy
+std::mutex g_playerVehiclesMutex;
+static std::vector<PhysicsVehicle*> g_playerVehicles;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vehicle constants
@@ -139,6 +145,18 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		// Disable front wheel for now, because the model isn't ready
 		wheelNode.Initialize(i < 2 && false ? "Wheel_Front" : "Wheel_Rear");
 	}
+
+	{
+		const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
+		g_playerVehicles.push_back(this);
+	}
+}
+
+PhysicsVehicle::~PhysicsVehicle()
+{
+	const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
+	g_playerVehicles.erase(std::remove(g_playerVehicles.begin(), g_playerVehicles.end(), this),
+	                       g_playerVehicles.end());
 }
 
 void PhysicsVehicle::Reset()
@@ -218,6 +236,7 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 	float engineRadiansPerStep = 0;
 
 	// While clutch is engaged, engine speed comes from the speed of the wheels
+	// TODO: Add case for if rear wheels are not contacting the ground
 	if (ClutchPercent < 0.3f)
 	{
 		float maxDeltaRotation = -1000000.f;
@@ -237,7 +256,6 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 	// TODO Need to take the same step from the wheel update calculations to get the same result
 	engineRpmOut =
 	    (engineRadiansPerStep * (1 / deltaTime)) * (1.f / (2.f * glm::pi<float>())) * (60.f / 1.f);
-	LOGD << "Engine RPM = " << engineRpmOut;
 
 	// Handle idle (manuals should stall I think? need to do some research on this)
 	if (engineRpmOut < idleEngineRpm)
@@ -266,8 +284,12 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 
 void PhysicsVehicle::Update(float deltaTime)
 {
-	float engineForce =
-	    EngineForceFromThrottle(deltaTime, ThrottlePercent, SelectedGear, engineRpm);
+	float engineForce = 0.f;
+	{
+		// TODO Technically we need the lock only for setting here.. messy
+		const std::lock_guard<std::mutex> lock(engineDetailsMutex);
+		engineForce = EngineForceFromThrottle(deltaTime, ThrottlePercent, SelectedGear, engineRpm);
+	}
 
 	// Automatic transmission
 	int gearBeforeAutoShift = SelectedGear;
@@ -375,4 +397,17 @@ bool PhysicsVehicle::WheelsContactingSurface()
 	}
 
 	return false;
+}
+
+float GetPlayerVehicleEngineRpmThreadSafe()
+{
+	const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
+
+	if (!g_playerVehicles.empty())
+	{
+		PhysicsVehicle* playerVehicle = g_playerVehicles[0];
+		const std::lock_guard<std::mutex> lock(playerVehicle->engineDetailsMutex);
+		return playerVehicle->engineRpm;
+	}
+	return 0.f;
 }

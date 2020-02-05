@@ -7,6 +7,8 @@
 
 #include <glm/vec3.hpp>  // vec3
 
+#include <thread>
+#include <mutex>
 #include <vector>
 
 class PhysicsWorld;
@@ -16,6 +18,7 @@ class PhysicsVehicle
 {
 public:
 	PhysicsVehicle(PhysicsWorld& physicsWorld);
+	~PhysicsVehicle();
 	void Update(float deltaTime);
 
 	void Reset();
@@ -136,4 +139,11 @@ private:
 	btScalar suspensionRestLength = 0.6;
 
 	std::vector<float> gearboxRatios;
+
+protected:
+	friend float GetPlayerVehicleEngineRpmThreadSafe();
+	std::mutex engineDetailsMutex;
 };
+
+// TODO Think of a good way of doing this
+float GetPlayerVehicleEngineRpmThreadSafe();
