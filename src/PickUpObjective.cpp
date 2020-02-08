@@ -104,14 +104,16 @@ void Initialize(PhysicsWorld* physicsWorld)
 	for (unsigned int i = 0; i < ArraySize(objectivePositions); ++i)
 	{
 		glm::mat4 objectiveLocation = glm::translate(glm::mat4(1.f), objectivePositions[i]);
-		g_PickUpObjectivesState.objectives[i].renderObject.SetTransform(objectiveLocation);
+		// NOT Normal! Only because I rescaled the world
+		glm::mat4 objectiveScale = glm::scale(glm::mat4(1.f), glm::vec3(0.75f));
+		g_PickUpObjectivesState.objectives[i].renderObject.SetTransform(objectiveScale * objectiveLocation);
 		g_PickUpObjectivesState.objectives[i].renderObject.Initialize("PickUp");
 	}
 
 	// Create bullet trigger bodies for g_PickUpObjectivesState.objectives
 	for (PickUpObjective& objective : g_PickUpObjectivesState.objectives)
 	{
-		const float triggerHalfWidth = 3.15f;
+		const float triggerHalfWidth = 2.3625f;
 		// TODO: Leak
 		btCollisionShape* triggerShape =
 		    new btBoxShape(btVector3(triggerHalfWidth, triggerHalfWidth, triggerHalfWidth));

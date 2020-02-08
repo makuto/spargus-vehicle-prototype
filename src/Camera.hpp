@@ -13,7 +13,7 @@ class RenderWindow;
 struct Camera
 {
 private:
-	glm::vec3 camPos = {0.f, 10.f, 0.f};
+	glm::vec3 camPos = {0.f, 7.5f, 0.f};
 	glm::vec3 camRot = {0.f, 0.f, 0.f};
 	glm::vec3 camTranslate = {0.f, 0.f, 0.f};
 	window& win;
@@ -23,10 +23,10 @@ private:
 	sf::RenderWindow* winBase = nullptr;
 
 	// Broadly determines the view angle
-	const double cameraHeight = 2.0;
+	const double cameraHeight = 1.5;
 	// Offsets the target down onscreen
-	const double targetAddHeight = 2.0;
-	const float pullbackRadius = 9.f;
+	const double targetAddHeight = 1.5;
+	const float pullbackRadius = 6.75f;
 public:
 	Camera(window& winOwner);
 

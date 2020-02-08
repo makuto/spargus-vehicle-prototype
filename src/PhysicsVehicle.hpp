@@ -70,6 +70,7 @@ private:
 	// Rendering
 	Graphics::Object chassisRender;
 	std::vector<Graphics::Object> wheelRender;
+	Graphics::Object basicDriver;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants
@@ -109,23 +110,23 @@ private:
 	// float chassisLength = 2.f;
 
 	// Double width of the chassis to approximate wheel collision, and increase balance
-	float chassisWidth = 3.0f;
+	float chassisWidth = 2.25f;
 	// float chassisWidth = 1.418f;
 	// Use the height at the middle of the chassis until we get nonrectangular collision set up
-	float chassisHeight = 1.3725f;
+	float chassisHeight = 1.029375f;
 	// float chassisHeight = 0.5f;
-	float chassisLength = 4.12349f;
+	float chassisLength = 3.0926175f;
 
 	float defaultBrakingForce = 20.f;
 
 	// The axle height relative to the vehicle (I think)
 	// float connectionHeight = 0.827f;  // 1.2f;
-	float connectionHeight = 0.727f;  // 1.2f;
+	float connectionHeight = 0.54525f;  // 1.2f;
 	// Use same radius wheels for now
 	// TODO add support for different rear/front wheel sizes
-	float wheelRadius = 1.64f / 2.f;
+	float wheelRadius = 1.23f / 2.f;
 	// Tread width
-	float wheelWidth = 0.5f;
+	float wheelWidth = 0.375f;
 	// Default by bullet
 	// float wheelFriction = 1000;  // BT_LARGE_FLOAT;
 	// Pretty slidey here, with some good characteristics (reverse 180s are fun)
@@ -136,7 +137,7 @@ private:
 	float suspensionDamping = 2.3f;
 	float suspensionCompression = 4.4f;
 	float rollInfluence = 0.1f;  // 1.0f;
-	btScalar suspensionRestLength = 0.6;
+	btScalar suspensionRestLength = 0.6f;
 
 	std::vector<float> gearboxRatios;
 

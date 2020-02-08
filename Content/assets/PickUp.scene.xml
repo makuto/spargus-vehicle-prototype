@@ -1,4 +1,4 @@
 <Model name="PickUp" geometry="assets/PickUp.geo">
 
-	<Mesh name="PickUp" material="assets/PickUp_Material.material.xml" batchStart="0" batchCount="144" vertRStart="0" vertREnd="95" />
+	<Mesh name="PickUp" material="assets/PickUp_Material.material.xml" sx="0.75" sy="0.75" sz="0.75" batchStart="0" batchCount="144" vertRStart="0" vertREnd="95" />
 </Model>

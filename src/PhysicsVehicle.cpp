@@ -146,6 +146,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		wheelNode.Initialize(i < 2 && false ? "Wheel_Front" : "Wheel_Rear");
 	}
 
+	basicDriver.Initialize("BasicDriver");
+
 	{
 		const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
 		g_playerVehicles.push_back(this);
@@ -301,12 +303,12 @@ void PhysicsVehicle::Update(float deltaTime)
 	SelectedGear = glm::clamp<int>(SelectedGear, 0, gearboxRatios.size() - 1);
 	if (SelectedGear != gearBeforeAutoShift)
 	{
-		LOGV << "Shifted from " << gearBeforeAutoShift << " to " << SelectedGear;
+		// LOGV << "Shifted from " << gearBeforeAutoShift << " to " << SelectedGear;
 		playVehicleShifting();
 	}
 
-	LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
-	     << " output force: " << engineForce;
+	// LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
+	     // << " output force: " << engineForce;
 
 	// Rear-wheel drive
 	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)
@@ -322,7 +324,9 @@ void PhysicsVehicle::Update(float deltaTime)
 	}
 
 	// Chassis rendering
-	chassisRender.SetTransform(GetTransform());
+	glm::mat4 chassisTransform = GetTransform();
+	chassisRender.SetTransform(chassisTransform);
+	basicDriver.SetTransform(chassisTransform);
 
 	// Wheel rendering
 	for (int i = 0; i < vehicle->getNumWheels(); i++)

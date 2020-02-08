@@ -50,6 +50,7 @@ BuildAsset assets/Wheel_Rear : assets/Wheel_Rear.blend ;
 BuildAsset assets/Wheel_Front : assets/Wheel_Front.blend ;
 BuildAsset assets/World : assets/World.blend ;
 BuildAsset assets/PickUp : assets/PickUp.blend ;
+BuildAsset assets/BasicDriver : assets/BasicDriver.blend ;
 
 # LinkLibraries spargus_vehicle_prototype : libBase20 ;
 
