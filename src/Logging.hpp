@@ -18,6 +18,8 @@
 // My modifications greatly simplify the library. Instead of using std::string, I use C strings, so
 // there are no allocations
 
+// Logging is thread-safe, though lots of contention will slow things down
+
 //////////////////////////////////////////////////////////////////////////
 // Helper macros that get context info
 
@@ -154,6 +156,7 @@ struct Record
 	// Print raw pointer
 	Record& operator<<(void* data);
 	Record& operator<<(const char* data);
+	Record& operator<<(const short data);
 	Record& operator<<(const int data);
 	Record& operator<<(const unsigned int data);
 	Record& operator<<(const float data);

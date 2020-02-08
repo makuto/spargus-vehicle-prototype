@@ -6,6 +6,8 @@
 #include <cstring>
 
 #include <iostream>
+#include <mutex>
+#include <thread>
 
 namespace Logging
 {
@@ -29,6 +31,12 @@ Record& Record::operator<<(void* data)
 Record& Record::operator<<(const char* data)
 {
 	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%s", data);
+	return *this;
+}
+
+Record& Record::operator<<(const short data)
+{
+	Offset += snprintf(OutBuffer + Offset, sizeof(OutBuffer) - Offset, "%d", data);
 	return *this;
 }
 
@@ -121,6 +129,9 @@ void FormatFuncName(char* buffer, const char* func, size_t bufferSize)
 	buffer[numCharsToCopy] = '\0';
 }
 
+Logger* Logger::Singleton = nullptr;
+std::mutex loggerMutex;
+
 Logger::Logger(Severity maxSeverity, CustomLogOutputFunc customOutputFunc)
     : MaxSeverity(maxSeverity), CustomOutputFunc(customOutputFunc)
 {
@@ -134,6 +145,8 @@ bool Logger::checkSeverity(Severity severity) const
 
 void Logger::operator+=(const Record& record)
 {
+	std::lock_guard<std::mutex> guard(loggerMutex);
+
 	if (CustomOutputFunc)
 		CustomOutputFunc(record);
 	else
@@ -145,8 +158,6 @@ void Logger::operator+=(const Record& record)
 		          << "(" << severityToString(record.severity) << ") " << record.OutBuffer << "\n";
 	}
 }
-
-Logger* Logger::Singleton = nullptr;
 
 Logger* Logger::GetSingleton()
 {
