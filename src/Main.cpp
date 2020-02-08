@@ -293,8 +293,17 @@ int main()
 		}
 
 		// Physics
-		vehicle.Update(previousFrameTime * timeStepScale);
-		physicsWorld.Update(previousFrameTime * timeStepScale);
+		{
+			// Make sure vehicle isn't falling through the world
+			if (vehicle.GetPosition()[1] < -30.f)
+			{
+				// TODO: Make this put you back in the last known good position?
+				vehicle.Reset();
+			}
+
+			vehicle.Update(previousFrameTime * timeStepScale);
+			physicsWorld.Update(previousFrameTime * timeStepScale);
+		}
 
 		PickUpObjectives::Update(previousFrameTime);
 

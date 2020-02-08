@@ -1,8 +1,9 @@
 #include "Audio.hpp"
 
-#include "Utilities.hpp"
 #include "DebugDisplay.hpp"
+#include "Logging.hpp"
 #include "PhysicsVehicle.hpp"
+#include "Utilities.hpp"
 
 #include "btBulletDynamicsCommon.h"
 #include "graphics/graphics.hpp"
@@ -18,9 +19,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <stdlib.h>  // rand
+#include <cmath>     // sin
 #include <limits>
-#include <stdlib.h> // rand
-#include <cmath> // sin
 
 sound sfxVehicleStartup;
 sound sfxVehicleIdle;
@@ -140,7 +141,7 @@ private:
 	SoundSample sampleBuffer[100];
 	unsigned int bufferOffset;
 	unsigned int sampleRate;
-	
+
 	virtual bool onGetData(sf::SoundStream::Chunk& data)
 	{
 		float engineRpm = GetPlayerVehicleEngineRpmThreadSafe();
@@ -155,9 +156,10 @@ private:
 		{
 			// TODO Overflow protection
 			// sampleBuffer[i] = lastSample + ((rand() % maxMotion) - maxMotion / 2);
-			
+
 			// Sawtooth wave
-			// sampleBuffer[i] = ((i * 7) / (float)ArraySize(sampleBuffer)) * std::numeric_limits<short>::max();
+			// sampleBuffer[i] = ((i * 7) / (float)ArraySize(sampleBuffer)) *
+			// std::numeric_limits<short>::max();
 
 			// Square wave
 			// if (i < ArraySize(sampleBuffer) / 2)
@@ -168,12 +170,11 @@ private:
 			// Triangle wave
 			// if (i == 0)
 			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
-			// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() + triangleWaveSpeed)
-			// 	triangleWaveDirection = 1;
-			// else if (sampleBuffer[i - 1] >= std::numeric_limits<short>::max() - triangleWaveSpeed)
-			// 	triangleWaveDirection = -1;
-			// if (i > 0)
-			// 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection * triangleWaveSpeed);
+			// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() +
+			// triangleWaveSpeed) 	triangleWaveDirection = 1; else if (sampleBuffer[i - 1] >=
+			// std::numeric_limits<short>::max() - triangleWaveSpeed) 	triangleWaveDirection = -1; if
+			// (i > 0) 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection *
+			// triangleWaveSpeed);
 
 			// Sine wave - Not working
 			// sampleBuffer[i] =
@@ -198,7 +199,7 @@ private:
 			}
 
 			// if (i < 10)
-				// std::cout << sampleBuffer[i] << "\n";
+			// LOGD << sampleBuffer[i];
 
 			lastSample = sampleBuffer[i];
 		}
@@ -207,7 +208,7 @@ private:
 		data.samples = sampleBuffer;
 
 		bufferOffset += data.sampleCount;
-		
+
 		// Keep playing forever
 		return true;
 	}
@@ -220,7 +221,7 @@ private:
 void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 {
 	const glm::vec3 vehiclePosition = vehicle.GetPosition();
-	
+
 	// if (false)
 	{
 		static BrownianNoiseAudioStream noiseStream;
@@ -234,7 +235,7 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 
 		noiseStream.setPitch(vehicle.engineRpm / 10000.f);
 		noiseStream.setVolume(40.f);
-		
+
 		noiseStream.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
 	}
 
@@ -330,10 +331,10 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 
 void playObjectiveGet()
 {
-	sfxObjectiveGet.play();	
+	sfxObjectiveGet.play();
 }
 
 void playVehicleShifting()
 {
-	sfxVehicleShifting.play();	
+	sfxVehicleShifting.play();
 }

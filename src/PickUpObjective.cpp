@@ -94,6 +94,8 @@ void Initialize(PhysicsWorld* physicsWorld)
 	    glm::vec3(249.6f, 3.254f, -128.6f),
 	    // Big hill jump
 	    glm::vec3(-125.4f, 37.37f, -0.975f),
+		// Loop-de-loop
+		glm::vec3(134.8f, 24.24f, 212.3f),
 	};
 
 	// Objectives

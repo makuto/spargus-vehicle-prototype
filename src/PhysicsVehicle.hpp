@@ -92,8 +92,8 @@ public:
 	// TODO Make getter?
 	float engineRpm;
 	
-	float idleEngineRpm = 100.f;
-	float maxEngineRpm = 2500.f;
+	float idleEngineRpm = 300.f;
+	float maxEngineRpm = 3000.f;
 
 	// "Realistic"
 	// float idleEngineRpm = 600.f;
