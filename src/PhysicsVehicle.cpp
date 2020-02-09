@@ -13,8 +13,8 @@
 #include <glm/vec3.hpp>           // vec3
 
 #include <algorithm>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 // TODO This is messy
 std::mutex g_playerVehiclesMutex;
@@ -182,6 +182,8 @@ void PhysicsVehicle::Reset()
 		}
 	}
 
+	lastUpdateTransform = GetInterpolatedTransform();
+
 	// Macoy: forklift stuff. Commented out, but may be useful later
 	// btTransform liftTrans;
 	// liftTrans.setIdentity();
@@ -308,7 +310,7 @@ void PhysicsVehicle::Update(float deltaTime)
 	}
 
 	// LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
-	     // << " output force: " << engineForce;
+	// << " output force: " << engineForce;
 
 	// Rear-wheel drive
 	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)
@@ -323,8 +325,11 @@ void PhysicsVehicle::Update(float deltaTime)
 		vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 	}
 
+	glm::mat4 chassisTransform = GetInterpolatedTransform();
+	// Update position. This is what everything outside the physics engine will use from now on
+	lastUpdateTransform = chassisTransform;
+
 	// Chassis rendering
-	glm::mat4 chassisTransform = GetTransform();
 	chassisRender.SetTransform(chassisTransform);
 	basicDriver.SetTransform(chassisTransform);
 
@@ -354,6 +359,16 @@ void PhysicsVehicle::Update(float deltaTime)
 
 glm::mat4 PhysicsVehicle::GetTransform() const
 {
+	return lastUpdateTransform;
+}
+
+glm::vec3 PhysicsVehicle::GetPosition() const
+{
+	return lastUpdateTransform[3];
+}
+
+glm::mat4 PhysicsVehicle::GetInterpolatedTransform() const
+{
 	const btMotionState* motionState = carChassis->getMotionState();
 	if (motionState)
 	{
@@ -368,7 +383,7 @@ glm::mat4 PhysicsVehicle::GetTransform() const
 	}
 }
 
-glm::vec3 PhysicsVehicle::GetPosition() const
+glm::vec3 PhysicsVehicle::GetInterpolatedPosition() const
 {
 	const btMotionState* motionState = carChassis->getMotionState();
 	if (motionState)

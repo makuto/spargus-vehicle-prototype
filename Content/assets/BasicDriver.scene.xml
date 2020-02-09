@@ -1,0 +1,102 @@
+<Model name="BasicDriver" geometry="assets/BasicDriver.geo">
+	<Joint name="Root" tx="0.0179806" ty="-0.437115" tz="-0.86792" rx="90" ry="0" rz="-90" jointIndex="1">
+		<Joint name="pelvis" tx="-0.0337464" ty="-1.4751e-09" tz="-0.975892" rx="-0" ry="0" rz="90" jointIndex="2">
+			<Joint name="spine_01" tx="0" ty="-0.0323008" tz="-0.0890886" jointIndex="3">
+				<Joint name="spine_02" tx="0" ty="0.00966962" tz="-0.0730516" jointIndex="4">
+					<Joint name="spine_03" tx="0" ty="-0.00737886" tz="-0.0650816" jointIndex="5">
+						<Joint name="clavicle_l" tx="0.0234623" ty="0.0506098" tz="-0.275837" rx="-0" ry="0" rz="5.50619" jointIndex="6">
+							<Joint name="upperarm_l" tx="0.165316" ty="-0.022668" tz="0.0313201" rx="-0" ry="0" rz="0.542609" jointIndex="7">
+								<Joint name="lowerarm_l" tx="0.174361" ty="-0.0178838" tz="0.200424" rx="-0" ry="0" rz="91.5623" jointIndex="8">
+									<Joint name="hand_l" tx="0.171405" ty="-0.1587" tz="0.128549" rx="-0" ry="0" rz="-33.9687" jointIndex="9">
+										<Joint name="index_01_l" tx="0.110041" ty="0.0198429" tz="0.0413004" rx="-0" ry="0" rz="-35.7504" jointIndex="10">
+											<Joint name="index_02_l" tx="0.0142421" ty="0.0194497" tz="0.0161922" rx="-0" ry="0" rz="15.7804" jointIndex="11">
+												<Joint name="index_03_l" tx="0.0131606" ty="0.0144284" tz="0.0179213" rx="-0" ry="0" rz="15.7991" jointIndex="12" />
+											</Joint>
+										</Joint>
+										<Joint name="middle_01_l" tx="0.101014" ty="-0.00489479" tz="0.0543497" rx="-0" ry="0" rz="-42.6213" jointIndex="13">
+											<Joint name="middle_02_l" tx="0.0163404" ty="0.0195212" tz="0.0284706" rx="-0" ry="0" rz="18.7699" jointIndex="14">
+												<Joint name="middle_03_l" tx="0.0146001" ty="0.0134166" tz="0.0231371" rx="-0" ry="0" rz="13.5288" jointIndex="15" />
+											</Joint>
+										</Joint>
+										<Joint name="pinky_01_l" tx="0.0690445" ty="-0.0318598" tz="0.0743133" rx="-0" ry="0" rz="-57.6375" jointIndex="16">
+											<Joint name="pinky_02_l" tx="0.00766957" ty="0.00854113" tz="0.0208641" rx="-0" ry="0" rz="34.0092" jointIndex="17">
+												<Joint name="pinky_03_l" tx="0.00644493" ty="0.00411418" tz="0.0158356" rx="-0" ry="0" rz="1.67122" jointIndex="18" />
+											</Joint>
+										</Joint>
+										<Joint name="ring_01_l" tx="0.0875716" ty="-0.0210765" tz="0.0632426" rx="-0" ry="0" rz="-59.9753" jointIndex="19">
+											<Joint name="ring_02_l" tx="0.0111114" ty="0.0161176" tz="0.0273935" rx="-0" ry="0" rz="22.269" jointIndex="20">
+												<Joint name="ring_03_l" tx="0.0111623" ty="0.0114675" tz="0.0227451" rx="-0" ry="0" rz="12.6892" jointIndex="21" />
+											</Joint>
+										</Joint>
+										<Joint name="thumb_01_l" tx="0.0458021" ty="0.0204216" tz="0.00634289" rx="-0" ry="0" rz="-20.7894" jointIndex="22">
+											<Joint name="thumb_02_l" tx="-0.00137508" ty="0.0334954" tz="0.00929439" rx="-0" ry="0" rz="-29.0414" jointIndex="23">
+												<Joint name="thumb_03_l" tx="-0.00538909" ty="0.0382856" tz="0.0137365" rx="-0" ry="0" rz="-11.4177" jointIndex="24" />
+											</Joint>
+										</Joint>
+									</Joint>
+								</Joint>
+							</Joint>
+						</Joint>
+						<Joint name="clavicle_r" tx="-0.0234623" ty="0.0506098" tz="-0.275837" rx="-0" ry="0" rz="-5.50619" jointIndex="25">
+							<Joint name="upperarm_r" tx="-0.165316" ty="-0.022668" tz="0.0313201" rx="-0" ry="0" rz="-0.542609" jointIndex="26">
+								<Joint name="lowerarm_r" tx="-0.174403" ty="-0.0179749" tz="0.200498" rx="-0" ry="0" rz="-91.5657" jointIndex="27">
+									<Joint name="hand_r" tx="-0.171488" ty="-0.158671" tz="0.128475" rx="-0" ry="0" rz="33.9722" jointIndex="28">
+										<Joint name="index_01_r" tx="-0.110041" ty="0.0198429" tz="0.0413003" rx="-0" ry="0" rz="35.7504" jointIndex="29">
+											<Joint name="index_02_r" tx="-0.014242" ty="0.0194497" tz="0.0161922" rx="-0" ry="0" rz="-15.7804" jointIndex="30">
+												<Joint name="index_03_r" tx="-0.0131606" ty="0.0144284" tz="0.0179213" rx="-0" ry="0" rz="-15.7991" jointIndex="31" />
+											</Joint>
+										</Joint>
+										<Joint name="middle_01_r" tx="-0.101014" ty="-0.00489479" tz="0.0543495" rx="-0" ry="0" rz="42.6213" jointIndex="32">
+											<Joint name="middle_02_r" tx="-0.0163404" ty="0.0195212" tz="0.0284706" rx="-0" ry="0" rz="-18.7699" jointIndex="33">
+												<Joint name="middle_03_r" tx="-0.0146001" ty="0.0134166" tz="0.0231371" rx="-0" ry="0" rz="-13.5288" jointIndex="34" />
+											</Joint>
+										</Joint>
+										<Joint name="pinky_01_r" tx="-0.0690445" ty="-0.0318598" tz="0.0743132" rx="-0" ry="0" rz="57.6375" jointIndex="35">
+											<Joint name="pinky_02_r" tx="-0.00766957" ty="0.00854119" tz="0.0208643" rx="-0" ry="0" rz="-34.0092" jointIndex="36">
+												<Joint name="pinky_03_r" tx="-0.0064449" ty="0.00411421" tz="0.0158355" rx="-0" ry="0" rz="-1.67122" jointIndex="37" />
+											</Joint>
+										</Joint>
+										<Joint name="ring_01_r" tx="-0.0875716" ty="-0.0210765" tz="0.0632424" rx="-0" ry="0" rz="59.9753" jointIndex="38">
+											<Joint name="ring_02_r" tx="-0.0111115" ty="0.0161176" tz="0.0273935" rx="-0" ry="0" rz="-22.269" jointIndex="39">
+												<Joint name="ring_03_r" tx="-0.0111623" ty="0.0114675" tz="0.0227453" rx="-0" ry="0" rz="-12.6892" jointIndex="40" />
+											</Joint>
+										</Joint>
+										<Joint name="thumb_01_r" tx="-0.0458022" ty="0.0204217" tz="0.00634277" rx="-0" ry="0" rz="20.7894" jointIndex="41">
+											<Joint name="thumb_02_r" tx="0.00137505" ty="0.0334954" tz="0.00929427" rx="-0" ry="0" rz="29.0414" jointIndex="42">
+												<Joint name="thumb_03_r" tx="0.00538909" ty="0.0382856" tz="0.0137366" rx="-0" ry="0" rz="11.4177" jointIndex="43" />
+											</Joint>
+										</Joint>
+									</Joint>
+								</Joint>
+							</Joint>
+						</Joint>
+						<Joint name="neck_01" tx="0" ty="0.0377019" tz="-0.350976" jointIndex="44">
+							<Joint name="head" tx="0" ty="0.0328476" tz="-0.0977578" jointIndex="45" />
+						</Joint>
+					</Joint>
+				</Joint>
+			</Joint>
+			<Joint name="thigh_l" tx="0.111571" ty="-0.0103841" tz="0.00442827" rx="-0" ry="0" rz="-71.6008" jointIndex="46">
+				<Joint name="calf_l" tx="-0.0223265" ty="0.0514857" tz="0.456026" rx="-0" ry="0" rz="-154.435" jointIndex="47">
+					<Joint name="foot_l" tx="-0.0456917" ty="-0.0201038" tz="0.44117" rx="-0" ry="0" rz="-141.949" jointIndex="48">
+						<Joint name="ball_l" tx="-0.0151583" ty="0.130558" tz="0.0662241" rx="-0" ry="0" rz="3.54634" jointIndex="49" />
+					</Joint>
+				</Joint>
+			</Joint>
+			<Joint name="thigh_r" tx="-0.111571" ty="-0.0103841" tz="0.00442827" rx="-0" ry="0" rz="71.6008" jointIndex="50">
+				<Joint name="calf_r" tx="0.0223265" ty="0.0514857" tz="0.456026" rx="-0" ry="0" rz="154.435" jointIndex="51">
+					<Joint name="foot_r" tx="0.0456917" ty="-0.0201038" tz="0.44117" rx="-0" ry="0" rz="141.949" jointIndex="52">
+						<Joint name="ball_r" tx="0.0151583" ty="0.130558" tz="0.0662241" rx="-0" ry="0" rz="-3.54634" jointIndex="53" />
+					</Joint>
+				</Joint>
+			</Joint>
+		</Joint>
+	</Joint>
+
+	<Mesh name="test-base" material="assets/BasicDriver_middleage_cauasian_male.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="0" batchCount="51768" vertRStart="0" vertREnd="9415" />
+	<Mesh name="test-short04" material="assets/BasicDriver_short04.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="51768" batchCount="3150" vertRStart="9416" vertREnd="10398" />
+	<Mesh name="test-low_poly" material="assets/BasicDriver_Eyeblue.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="54918" batchCount="516" vertRStart="10399" vertREnd="10494" />
+	<Mesh name="test-eyebrow012" material="assets/BasicDriver_eyebrow012.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="55434" batchCount="576" vertRStart="10495" vertREnd="10618" />
+	<Mesh name="test-shoes04" material="assets/BasicDriver_shoes04.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="56010" batchCount="9960" vertRStart="10619" vertREnd="12464" />
+	<Mesh name="test-male_casualsuit06" material="assets/BasicDriver_male_casualsuit06.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="65970" batchCount="21504" vertRStart="12465" vertREnd="16399" />
+</Model>

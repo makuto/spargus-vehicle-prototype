@@ -295,7 +295,7 @@ int main()
 		// Physics
 		{
 			// Make sure vehicle isn't falling through the world
-			if (vehicle.GetPosition()[1] < -30.f)
+			if (vehicle.GetPosition()[1] < -20.f)
 			{
 				// TODO: Make this put you back in the last known good position?
 				vehicle.Reset();
@@ -429,7 +429,7 @@ int main()
 					btScalar vehicleMat[16];
 					vehicleTransform.getOpenGLMatrix(vehicleMat);
 					std::ostringstream outputPosition;
-					outputPosition << vehicleMat[12] << ", " << vehicleMat[13] << ", "
+					outputPosition << "Vehicle position: " << vehicleMat[12] << ", " << vehicleMat[13] << ", "
 					               << vehicleMat[14];
 					DebugDisplay::print(outputPosition.str());
 				}

@@ -5,10 +5,11 @@
 #include "GraphicsObject.hpp"
 #include "PhysicsWorld.hpp"
 
-#include <glm/vec3.hpp>  // vec3
+#include <glm/mat4x4.hpp>  // mat4
+#include <glm/vec3.hpp>    // vec3
 
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <vector>
 
 class PhysicsWorld;
@@ -38,6 +39,10 @@ public:
 
 	btRaycastVehicle* vehicle;
 
+	// Note that these cache the last position since Update() was called. This is because the
+	// btMotionState interpolation will happen for each call to the chassis GetTransform, which
+	// means that calls throughout the frame would get different positions, leading to
+	// synchronization issues
 	glm::vec3 GetPosition() const;
 	glm::mat4 GetTransform() const;
 
@@ -51,6 +56,7 @@ public:
 
 	// Set in constructor. Don't change
 	int numGears;
+
 private:
 	btRigidBody* carChassis;
 	/// btRaycastVehicle is the interface for the constraint that implements the raycast vehicle
@@ -58,6 +64,8 @@ private:
 	/// implementing explicit hinged-wheel constraints with cylinder collision, rather then raycasts
 	btRaycastVehicle::btVehicleTuning tuning;
 	btVehicleRaycaster* vehicleRayCaster;
+
+	glm::mat4 lastUpdateTransform;
 
 	PhysicsWorld& ownerWorld;
 
@@ -92,7 +100,7 @@ public:
 
 	// TODO Make getter?
 	float engineRpm;
-	
+
 	float idleEngineRpm = 300.f;
 	float maxEngineRpm = 3000.f;
 
@@ -113,7 +121,8 @@ private:
 	float chassisWidth = 2.25f;
 	// float chassisWidth = 1.418f;
 	// Use the height at the middle of the chassis until we get nonrectangular collision set up
-	float chassisHeight = 1.029375f;
+	// float chassisHeight = 1.029375f;
+	float chassisHeight = 1.28671875f;
 	// float chassisHeight = 0.5f;
 	float chassisLength = 3.0926175f;
 
@@ -122,6 +131,7 @@ private:
 	// The axle height relative to the vehicle (I think)
 	// float connectionHeight = 0.827f;  // 1.2f;
 	float connectionHeight = 0.54525f;  // 1.2f;
+	// float connectionHeight = 0.7525f;  // 1.2f;
 	// Use same radius wheels for now
 	// TODO add support for different rear/front wheel sizes
 	float wheelRadius = 1.23f / 2.f;
@@ -140,6 +150,11 @@ private:
 	btScalar suspensionRestLength = 0.6f;
 
 	std::vector<float> gearboxRatios;
+
+	// See comment above GetTransform() on why you probably don't want this function
+	// (Unless you're in the internals of Update())
+	glm::vec3 GetInterpolatedPosition() const;
+	glm::mat4 GetInterpolatedTransform() const;
 
 protected:
 	friend float GetPlayerVehicleEngineRpmThreadSafe();

@@ -1,0 +1,5 @@
+<Model name="Wheel_Front" geometry="assets/Wheel_Front.geo">
+
+	<Mesh name="Wheel_Front.LR" material="assets/Wheel_Front_Material.003.material.xml" sx="0.75" sy="0.75" sz="0.75" batchStart="0" batchCount="4038" vertRStart="0" vertREnd="3265" />
+	<Mesh name="AdultMaleReference" material="assets/Wheel_Front_.material.xml" tx="-0.412669" ty="0" tz="0" batchStart="4038" batchCount="36" vertRStart="3266" vertREnd="3289" />
+</Model>
