@@ -64,4 +64,26 @@ void Object::TransformUpdated()
 	if (resource && resource->node)
 		h3dSetNodeTransMat(resource->node, glmMatrixToHordeMatrixRef(transform));
 }
+
+void ProceduralMesh::Initialize(const char* geoName, float* vertices, unsigned int* indices,
+                                int numTriangles, int numIndices)
+{
+	// If you're getting this, make sure to call Graphics::Initialize() before any nodes initialize
+	assert(g_graphicsIntialized);
+
+	// TODO: Remove allocation
+	resource = new ResourceReference();
+
+	resource->node = TestProceduralGeometry(geoName, vertices, indices, numTriangles, numIndices);
+
+	if (!resource->node)
+	{
+		LOGE << "Could not create Horde3D Mesh Node for '" << geoName << "' (requested a "
+		     << numTriangles << " mesh)";
+		return;
+	}
+
+	// Set the transform in case this node has an updated transform already
+	TransformUpdated();
+}
 }  // namespace Graphics

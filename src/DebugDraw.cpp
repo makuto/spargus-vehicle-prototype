@@ -3,6 +3,7 @@
 #include <GL/glu.h>
 #include <SFML/OpenGL.hpp>
 #include <iostream>
+#include <limits>
 #include <vector>
 
 #include "Logging.hpp"
@@ -35,6 +36,7 @@ struct DebugDrawState
 };
 DebugDrawState g_DebugDrawState;
 const float Lifetime_OneFrame = 0.f;
+const float Lifetime_VeryLongTime = std::numeric_limits<float>::max();
 
 void render(float frameTime)
 {

@@ -32,4 +32,12 @@ protected:
 	void TransformUpdated();
 	ResourceReference* resource;
 };
+
+// TODO: Figure out this API...
+class ProceduralMesh : public Object
+{
+public:
+	void Initialize(const char* geoName, float* vertices, unsigned int* indices, int numTriangles,
+	                int numIndices);
+};
 }  // namespace Graphics
