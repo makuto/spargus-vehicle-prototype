@@ -66,7 +66,11 @@ void Object::TransformUpdated()
 }
 
 void ProceduralMesh::Initialize(const char* geoName, float* vertices, unsigned int* indices,
-                                int numTriangles, int numIndices)
+                                // Optional
+                                short* normals, short* tangents, short* bitangents,
+                                float* texture1UVs, float* texture2UVs,
+                                // Required
+                                int numVertices, int numIndices)
 {
 	// If you're getting this, make sure to call Graphics::Initialize() before any nodes initialize
 	assert(g_graphicsIntialized);
@@ -74,12 +78,14 @@ void ProceduralMesh::Initialize(const char* geoName, float* vertices, unsigned i
 	// TODO: Remove allocation
 	resource = new ResourceReference();
 
-	resource->node = TestProceduralGeometry(geoName, vertices, indices, numTriangles, numIndices);
+	resource->node =
+	    CreateProceduralGeometry(geoName, vertices, indices, normals, tangents, bitangents,
+	                             texture1UVs, texture2UVs, numVertices, numIndices);
 
 	if (!resource->node)
 	{
 		LOGE << "Could not create Horde3D Mesh Node for '" << geoName << "' (requested a "
-		     << numTriangles << " mesh)";
+		     << numVertices << " vertex mesh)";
 		return;
 	}
 

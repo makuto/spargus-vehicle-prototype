@@ -1,3 +1,5 @@
+#include "Horde3DCore.hpp"
+
 #include "GraphicsInterface.hpp"
 
 // From http://www.horde3d.org/docs/html/_tutorial.html
@@ -22,14 +24,17 @@ const float cameraFarPlane = 4096.0f;
 bool g_graphicsIntialized = false;
 
 // Note that the name must be unique (because Horde3D uses strings as references)
-H3DNode TestProceduralGeometry(const char* geoName, float* vertices, unsigned int* indices,
-                               int numTriangles, int numIndices)
+H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned int* indices,
+                                 // Optional
+                                 short* normals, short* tangents, short* bitangents,
+                                 float* texture1UVs, float* texture2UVs,
+                                 // Required
+                                 int numVertices, int numIndices)
 {
 	// This copies the geometry data
-	H3DRes proceduralCubeGeo = h3dutCreateGeometryRes(
-	    geoName, numTriangles, numIndices, vertices, indices, /*normalData=*/nullptr,
-	    /*tangentData=*/nullptr, /*bitangentData=*/nullptr,
-	    /*texData1=*/nullptr, /*texData2=*/nullptr);
+	H3DRes proceduralCubeGeo =
+	    h3dutCreateGeometryRes(geoName, numVertices, numIndices, vertices, indices, normals,
+	                           tangents, bitangents, texture1UVs, texture2UVs);
 
 	if (proceduralCubeGeo)
 	{
@@ -46,7 +51,7 @@ H3DNode TestProceduralGeometry(const char* geoName, float* vertices, unsigned in
 		// first vertex in Geometry resource of parent Model node
 		int vertRStart = 0;
 		// last vertex in Geometry resource of parent Model node
-		int vertREnd = numTriangles - 1;
+		int vertREnd = numVertices - 1;
 
 		H3DNode mesh = h3dAddMeshNode(model, geoName, materialRes, batchStart, batchCount,
 		                              vertRStart, vertREnd);
@@ -64,7 +69,6 @@ H3DNode TestProceduralGeometry(const char* geoName, float* vertices, unsigned in
 
 namespace Graphics
 {
-
 static void TestProceduralGeometry_Cube()
 {
 	float size = 10.f;
@@ -103,7 +107,7 @@ static void TestProceduralGeometry_Cube()
 	    1.f * size,
 	};
 
-	unsigned int numTriangles = ArraySize(vertices) / 3;
+	unsigned int numVertices = ArraySize(vertices) / 3;
 
 	unsigned int indices[] = {// Top
 	                          0, 2, 1, 1, 2, 3,
@@ -120,25 +124,8 @@ static void TestProceduralGeometry_Cube()
 
 	unsigned int numIndices = ArraySize(indices);
 
-	TestProceduralGeometry("ProceduralGeo_Cube", vertices, indices, numTriangles, numIndices);
-}
-
-void TestCreateProceduralGeometryFromHeightField(const float* heightField, unsigned int width,
-                                                 unsigned int height)
-{
-	// float* vertices = new float[width * height * 3];
-	// unsigned int* indices = new unsigned int[width * height * 3];
-
-	// for (unsigned int row = 0; row < height; ++row)
-	// {
-	// 	for (unsigned int column = 0; column < width; ++column)
-	// 	{
-	// 	}
-	// }
-
-	// TestProceduralGeometry("ProceduralGeo_Heightfield", vertices, indices, numTriangles, numIndices);	
-
-	// delete[] vertices;
+	CreateProceduralGeometry("ProceduralGeo_Cube", vertices, indices, nullptr, nullptr, nullptr,
+	                         nullptr, nullptr, numVertices, numIndices);
 }
 
 void Initialize(int winWidth, int winHeight)
@@ -171,7 +158,7 @@ void Initialize(int winWidth, int winHeight)
 	// // H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
 	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 
-	TestProceduralGeometry_Cube();	
+	TestProceduralGeometry_Cube();
 
 	// Add pipeline resource
 	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);

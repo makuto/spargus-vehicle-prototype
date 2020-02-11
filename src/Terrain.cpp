@@ -44,6 +44,7 @@ public:
 		IndicesOut = nullptr;
 	}
 
+	// TODO: What a waste of vertices. Is there duplication happening? (look at HeightfieldExample)
 	virtual void processTriangle(btVector3* vertices, int partId, int triangleIndex)
 	{
 		for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
@@ -60,8 +61,21 @@ public:
 			}
 
 			// TODO Pretty sure these are wrong
-			UVsOut->push_back(0.5f);  // U
-			UVsOut->push_back(0.5f);  // V
+			switch (vertexIndex)
+			{
+				case 0:
+					UVsOut->push_back(0.f);  // U
+					UVsOut->push_back(0.f);  // V
+					break;
+				case 1:
+					UVsOut->push_back(1.f);  // U
+					UVsOut->push_back(0.f);  // V
+					break;
+				case 2:
+					UVsOut->push_back(1.f);  // U
+					UVsOut->push_back(1.f);  // V
+					break;
+			}
 		}
 	}
 };
@@ -150,8 +164,9 @@ void createCollisionHeightfield(PhysicsWorld& world)
 			//                                  indices.data(), vertices.size() / 3, indices.size());
 
 			Graphics::ProceduralMesh graphicsMesh;
-			graphicsMesh.Initialize("Heightfield", vertices.data(), indices.data(),
-			                        vertices.size() / 3, indices.size());
+			graphicsMesh.Initialize("Heightfield", vertices.data(), indices.data(), nullptr,
+			                        nullptr, nullptr, uvs.data(), nullptr, vertices.size() / 3,
+			                        indices.size());
 			// Note that scaling happens in processAllTriangles(), not from the transform
 			graphicsMesh.SetTransform(BulletTransformToGlmMat4(transform));
 

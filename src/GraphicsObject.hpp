@@ -37,7 +37,11 @@ protected:
 class ProceduralMesh : public Object
 {
 public:
-	void Initialize(const char* geoName, float* vertices, unsigned int* indices, int numTriangles,
-	                int numIndices);
+	void Initialize(const char* geoName, float* vertices, unsigned int* indices,
+	                // Optional
+	                short* normals, short* tangents, short* bitangents, float* texture1UVs,
+	                float* texture2UVs,
+	                // Required
+	                int numVertices, int numIndices);
 };
 }  // namespace Graphics
