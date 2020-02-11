@@ -30,6 +30,7 @@
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 #include "PickUpObjective.hpp"
+#include "Terrain.hpp"
 
 // Window variables
 // int WindowWidth = 1200;
@@ -221,6 +222,11 @@ int main()
 			// worldRender.SetTransform(glm::translate(glm::mat4(1.f), {0.f, -100.f, 0.f}));
 			// World collision
 			objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
+		}
+ 
+		// Terrain
+		{
+			createCollisionHeightfield(physicsWorld);
 		}
 
 		// objTest();

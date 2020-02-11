@@ -1,3 +1,5 @@
+#include "Horde3DCore.hpp"
+
 #include "GraphicsInterface.hpp"
 
 // From http://www.horde3d.org/docs/html/_tutorial.html
@@ -21,9 +23,53 @@ const float cameraFarPlane = 4096.0f;
 
 bool g_graphicsIntialized = false;
 
+// Note that the name must be unique (because Horde3D uses strings as references)
+H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned int* indices,
+                                 // Optional
+                                 short* normals, short* tangents, short* bitangents,
+                                 float* texture1UVs, float* texture2UVs,
+                                 // Required
+                                 int numVertices, int numIndices)
+{
+	// This copies the geometry data
+	H3DRes proceduralCubeGeo =
+	    h3dutCreateGeometryRes(geoName, numVertices, numIndices, vertices, indices, normals,
+	                           tangents, bitangents, texture1UVs, texture2UVs);
+
+	if (proceduralCubeGeo)
+	{
+		H3DNode model = h3dAddModelNode(H3DRootNode, geoName, proceduralCubeGeo);
+		// Material resource used by Mesh node
+		H3DRes materialRes =
+		    h3dAddResource(H3DResTypes::Material, "assets/World_Material.001.material.xml", 0);
+		h3dutLoadResourcesFromDisk("Content");
+
+		// first triangle index of mesh in Geometry resource of parent Model node
+		int batchStart = 0;
+		// number of triangle indices used for drawing mesh
+		int batchCount = numIndices;
+		// first vertex in Geometry resource of parent Model node
+		int vertRStart = 0;
+		// last vertex in Geometry resource of parent Model node
+		int vertREnd = numVertices - 1;
+
+		H3DNode mesh = h3dAddMeshNode(model, geoName, materialRes, batchStart, batchCount,
+		                              vertRStart, vertREnd);
+
+		return mesh;
+
+		// H3DNode mesh = h3dAddMeshNode(model, "ProceduralCube_Mesh", 0, 0, 6, 0, 3);
+
+		// H3DNode cube = h3dAddNodes(H3DRootNode, proceduralCube);
+		// h3dSetNodeTransform(cube, 0, 0, 0, 0, 0, 0, 0, 10, 0);
+	}
+
+	return 0;
+}
+
 namespace Graphics
 {
-static void TestProceduralGeometry()
+static void TestProceduralGeometry_Cube()
 {
 	float size = 10.f;
 	float vertices[] = {
@@ -61,52 +107,25 @@ static void TestProceduralGeometry()
 	    1.f * size,
 	};
 
-	unsigned int numTriangles = ArraySize(vertices) / 3;
+	unsigned int numVertices = ArraySize(vertices) / 3;
 
 	unsigned int indices[] = {// Top
-	                            0, 2, 1, 1, 2, 3,
-	                            // Front
-	                            0, 1, 4, 4, 1, 5,
-	                            // Left
-	                            6, 2, 4, 4, 2, 0,
-	                            // Back
-	                            3, 2, 6, 6, 7, 3,
-	                            // Right
-	                            5, 1, 7, 7, 1, 3,
-	                            // Bottom
-	                            6, 4, 7, 7, 4, 5};
+	                          0, 2, 1, 1, 2, 3,
+	                          // Front
+	                          0, 1, 4, 4, 1, 5,
+	                          // Left
+	                          6, 2, 4, 4, 2, 0,
+	                          // Back
+	                          3, 2, 6, 6, 7, 3,
+	                          // Right
+	                          5, 1, 7, 7, 1, 3,
+	                          // Bottom
+	                          6, 4, 7, 7, 4, 5};
 
 	unsigned int numIndices = ArraySize(indices);
 
-	H3DRes proceduralCubeGeo = h3dutCreateGeometryRes(
-	    "ProceduralCube_Geo", numTriangles, numIndices, vertices, indices, /*normalData=*/nullptr,
-	    /*tangentData=*/nullptr, /*bitangentData=*/nullptr,
-	    /*texData1=*/nullptr, /*texData2=*/nullptr);
-
-	if (proceduralCubeGeo)
-	{
-		H3DNode model = h3dAddModelNode(H3DRootNode, "ProceduralCube_Model", proceduralCubeGeo);
-		// Material resource used by Mesh node
-		H3DRes materialRes = h3dAddResource(H3DResTypes::Material, "assets/World_Material.001.material.xml", 0);
-		h3dutLoadResourcesFromDisk("Content");
-
-		// first triangle index of mesh in Geometry resource of parent Model node
-		int batchStart = 0;
-		// number of triangle indices used for drawing mesh
-		int batchCount = numIndices;
-		// first vertex in Geometry resource of parent Model node
-		int vertRStart = 0;
-		// last vertex in Geometry resource of parent Model node
-		int vertREnd = numTriangles - 1;
-
-		H3DNode mesh = h3dAddMeshNode(model, "ProceduralCube_Mesh", materialRes, batchStart,
-		                              batchCount, vertRStart, vertREnd);
-
-		// H3DNode mesh = h3dAddMeshNode(model, "ProceduralCube_Mesh", 0, 0, 6, 0, 3);
-
-		// H3DNode cube = h3dAddNodes(H3DRootNode, proceduralCube);
-		// h3dSetNodeTransform(cube, 0, 0, 0, 0, 0, 0, 0, 10, 0);
-	}
+	CreateProceduralGeometry("ProceduralGeo_Cube", vertices, indices, nullptr, nullptr, nullptr,
+	                         nullptr, nullptr, numVertices, numIndices);
 }
 
 void Initialize(int winWidth, int winHeight)
@@ -139,7 +158,7 @@ void Initialize(int winWidth, int winHeight)
 	// // H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
 	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 
-	// TestProceduralGeometry();	
+	TestProceduralGeometry_Cube();
 
 	// Add pipeline resource
 	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);

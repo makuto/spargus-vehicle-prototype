@@ -31,6 +31,7 @@ void render(float frameTime);
 void updateLifetimesOnly(float frameTime);
 
 extern const float Lifetime_OneFrame;
+extern const float Lifetime_VeryLongTime;
 void addLine(const glm::vec3& from, const glm::vec3& to, const Color4<float>& fromColor,
              const Color4<float>& toColor, float lifetimeSeconds);
 }  // namespace DebugDraw
