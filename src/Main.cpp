@@ -214,6 +214,7 @@ int main()
 	// World/meshes
 	PhysicsWorld physicsWorld;
 	PhysicsVehicle vehicle(physicsWorld);
+	PhysicsVehicle otherVehicle(physicsWorld);
 	Graphics::Object worldRender;
 	{
 		{
@@ -300,14 +301,24 @@ int main()
 
 		// Physics
 		{
-			// Make sure vehicle isn't falling through the world
-			if (vehicle.GetPosition()[1] < -20.f)
+			// Vehicle updates
 			{
-				// TODO: Make this put you back in the last known good position?
-				vehicle.Reset();
+				const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
+
+				// Ricky Suicide
+				otherVehicle.ThrottlePercent = 0.33f;
+				for (PhysicsVehicle* currentVehicle : g_vehicles)
+				{
+					// Make sure vehicle isn't falling through the world
+					if (currentVehicle->GetPosition()[1] < -20.f)
+					{
+						// TODO: Make this put you back in the last known good position?
+						currentVehicle->Reset();
+					}
+					currentVehicle->Update(previousFrameTime * timeStepScale);
+				}
 			}
 
-			vehicle.Update(previousFrameTime * timeStepScale);
 			physicsWorld.Update(previousFrameTime * timeStepScale);
 		}
 

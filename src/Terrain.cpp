@@ -98,12 +98,12 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	{
 		for (int cellX = 0; cellX < s_gridSize; cellX++)
 		{
-			float noiseScale = 0.5f;
+			float noiseScale = 0.7f;
 			float noiseX = (cellX + xOffset) * noiseScale;
 			float noiseZ = (cellZ + zOffset) * noiseScale;
 
 			float value =
-			    noiseGenerator.scaledOctaveNoise2d(noiseX, noiseZ, 0.f, 10.f, 10, 0.1f, 0.55f, 2);
+			    noiseGenerator.scaledOctaveNoise2d(noiseX, noiseZ, 0.f, 10.f, 4, 0.1f, 0.22f, 2.f);
 
 			g_rawHeightfieldData[(cellZ * s_gridSize) + cellX] = value;
 			minY = std::min(minY, value);
@@ -134,7 +134,7 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	transform.setIdentity();
 	// Note that this origin will be center of heightfield, so it will need to be adjusted if bounds
 	// change
-	transform.setOrigin(btVector3(0, 0, -4));
+	transform.setOrigin(btVector3(-17.f, -5.f, 250.f));
 	btRigidBody* body =
 	    world.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, transform, heightfieldShape);
 

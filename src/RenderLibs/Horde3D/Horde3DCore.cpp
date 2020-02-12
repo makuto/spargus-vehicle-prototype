@@ -158,7 +158,7 @@ void Initialize(int winWidth, int winHeight)
 	// // H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/man.anim", 0);
 	// H3DRes animRes = h3dAddResource(H3DResTypes::Animation, "animations/knight_order.anim", 0);
 
-	TestProceduralGeometry_Cube();
+	// TestProceduralGeometry_Cube();
 
 	// Add pipeline resource
 	pipeRes = h3dAddResource(H3DResTypes::Pipeline, "pipelines/hdr.pipeline.xml", 0);

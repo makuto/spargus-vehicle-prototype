@@ -163,3 +163,6 @@ protected:
 
 // TODO Think of a good way of doing this
 float GetPlayerVehicleEngineRpmThreadSafe();
+
+extern std::mutex g_vehiclesMutex;
+extern std::vector<PhysicsVehicle*> g_vehicles;

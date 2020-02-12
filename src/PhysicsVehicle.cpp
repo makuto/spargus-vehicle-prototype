@@ -17,8 +17,8 @@
 #include <vector>
 
 // TODO This is messy
-std::mutex g_playerVehiclesMutex;
-static std::vector<PhysicsVehicle*> g_playerVehicles;
+std::mutex g_vehiclesMutex;
+std::vector<PhysicsVehicle*> g_vehicles;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vehicle constants
@@ -149,16 +149,15 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	basicDriver.Initialize("BasicDriver");
 
 	{
-		const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
-		g_playerVehicles.push_back(this);
+		const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
+		g_vehicles.push_back(this);
 	}
 }
 
 PhysicsVehicle::~PhysicsVehicle()
 {
-	const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
-	g_playerVehicles.erase(std::remove(g_playerVehicles.begin(), g_playerVehicles.end(), this),
-	                       g_playerVehicles.end());
+	const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
+	g_vehicles.erase(std::remove(g_vehicles.begin(), g_vehicles.end(), this), g_vehicles.end());
 }
 
 void PhysicsVehicle::Reset()
@@ -421,11 +420,11 @@ bool PhysicsVehicle::WheelsContactingSurface()
 
 float GetPlayerVehicleEngineRpmThreadSafe()
 {
-	const std::lock_guard<std::mutex> lock(g_playerVehiclesMutex);
+	const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
 
-	if (!g_playerVehicles.empty())
+	if (!g_vehicles.empty())
 	{
-		PhysicsVehicle* playerVehicle = g_playerVehicles[0];
+		PhysicsVehicle* playerVehicle = g_vehicles[0];
 		const std::lock_guard<std::mutex> lock(playerVehicle->engineDetailsMutex);
 		return playerVehicle->engineRpm;
 	}
