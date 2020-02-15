@@ -45,4 +45,7 @@ inline float KilometersToMiles(float kilometers)
 	return kilometers / 1.609344f;
 }
 
+//
+// Interpolation
+//
 float interpolateRange(float startA, float endA, float startB, float endB, float bValue);

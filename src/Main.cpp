@@ -11,7 +11,9 @@
 #include <SFML/Window.hpp>
 
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/mat4x4.hpp>  // mat4
+#include <glm/gtx/norm.hpp>          // distance2
+#include <glm/gtx/vector_angle.hpp>  // angle
+#include <glm/mat4x4.hpp>            // mat4
 
 #include <map>
 #include <sstream>
@@ -303,10 +305,43 @@ int main()
 		{
 			// Vehicle updates
 			{
-				const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
-
 				// Ricky Suicide
-				otherVehicle.ThrottlePercent = 0.33f;
+				{
+					if (glm::distance2(otherVehicle.GetPosition(), vehicle.GetPosition()) <
+					    glm::pow(10.f, 2))
+					{
+						// Stop near player
+						otherVehicle.ThrottlePercent = 0.f;
+						otherVehicle.BrakingForce = otherVehicle.maxBrakingForce;
+					}
+					else
+					{
+						otherVehicle.ThrottlePercent = 1.f;
+						// Steer towards player
+						glm::vec3 playerDelta =
+						    glm::normalize(vehicle.GetPosition() - otherVehicle.GetPosition());
+						glm::vec4 vehicleLeft4d =
+						    otherVehicle.GetTransform() * glm::vec4(LeftAxis, 0.f);
+						glm::vec3 vehicleLeft = glm::normalize(glm::vec3(vehicleLeft4d));
+						float targetDot = glm::dot(vehicleLeft, playerDelta);
+						float angleToPlayer = glm::angle(vehicleLeft, playerDelta);
+						LOGV << glm::degrees(angleToPlayer) << " angle; dot " << targetDot;
+						if (targetDot > 0.f)
+							otherVehicle.VehicleSteering = otherVehicle.steeringClamp;
+						else if (glm::abs(targetDot) < 0.1f)
+							otherVehicle.VehicleSteering = 0.f;
+						else
+							otherVehicle.VehicleSteering = -otherVehicle.steeringClamp;
+						DebugDraw::addLine(otherVehicle.GetPosition(), vehicle.GetPosition(),
+						                   Color::Orange, Color::Blue,
+						                   DebugDraw::Lifetime_OneFrame);
+						DebugDraw::addLine(otherVehicle.GetPosition(),
+						                   otherVehicle.GetPosition() + vehicleLeft, Color::Orange,
+						                   Color::Blue, DebugDraw::Lifetime_OneFrame);
+					}
+				}
+
+				const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
 				for (PhysicsVehicle* currentVehicle : g_vehicles)
 				{
 					// Make sure vehicle isn't falling through the world
