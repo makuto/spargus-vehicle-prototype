@@ -5,6 +5,7 @@
 #include "Audio.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
+#include "Performance.hpp"
 #include "Utilities.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
@@ -33,6 +34,8 @@ const btVector3 wheelAxleCS(-1, 0, 0);
 
 PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsWorld)
 {
+	PerfTimeNamedScope(vehicleInit, "Vehicle constructor", tracy::Color::Tomato);
+
 	float chassisWidthHalfExtents = chassisWidth / 2.f;
 	float chassisLengthHalfExtents = chassisLength / 2.f;
 

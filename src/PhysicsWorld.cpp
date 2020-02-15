@@ -8,7 +8,9 @@
 #include "btBulletDynamicsCommon.h"
 
 #include <algorithm>
+
 #include "Logging.hpp"
+#include "Performance.hpp"
 
 void SimulationTickCallback(btDynamicsWorld* world, btScalar timeStep);
 
@@ -17,6 +19,8 @@ bool bulletUseMCLPSolver = true;
 
 PhysicsWorld::PhysicsWorld()
 {
+	PerfTimeNamedScope(physicsWorldInit, "Physics World constructor", tracy::Color::DeepPink);
+
 	// btVector3 groundExtents(50, 50, 50);
 	// groundExtents[upAxis] = 3;
 	// btCollisionShape* groundShape = new btBoxShape(groundExtents);
@@ -159,6 +163,8 @@ void PhysicsWorld::DebugRender()
 btRigidBody* PhysicsWorld::localCreateRigidBody(btScalar mass, const btTransform& startTransform,
                                                 btCollisionShape* shape)
 {
+	PerfTimeNamedScope(worldCreateRigidBodyScope, "World add rigid body", tracy::Color::HotPink);
+
 	btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 
 	// rigidbody is dynamic if and only if mass is non zero, otherwise static
@@ -198,6 +204,9 @@ void PhysicsWorld::AddCollisionListener(CollisionListener listener)
 // Under LGPL 3.0 - Spargus is MIT, so by extension LGPL should be met due to MIT source available?
 void SimulationTickCallback(btDynamicsWorld* const world, btScalar const timeStep)
 {
+	PerfTimeNamedScope(simulationCallbackScope, "World simulation callback",
+	                   tracy::Color::LightSalmon);
+
 	CollisionPairs currentTickCollisionPairs;
 
 	PhysicsWorld* const physicsWorld = static_cast<PhysicsWorld*>(world->getWorldUserInfo());

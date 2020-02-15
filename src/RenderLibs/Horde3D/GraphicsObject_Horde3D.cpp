@@ -4,6 +4,7 @@
 #include "Horde3DCore.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
+#include "Performance.hpp"
 
 #include <Horde3D.h>
 #include <Horde3DUtils.h>
@@ -18,6 +19,9 @@ namespace Graphics
 // TODO: Prevent reinitialization
 void Object::Initialize(const char* requestedResource)
 {
+	PerfTimeNamedScope(HordeRenderScope, "Graphics Object Init", tracy::Color::Chocolate4);
+	PerfSetNameFormat(HordeRenderScope, "Graphics Object Init '%s'", requestedResource);
+
 	// If you're getting this, make sure to call Graphics::Initialize() before any nodes initialize
 	assert(g_graphicsIntialized);
 
@@ -38,7 +42,10 @@ void Object::Initialize(const char* requestedResource)
 	}
 	// Hitting an assert somewhere in here? Make sure the OpenGL SFML context is active
 	// See https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
-	h3dutLoadResourcesFromDisk("Content");
+	{
+		PerfTimeNamedScope(HordeRenderScope, "Graphics Object Load Resources", tracy::Color::Red1);
+		h3dutLoadResourcesFromDisk("Content");
+	}
 
 	// TODO: Remove node on destroy
 	resource->node = h3dAddNodes(H3DRootNode, resource->resource);
@@ -72,6 +79,9 @@ void ProceduralMesh::Initialize(const char* geoName, float* vertices, unsigned i
                                 // Required
                                 int numVertices, int numIndices)
 {
+	PerfTimeNamedScope(HordeRenderScope, "Horde Init Procedural Geometry",
+	                   tracy::Color::LightGreen);
+
 	// If you're getting this, make sure to call Graphics::Initialize() before any nodes initialize
 	assert(g_graphicsIntialized);
 

@@ -9,6 +9,8 @@
 #include <mutex>
 #include <thread>
 
+#include "Performance.hpp"
+
 namespace Logging
 {
 Record::Record(Severity newSeverity, const char* func, size_t line, const char* file)
@@ -145,6 +147,8 @@ bool Logger::checkSeverity(Severity severity) const
 
 void Logger::operator+=(const Record& record)
 {
+	PerfTimeNamedScope(loggerScope, "Logging", tracy::Color::DarkGrey);
+
 	std::lock_guard<std::mutex> guard(loggerMutex);
 
 	if (CustomOutputFunc)

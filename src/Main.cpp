@@ -29,6 +29,7 @@
 #include "ModelUtilities/ModelLoader.hpp"
 #include "ModelUtilities/ModelToBullet.hpp"
 #include "ModelUtilities/ObjLoader.hpp"
+#include "Performance.hpp"
 #include "PhysicsVehicle.hpp"
 #include "PhysicsWorld.hpp"
 #include "PickUpObjective.hpp"
@@ -41,7 +42,23 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
+void LogOutput_WithPerfOutput(const Logging::Record& record)
+{
+	static char funcNameBuffer[256];
+	Logging::FormatFuncName(funcNameBuffer, record.Function, sizeof(funcNameBuffer));
+	std::ostringstream outputStream;
+	outputStream << funcNameBuffer << "(): " << record.OutBuffer;
+	std::cout << outputStream.str() << "\n";
+	// TODO This is weird and probably wrong
+	PerfLog(outputStream.str().c_str(), outputStream.str().size() + 1);
+}
+
+// Only use the slower logger if we're actually profiling
+#ifdef PERF_ENABLE
+Logging::Logger globalLogger(Logging::Severity::verbose, LogOutput_WithPerfOutput);
+#else
 Logging::Logger globalLogger(Logging::Severity::verbose, Logging::MinimalLogOutput);
+#endif
 
 void initializeWindow(window& win)
 {
@@ -210,6 +227,8 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 
 int main()
 {
+	PerfTimeNamedScope(mainScope, "Main", tracy::Color::Gray);
+
 	LOGI << "Spargus Vehicle Prototype";
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -217,8 +236,12 @@ int main()
 	//
 
 	// Window/rendering
+	PerfManualZoneBegin(MainWindowContext, "Main window initialization", tracy::Color::RoyalBlue);
 	window mainWindow(WindowWidth, WindowHeight, "Spargus Vehicle Prototype", &windowResizeCB);
+	PerfManualZoneEnd(MainWindowContext);
 	{
+		PerfTimeNamedScope(windowInit, "Initialize Graphics", tracy::Color::Navy);
+
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
 		Graphics::Initialize(WindowWidth, WindowHeight);
@@ -233,13 +256,14 @@ int main()
 	Graphics::Object worldRender;
 	{
 		{
+			PerfTimeNamedScope(worldInit, "World initialization", tracy::Color::MediumPurple);
 			// Drawing the world
 			worldRender.Initialize("World");
 			// worldRender.SetTransform(glm::translate(glm::mat4(1.f), {0.f, -100.f, 0.f}));
 			// World collision
 			objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 		}
- 
+
 		// Terrain
 		{
 			createCollisionHeightfield(physicsWorld);
@@ -302,8 +326,12 @@ int main()
 
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
+		PerfTimeNamedScope(timeFrameScope, "Frame", tracy::Color::SlateBlue);
+
 		// Input
 		{
+			PerfTimeNamedScope(inputScope, "Input", tracy::Color::Sienna);
+
 			handleConfigurationInput(input, vehicle);
 
 			handleCameraInput(camera, previousFrameTime);
@@ -316,8 +344,13 @@ int main()
 
 		// Physics
 		{
+			PerfTimeNamedScope(physicsScope, "Physics", tracy::Color::Firebrick);
+
 			// Vehicle updates
 			{
+				PerfTimeNamedScope(physicsVehicleScope, "Physics Vehicles",
+				                   tracy::Color::OrangeRed);
+
 				// Ricky Suicide
 				{
 					if (glm::distance2(otherVehicle.GetPosition(), vehicle.GetPosition()) <
@@ -367,13 +400,19 @@ int main()
 				}
 			}
 
-			physicsWorld.Update(previousFrameTime * timeStepScale);
+			{
+				PerfTimeNamedScope(physicsWorldScope, "Physics World", tracy::Color::Red);
+
+				physicsWorld.Update(previousFrameTime * timeStepScale);
+			}
 		}
 
 		PickUpObjectives::Update(previousFrameTime);
 
 		// Audio
-		updateAudio(vehicle, previousFrameTime);
+		{
+			updateAudio(vehicle, previousFrameTime);
+		}
 
 		// Camera
 		{
@@ -406,12 +445,22 @@ int main()
 
 		// Rendering
 		{
+			PerfTimeNamedScope(renderingScope, "Rendering", tracy::Color::Yellow1);
+
 			// glCallList(groundCallList);
 
 			if (!splitScreen)
+			{
+				PerfTimeNamedScope(singleViewportScope, "Render single viewport",
+				                   tracy::Color::Goldenrod1);
+
 				Graphics::Update(previousFrameTime);
+			}
 			else
 			{
+				PerfTimeNamedScope(singleViewportScope, "Render splitscreen viewport",
+				                   tracy::Color::DarkGoldenrod3);
+
 				float windowHalfHeight = WindowHeight / 2.f;
 				// Draw top screen
 				Graphics::SetViewport(0, 0, WindowWidth, windowHalfHeight);
@@ -431,6 +480,8 @@ int main()
 			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
 			if (debugDraw3D)
 			{
+				PerfTimeNamedScope(draw3DScope, "Render Debug 3D", tracy::Color::Orange1);
+
 				glm::mat4 projectionMatrix = Graphics::GetCameraProjectionMatrixCopy();
 				glMatrixMode(GL_PROJECTION);
 				glLoadMatrixf(glmMatrixToHordeMatrixRef(projectionMatrix));
@@ -450,7 +501,12 @@ int main()
 				DebugDraw::render(previousFrameTime);
 
 				if (debugPhysicsDraw)
+				{
+					PerfTimeNamedScope(drawPhysics3DScope, "Render Physics 3D",
+					                   tracy::Color::Coral1);
+
 					physicsWorld.DebugRender();
+				}
 
 				// If local transform, then
 				// glPopMatrix();
@@ -464,6 +520,8 @@ int main()
 			// 2D overlays
 			if (debugDraw2D)
 			{
+				PerfTimeNamedScope(draw3DScope, "Render Debug 2D", tracy::Color::DeepPink1);
+
 				// Time
 				{
 					std::ostringstream controls;
@@ -492,9 +550,8 @@ int main()
 					       << " (mph = " << KilometersToMiles(speedKmHour)
 					       << ") throttle = " << vehicle.ThrottlePercent * 100.f
 					       << "% brake = " << vehicle.BrakingForce
-						   << " gear = " << vehicle.SelectedGear
-						   << " rpm = " << vehicle.engineRpm
-						   << "\n";
+					       << " gear = " << vehicle.SelectedGear << " rpm = " << vehicle.engineRpm
+					       << "\n";
 					DebugDisplay::print(output.str());
 
 					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)
@@ -513,8 +570,8 @@ int main()
 					btScalar vehicleMat[16];
 					vehicleTransform.getOpenGLMatrix(vehicleMat);
 					std::ostringstream outputPosition;
-					outputPosition << "Vehicle position: " << vehicleMat[12] << ", " << vehicleMat[13] << ", "
-					               << vehicleMat[14];
+					outputPosition << "Vehicle position: " << vehicleMat[12] << ", "
+					               << vehicleMat[13] << ", " << vehicleMat[14];
 					DebugDisplay::print(outputPosition.str());
 				}
 
@@ -538,8 +595,15 @@ int main()
 			}
 
 			// Finished physics update and drawing; send it on its way
-			mainWindow.update();
+			{
+				PerfTimeNamedScope(renderWindowScope, "Render window update",
+				                   tracy::Color::DarkCyan);
+
+				mainWindow.update();
+			}
 		}
+
+		PerfEndFrame;
 
 		previousFrameTime = frameTimer.getTime();
 		frameTimer.start();

@@ -7,6 +7,7 @@
 #include <Horde3DUtils.h>
 
 #include "Math.hpp"
+#include "Performance.hpp"
 #include "Utilities.hpp"
 
 H3DNode model = 0;
@@ -130,6 +131,8 @@ static void TestProceduralGeometry_Cube()
 
 void Initialize(int winWidth, int winHeight)
 {
+	PerfTimeNamedScope(HordeRenderScope, "Horde Init", tracy::Color::Brown2);
+
 	// Initialize engine
 	h3dInit(H3DRenderDevice::OpenGL4);
 
@@ -165,7 +168,10 @@ void Initialize(int winWidth, int winHeight)
 	// Add font
 	fontMaterialRes = h3dAddResource(H3DResTypes::Material, "overlays/font.material.xml", 0);
 	// Load added resources
-	h3dutLoadResourcesFromDisk("Content");
+	{
+		PerfTimeNamedScope(HordeRenderScope, "Horde Init Load resources", tracy::Color::Red2);
+		h3dutLoadResourcesFromDisk("Content");
+	}
 
 	// Add environment
 	// H3DNode env = h3dAddNodes(H3DRootNode, envRes);
@@ -238,6 +244,8 @@ void Initialize(int winWidth, int winHeight)
 
 void SetViewport(int x, int y, int width, int height)
 {
+	PerfTimeNamedScope(GraphicsViewportScope, "Set render viewport", tracy::Color::Crimson);
+
 	if (!hordeCamera || !pipeRes)
 		return;
 
@@ -261,6 +269,8 @@ void OnWindowResized(int winWidth, int winHeight)
 
 void Update(float fps)
 {
+	PerfTimeNamedScope(HordeRenderScope, "Horde Render", tracy::Color::SkyBlue1);
+
 	if (model)
 	{
 		static float t = 0;
@@ -278,7 +288,7 @@ void Update(float fps)
 		//                     1, 1, 1);             // Scale
 	}
 
-	h3dutShowText("Test", /*x, y*/ 10, 10, /*size*/ 10, /*r,g,b*/ 1.f, 0.f, 0.f, fontMaterialRes);
+	// h3dutShowText("Test", /*x, y*/ 10, 10, /*size*/ 10, /*r,g,b*/ 1.f, 0.f, 0.f, fontMaterialRes);
 
 	// Render scene
 	h3dRender(hordeCamera);

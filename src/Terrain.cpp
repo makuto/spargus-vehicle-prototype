@@ -15,6 +15,7 @@
 #include "GraphicsObject.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
+#include "Performance.hpp"
 #include "PhysicsWorld.hpp"
 
 // This must be crap is probably not true I think
@@ -84,6 +85,8 @@ public:
 // Note that heightfield data is not owned by Bullet
 void createCollisionHeightfield(PhysicsWorld& world)
 {
+	PerfTimeNamedScope(terrainInit, "Terrain creation", tracy::Color::LawnGreen);
+
 	// Get new heightfield of appropriate type
 	// g_rawHeightfieldData =
 	// getRawHeightfieldData(model, type, minHeight, maxHeight);
@@ -94,20 +97,24 @@ void createCollisionHeightfield(PhysicsWorld& world)
 
 	float minY = 0.f;
 	float maxY = 0.f;
-	for (int cellZ = 0; cellZ < s_gridSize; cellZ++)
 	{
-		for (int cellX = 0; cellX < s_gridSize; cellX++)
+		PerfTimeNamedScope(terrainNoise, "Terrain noise generation", tracy::Color::ForestGreen);
+
+		for (int cellZ = 0; cellZ < s_gridSize; cellZ++)
 		{
-			float noiseScale = 0.7f;
-			float noiseX = (cellX + xOffset) * noiseScale;
-			float noiseZ = (cellZ + zOffset) * noiseScale;
+			for (int cellX = 0; cellX < s_gridSize; cellX++)
+			{
+				float noiseScale = 0.7f;
+				float noiseX = (cellX + xOffset) * noiseScale;
+				float noiseZ = (cellZ + zOffset) * noiseScale;
 
-			float value =
-			    noiseGenerator.scaledOctaveNoise2d(noiseX, noiseZ, 0.f, 10.f, 4, 0.1f, 0.22f, 2.f);
+				float value = noiseGenerator.scaledOctaveNoise2d(noiseX, noiseZ, 0.f, 10.f, 4, 0.1f,
+				                                                 0.22f, 2.f);
 
-			g_rawHeightfieldData[(cellZ * s_gridSize) + cellX] = value;
-			minY = std::min(minY, value);
-			maxY = std::max(maxY, value);
+				g_rawHeightfieldData[(cellZ * s_gridSize) + cellX] = value;
+				minY = std::min(minY, value);
+				maxY = std::max(maxY, value);
+			}
 		}
 	}
 
@@ -157,11 +164,18 @@ void createCollisionHeightfield(PhysicsWorld& world)
 			aabbMax[k] = std::numeric_limits<float>::max();
 		}
 
-		heightfieldShape->processAllTriangles(&triangleCollector, aabbMin, aabbMax);
+		{
+			PerfTimeNamedScope(terrainNoise, "Terrain triangle collection",
+			                   tracy::Color::MediumSpringGreen);
+
+			heightfieldShape->processAllTriangles(&triangleCollector, aabbMin, aabbMax);
+		}
+
 		if (vertices.size() && indices.size())
 		{
 			// Graphics::TestProceduralGeometry("Heightfield", vertices.data(),
-			//                                  indices.data(), vertices.size() / 3, indices.size());
+			//                                  indices.data(), vertices.size() / 3,
+			//                                  indices.size());
 
 			Graphics::ProceduralMesh graphicsMesh;
 			graphicsMesh.Initialize("Heightfield", vertices.data(), indices.data(), nullptr,

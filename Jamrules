@@ -14,6 +14,8 @@ LINK = clang++ ;
 
 # Arguments used on all projects, regardless of any variables
 C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter
+# Only for profiling, i.e. not release builds
+-DTRACY_ENABLE
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 # Disabled now that I'm compiling Bullet in single-precision
 # -DBT_USE_DOUBLE_PRECISION
@@ -24,7 +26,8 @@ Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImport
 Dependencies/base2.0
 Dependencies/tinygltf Dependencies/tinyobjloader
 Dependencies/glm
-Dependencies/Horde3D/Horde3D/Bindings/C++ ;
+Dependencies/Horde3D/Horde3D/Bindings/C++
+Dependencies/tracy ;
 
 if $(DEBUG_BUILD)
 {
@@ -45,7 +48,7 @@ OPTIM = -O0 ;
 ##
 
 LINKLIBS =
-# Standard
+# Standard (e.g. for Tracy)
 -lpthread -ldl
 
 # SFML

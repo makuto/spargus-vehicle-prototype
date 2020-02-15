@@ -2,6 +2,7 @@
 
 #include "DebugDisplay.hpp"
 #include "Logging.hpp"
+#include "Performance.hpp"
 #include "PhysicsVehicle.hpp"
 #include "Utilities.hpp"
 
@@ -91,8 +92,14 @@ static SoundEffect soundFxFilePairs[] = {
 
 void loadAudio()
 {
+	PerfTimeNamedScope(loadAudioScope, "Load Audio", tracy::Color::RoyalBlue1);
+
 	for (size_t i = 0; i < ArraySize(soundFxFilePairs); ++i)
 	{
+		PerfTimeNamedScope(loadAudioSingleFileScope, "Load Audio file", tracy::Color::RoyalBlue3);
+		PerfSetNameFormat(loadAudioSingleFileScope, "Load Audio '%s'",
+		                  soundFxFilePairs[i].filename);
+
 		if (!soundFxFilePairs[i].soundFx->load(soundFxFilePairs[i].filename))
 			std::cout << "Failed to load " << soundFxFilePairs[i].filename << "\n";
 	}
@@ -121,7 +128,7 @@ void debugPrintAudio()
 }
 
 typedef short SoundSample;
-class BrownianNoiseAudioStream : public sf::SoundStream
+class EngineAudioStream : public sf::SoundStream
 {
 public:
 	void initializeNoiseStream()
@@ -144,6 +151,8 @@ private:
 
 	virtual bool onGetData(sf::SoundStream::Chunk& data)
 	{
+		PerfTimeNamedScope(audioScope, "Audio: Engine stream", tracy::Color::RoyalBlue1);
+
 		float engineRpm = GetPlayerVehicleEngineRpmThreadSafe();
 
 		const SoundSample maxMotion = 10;
@@ -172,8 +181,8 @@ private:
 			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
 			// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() +
 			// triangleWaveSpeed) 	triangleWaveDirection = 1; else if (sampleBuffer[i - 1] >=
-			// std::numeric_limits<short>::max() - triangleWaveSpeed) 	triangleWaveDirection = -1; if
-			// (i > 0) 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection *
+			// std::numeric_limits<short>::max() - triangleWaveSpeed) 	triangleWaveDirection = -1;
+			// if (i > 0) 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection *
 			// triangleWaveSpeed);
 
 			// Sine wave - Not working
@@ -220,11 +229,13 @@ private:
 
 void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 {
+	PerfTimeNamedScope(audioScope, "Audio", tracy::Color::Ivory4);
+
 	const glm::vec3 vehiclePosition = vehicle.GetPosition();
 
 	// if (false)
 	{
-		static BrownianNoiseAudioStream noiseStream;
+		static EngineAudioStream noiseStream;
 		static bool initialized = false;
 		if (!initialized)
 		{
