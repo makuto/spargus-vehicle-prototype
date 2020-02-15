@@ -29,6 +29,9 @@ src/PickUpObjective.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/Terrain.cpp
+
+#Third party
+Dependencies/tracy/TracyClient.cpp
 ;
 
 # This is all that is needed to select Render library
