@@ -3,6 +3,7 @@ This is a 3D vehicle game prototype inspired by the gameplay and feel of the dun
 
 ** Videos
 Progress videos, newest to oldest:
+- [[https://github.com/makuto/spargus-vehicle-prototype][Split-screen and better "AI"]] (the top screen is the AI follower)
 - [[https://www.youtube.com/watch?v=LXAsL04EPDY][First "AI" driver]]. WIP Procedural terrain can be seen in the far background
 - [[https://www.youtube.com/watch?v=JNJRJw6R5xY][Drivetrain and engine audio]]
 - [[https://www.youtube.com/watch?v=bCw-OMBP5XU][Objective system and audio]], plus improved camera and skybox

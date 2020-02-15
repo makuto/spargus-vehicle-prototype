@@ -10,6 +10,8 @@ void Initialize(int width, int height);
 void Update(float frameTime);
 void Destroy();
 
+void SetViewport(int x, int y, int width, int height);
+
 // Camera
 void SetCameraTransform(const glm::mat4& newTransform);
 glm::mat4 GetCameraTransformCopy();

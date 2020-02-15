@@ -163,6 +163,8 @@ bool debugDraw2D = true;
 bool useJoystick = true;
 // bool useJoystick = false;
 
+bool splitScreen = true;
+
 float timeStepScale = 1.f;
 
 void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
@@ -182,6 +184,17 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 		debugDraw3D = !debugDraw3D;
 		debugDraw2D = !debugDraw2D;
 	}
+	if (input.WasTapped(inputCode::F10, noKeyRepeat))
+	{
+		splitScreen = !splitScreen;
+		if (!splitScreen)
+		{
+			// Make sure the viewport gets resized to normal
+			Graphics::SetViewport(0, 0, WindowWidth, WindowHeight);
+		}
+	}
+
+	// Time scaling
 	if (input.WasTapped(inputCode::F5, true))
 		timeStepScale -= 0.1f;
 	if (input.WasTapped(inputCode::F6, true))
@@ -395,7 +408,24 @@ int main()
 		{
 			// glCallList(groundCallList);
 
-			Graphics::Update(previousFrameTime);
+			if (!splitScreen)
+				Graphics::Update(previousFrameTime);
+			else
+			{
+				float windowHalfHeight = WindowHeight / 2.f;
+				// Draw top screen
+				Graphics::SetViewport(0, 0, WindowWidth, windowHalfHeight);
+				Graphics::Update(previousFrameTime);
+
+				// Draw bottom screen
+				{
+					glm::mat4 vehicleTransform = otherVehicle.GetTransform();
+					camera.ChaseCamera(vehicleTransform);
+
+					Graphics::SetViewport(0, windowHalfHeight, WindowWidth, windowHalfHeight);
+					Graphics::Update(previousFrameTime);
+				}
+			}
 
 			// Draw debug things (must happen AFTER h3dFinalizeFrame() but BEFORE swapping buffers)
 			// From http://www.horde3d.org/forums/viewtopic.php?f=1&t=978
@@ -436,6 +466,15 @@ int main()
 			{
 				// Time
 				{
+					std::ostringstream controls;
+					controls << "F1 = reset vehicle "
+					         << "F2 = toggle camera "
+					         << "F3 = toggle input "
+					         << "F4 = draw physics "
+					         << "F9 = debug drawing "
+					         << "F10 = toggle splitscreen";
+					DebugDisplay::print(controls.str());
+
 					std::ostringstream output;
 					output << "Time scaling: " << timeStepScale << "x"
 					       << " (F5 = -0.1x "
@@ -443,13 +482,6 @@ int main()
 					       << "F7 = 1x "
 					       << "F8 = 0x)";
 					DebugDisplay::print(output.str());
-					std::ostringstream controls;
-					controls << "F1 = reset vehicle "
-					         << "F2 = free/chase camera "
-					         << "F3 = joystick/keyboard "
-					         << "F4 = physics drawing "
-					         << "F9 = debug drawing ";
-					DebugDisplay::print(controls.str());
 				}
 
 				// Vehicle

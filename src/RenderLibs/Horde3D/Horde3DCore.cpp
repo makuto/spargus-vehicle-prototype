@@ -236,21 +236,27 @@ void Initialize(int winWidth, int winHeight)
 	g_graphicsIntialized = true;
 }
 
-void OnWindowResized(int winWidth, int winHeight)
+void SetViewport(int x, int y, int width, int height)
 {
 	if (!hordeCamera || !pipeRes)
 		return;
 
 	// Resize viewport
-	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportXI, 0);
-	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, 0);
-	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, winWidth);
-	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, winHeight);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportXI, x);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, y);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI, width);
+	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI, height);
 
 	// Set virtual camera parameters
-	h3dSetupCameraView(hordeCamera, cameraFov, (float)winWidth / winHeight, cameraNearPlane,
+	float aspectRatio = (float)width / height;
+	h3dSetupCameraView(hordeCamera, cameraFov, aspectRatio, cameraNearPlane,
 	                   cameraFarPlane);
-	h3dResizePipelineBuffers(pipeRes, winWidth, winHeight);
+	h3dResizePipelineBuffers(pipeRes, width, height);
+}
+
+void OnWindowResized(int winWidth, int winHeight)
+{
+	SetViewport(0, 0, winWidth, winHeight);
 }
 
 void Update(float fps)
