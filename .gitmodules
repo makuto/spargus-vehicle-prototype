@@ -16,3 +16,6 @@
 [submodule "tinyobjloader"]
 	path = Dependencies/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader
+[submodule "Dependencies/tracy"]
+	path = Dependencies/tracy
+	url = https://bitbucket.org/wolfpld/tracy.git
