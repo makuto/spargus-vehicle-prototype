@@ -45,6 +45,23 @@ int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
 bool splitScreen = true;
+bool twoPlayer = true;
+
+bool useChaseCam = true;
+// bool useChaseCam = false;
+
+// bool debugPhysicsDraw = true;
+bool debugPhysicsDraw = false;
+
+bool debugDraw3D = true;
+// bool debugDraw3D = false;
+bool debugDraw2D = true;
+// bool debugDraw2D = false;
+
+bool useJoystick = true;
+// bool useJoystick = false;
+
+float timeStepScale = 1.f;
 
 void LogOutput_WithPerfOutput(const Logging::Record& record)
 {
@@ -178,22 +195,6 @@ struct WindowScopedContextActivate
 		win.getBase()->setActive(false);
 	}
 };
-
-bool useChaseCam = true;
-// bool useChaseCam = false;
-
-// bool debugPhysicsDraw = true;
-bool debugPhysicsDraw = false;
-
-bool debugDraw3D = true;
-// bool debugDraw3D = false;
-bool debugDraw2D = true;
-// bool debugDraw2D = false;
-
-bool useJoystick = true;
-// bool useJoystick = false;
-
-float timeStepScale = 1.f;
 
 void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 {
@@ -337,6 +338,7 @@ int main()
 	float simulationDeltaTime = previousFrameTime * timeStepScale;
 
 	Camera camera(mainWindow);
+	Camera otherCamera(mainWindow);
 
 	mainWindow.shouldClear(false);
 
@@ -354,10 +356,18 @@ int main()
 
 			handleConfigurationInput(input, *vehicle);
 
-			handleCameraInput(camera, previousFrameTime);
+			int player1Joystick = 0;
+			int player2Joystick = 1;
+
+			handleCameraInput(camera, previousFrameTime, player1Joystick);
+			handleCameraInput(otherCamera, previousFrameTime, player2Joystick);
 
 			if (useJoystick)
-				processVehicleInputJoystick(*vehicle, previousFrameTime);
+			{
+				processVehicleInputJoystick(*vehicle, previousFrameTime, player1Joystick);
+				if (twoPlayer)
+					processVehicleInputJoystick(*otherVehicle, previousFrameTime, player2Joystick);
+			}
 			else
 				processVehicleInputKeyboard(input, *vehicle);
 		}
@@ -369,6 +379,7 @@ int main()
 			// Vehicle updates
 			{
 				// Ricky Suicide
+				if (!twoPlayer)
 				{
 					if (glm::distance2(otherVehicle->GetPosition(), vehicle->GetPosition()) <
 					    glm::pow(10.f, 2))
@@ -436,13 +447,15 @@ int main()
 			if (!useChaseCam)
 				camera.FreeCam(input, previousFrameTime);
 			camera.UpdateStart();
+			otherCamera.UpdateStart();
 			// Use vehicle transform to position camera
 			if (useChaseCam)
 			{
-				glm::mat4 vehicleTransform = vehicle->GetTransform();
-				camera.ChaseCamera(vehicleTransform);
+				camera.ChaseCamera(vehicle->GetTransform());
+				otherCamera.ChaseCamera(otherVehicle->GetTransform());
 			}
 			camera.UpdateEnd();
+			otherCamera.UpdateEnd();
 
 			// Debug lines for camera
 			{
@@ -483,6 +496,9 @@ int main()
 				float windowHalfHeight = WindowHeight / 2.f;
 				// Draw top screen
 				Graphics::SetViewport(0, 0, WindowWidth, windowHalfHeight);
+
+				otherCamera.ChaseCamera(otherVehicle->GetTransform());
+
 				Graphics::Update(previousFrameTime);
 
 				// Draw bottom screen
@@ -491,6 +507,9 @@ int main()
 					camera.ChaseCamera(vehicleTransform);
 
 					Graphics::SetViewport(0, windowHalfHeight, WindowWidth, windowHalfHeight);
+
+					camera.ChaseCamera(vehicle->GetTransform());
+
 					Graphics::Update(previousFrameTime);
 				}
 			}

@@ -110,14 +110,23 @@ void applyDeadzone(float& joystickValue)
 		joystickValue = 0.f;
 }
 
-void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
+bool isJoystickValid(int playerJoystickId)
+{
+	if (!sf::Joystick::isConnected(playerJoystickId))
+	{
+		LOGE << "Player Joystick " << playerJoystickId << " is not connected";
+		return false;
+	}
+	return true;
+}
+
+void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime, int playerJoystickId)
 {
 	bool debugPrint = false;
 
 	printJoystickButtonPresses();
 
-	int playerJoystickId = getPlayerJoystickId();
-	if (playerJoystickId < 0)
+	if (!isJoystickValid(playerJoystickId))
 		return;
 
 	// Start button resets vehicle
@@ -262,10 +271,9 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime)
 	}
 }
 
-void handleCameraInput(Camera& camera, float frameTime)
+void handleCameraInput(Camera& camera, float frameTime, int playerJoystickId)
 {
-	int playerJoystickId = getPlayerJoystickId();
-	if (playerJoystickId < 0)
+	if (!isJoystickValid(playerJoystickId))
 		return;
 
 	// Right joystick X left -100
