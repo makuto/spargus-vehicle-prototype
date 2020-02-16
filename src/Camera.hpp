@@ -17,7 +17,6 @@ private:
 	glm::vec3 camRot = {0.f, 0.f, 0.f};
 	glm::vec3 camTranslate = {0.f, 0.f, 0.f};
 	window& win;
-	float add = 1.f;
 	float prevY = 0.f;
 	float prevX = 0.f;
 	sf::RenderWindow* winBase = nullptr;

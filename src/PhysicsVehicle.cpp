@@ -161,6 +161,9 @@ PhysicsVehicle::~PhysicsVehicle()
 {
 	const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
 	g_vehicles.erase(std::remove(g_vehicles.begin(), g_vehicles.end(), this), g_vehicles.end());
+
+	delete vehicleRayCaster;
+	delete vehicle;
 }
 
 void PhysicsVehicle::Reset()

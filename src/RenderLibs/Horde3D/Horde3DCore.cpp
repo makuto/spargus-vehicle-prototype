@@ -249,6 +249,9 @@ void SetViewport(int x, int y, int width, int height)
 	if (!hordeCamera || !pipeRes)
 		return;
 
+	bool viewportSizeChanged = h3dGetNodeParamI(hordeCamera, H3DCamera::ViewportWidthI) != width ||
+	                           h3dGetNodeParamI(hordeCamera, H3DCamera::ViewportHeightI) != height;
+
 	// Resize viewport
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportXI, x);
 	h3dSetNodeParamI(hordeCamera, H3DCamera::ViewportYI, y);
@@ -259,7 +262,14 @@ void SetViewport(int x, int y, int width, int height)
 	float aspectRatio = (float)width / height;
 	h3dSetupCameraView(hordeCamera, cameraFov, aspectRatio, cameraNearPlane,
 	                   cameraFarPlane);
-	h3dResizePipelineBuffers(pipeRes, width, height);
+
+	// This is a slow operation, so only do it if a change happened
+	if (viewportSizeChanged)
+	{
+		PerfTimeNamedScope(ResizeBuffersScope, "Resize pipeline buffers", tracy::Color::Crimson);
+
+		h3dResizePipelineBuffers(pipeRes, width, height);
+	}
 }
 
 void OnWindowResized(int winWidth, int winHeight)
@@ -269,7 +279,7 @@ void OnWindowResized(int winWidth, int winHeight)
 
 void Update(float fps)
 {
-	PerfTimeNamedScope(HordeRenderScope, "Horde Render", tracy::Color::SkyBlue1);
+	PerfTimeNamedScope(HordeRenderScope, "Horde Render", tracy::Color::VioletRed4);
 
 	if (model)
 	{

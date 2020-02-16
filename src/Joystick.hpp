@@ -1,5 +1,7 @@
 #pragma once
 
+void listConnectedJoysticks();
+
 class PhysicsVehicle;
 void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime);
 

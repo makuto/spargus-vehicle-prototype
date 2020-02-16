@@ -10,6 +10,9 @@ void Initialize(int width, int height);
 void Update(float frameTime);
 void Destroy();
 
+// Change the render viewport position and size
+// Note that because resizing the viewport is an expensive operation, the RenderLib should only
+// resize buffers if it detects a change in width or height. Positioning the viewport is fine
 void SetViewport(int x, int y, int width, int height);
 
 // Camera

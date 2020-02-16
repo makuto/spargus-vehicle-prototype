@@ -26,13 +26,29 @@ const float joystickRange = 100.f;
 const int JOYSTICK_XBOX_X = 2;
 const int JOYSTICK_XBOX_B = 1;
 
+// This is a limitation of SFML (though we won't get to 8)
+const int NUM_JOYSTICKS_SUPPORTED = 8;
+
+void listConnectedJoysticks()
+{
+	for (int i = 0; i < NUM_JOYSTICKS_SUPPORTED; ++i)
+	{
+		if (sf::Joystick::isConnected(i))
+			LOGI << "Joystick [" << i << "] buttons: " << sf::Joystick::getButtonCount(i);
+	}
+}
+
 int getPlayerJoystickId()
 {
 	int playerJoystickId = 0;
 	if (!sf::Joystick::isConnected(playerJoystickId))
-		return -1;
-	else
-		return playerJoystickId;
+	{
+		playerJoystickId = 1;
+		if (!sf::Joystick::isConnected(playerJoystickId))
+			return -1;
+	}
+
+	return playerJoystickId;
 }
 
 void printJoystickButtonPresses()

@@ -42,6 +42,8 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
+bool splitScreen = true;
+
 void LogOutput_WithPerfOutput(const Logging::Record& record)
 {
 	static char funcNameBuffer[256];
@@ -86,10 +88,19 @@ void windowResizeCB(float width, float height)
 	WindowWidth = width;
 	WindowHeight = height;
 
-	// Is this necessary?
-	// glViewport(0, 0, width, height);
-
-	Graphics::OnWindowResized(width, height);
+	// Splitscreen requires a more advanced approach to make sure we don't resize twice
+	// (OnWindowResized() assumes a single viewport)
+	if (!splitScreen)
+	{
+		// All this does is SetViewport with the width and height
+		Graphics::OnWindowResized(width, height);
+	}
+	else
+	{
+		// Rather than caring about both viewports, only care about one, because we are going to
+		// move it around later anyways
+		Graphics::SetViewport(0, 0, WindowWidth, WindowHeight / 2);
+	}
 }
 
 void processVehicleInputKeyboard(inputManager& input, PhysicsVehicle& vehicle)
@@ -180,8 +191,6 @@ bool debugDraw2D = true;
 bool useJoystick = true;
 // bool useJoystick = false;
 
-bool splitScreen = true;
-
 float timeStepScale = 1.f;
 
 void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
@@ -249,6 +258,8 @@ int main()
 	}
 
 	inputManager input(&mainWindow);
+
+	listConnectedJoysticks();
 
 	// World/meshes
 	PhysicsWorld physicsWorld;
@@ -605,7 +616,7 @@ int main()
 
 			// Finished physics update and drawing; send it on its way
 			{
-				PerfTimeNamedScope(renderWindowScope, "Render window update",
+				PerfTimeNamedScope(renderWindowScope, "Render window update + vsync",
 				                   tracy::Color::DarkCyan);
 
 				mainWindow.update();
