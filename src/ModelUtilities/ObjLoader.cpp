@@ -3,7 +3,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION  // define this in only *one* .cc
 #include "tiny_obj_loader.h"
 
+#include "Performance.hpp"
 #include "PhysicsWorld.hpp"
+
 #include "btBulletCollisionCommon.h"
 #include "btBulletDynamicsCommon.h"
 
@@ -78,6 +80,9 @@ bool objTest()
 
 bool objToBulletTriangleMesh(PhysicsWorld& world, const char* filename)
 {
+	PerfTimeNamedScope(objToBulletScope, "Load Collision .Obj to Bullet", tracy::Color::SteelBlue3);
+	PerfSetNameFormat(objToBulletScope, "Load collision obj '%s'", filename);
+
 	const bool debugPrint = false;
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;

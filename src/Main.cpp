@@ -228,6 +228,7 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 int main()
 {
 	PerfTimeNamedScope(mainScope, "Main", tracy::Color::Gray);
+	PerfManualZoneBegin(InitializeContext, "Initialization", tracy::Color::IndianRed4);
 
 	LOGI << "Spargus Vehicle Prototype";
 
@@ -255,14 +256,13 @@ int main()
 	PhysicsVehicle otherVehicle(physicsWorld);
 	Graphics::Object worldRender;
 	{
-		{
-			PerfTimeNamedScope(worldInit, "World initialization", tracy::Color::MediumPurple);
-			// Drawing the world
-			worldRender.Initialize("World");
-			// worldRender.SetTransform(glm::translate(glm::mat4(1.f), {0.f, -100.f, 0.f}));
-			// World collision
-			objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
-		}
+		PerfTimeNamedScope(worldInit, "Level/world initialization", tracy::Color::MediumPurple);
+
+		// Drawing the world
+		worldRender.Initialize("World");
+		// worldRender.SetTransform(glm::translate(glm::mat4(1.f), {0.f, -100.f, 0.f}));
+		// World collision
+		objToBulletTriangleMesh(physicsWorld, "Collision/World.obj");
 
 		// Terrain
 		{
@@ -324,9 +324,13 @@ int main()
 
 	mainWindow.shouldClear(false);
 
+	PerfManualZoneEnd(InitializeContext);
+
 	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
 	{
 		PerfTimeNamedScope(timeFrameScope, "Frame", tracy::Color::SlateBlue);
+
+		PerfManualZoneBegin(GameplayContext, "Gameplay", tracy::Color::RoyalBlue);
 
 		// Input
 		{
@@ -409,13 +413,15 @@ int main()
 
 		PickUpObjectives::Update(previousFrameTime);
 
+		PerfManualZoneEnd(GameplayContext);
+
 		// Audio
-		{
-			updateAudio(vehicle, previousFrameTime);
-		}
+		updateAudio(vehicle, previousFrameTime);
 
 		// Camera
 		{
+			PerfTimeNamedScope(cameraScope, "Camera", tracy::Color::OliveDrab4);
+
 			if (!useChaseCam)
 				camera.FreeCam(input, previousFrameTime);
 			camera.UpdateStart();
@@ -589,9 +595,12 @@ int main()
 				DebugDisplay::clear();
 			}
 
-			mainWindow.getBase()->resetGLStates();
 			{
-				PickUpObjectives::RenderUI(mainWindow);
+				PerfTimeNamedScope(renderWindowScope, "Render UI", tracy::Color::RosyBrown4);
+				mainWindow.getBase()->resetGLStates();
+				{
+					PickUpObjectives::RenderUI(mainWindow);
+				}
 			}
 
 			// Finished physics update and drawing; send it on its way

@@ -18,6 +18,7 @@
 #include "GraphicsObject.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
+#include "Performance.hpp"
 #include "PhysicsWorld.hpp"
 #include "Utilities.hpp"
 
@@ -138,6 +139,8 @@ void Initialize(PhysicsWorld* physicsWorld)
 
 void Update(float frameTime)
 {
+	PerfTimeNamedScope(pickupObjectiveUpdate, "Game objectives", tracy::Color::SpringGreen4);
+
 	g_PickUpObjectivesState.numObjectivesHit = 0;
 	for (const PickUpObjective& objective : g_PickUpObjectivesState.objectives)
 	{
