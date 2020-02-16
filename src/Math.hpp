@@ -37,6 +37,9 @@ class btVector3;
 btVector3 glmVec3ToBulletVector(const glm::vec3& vec);
 glm::vec3 BulletVectorToGlmVec3(const btVector3& vec);
 
+// Handles the 4D->3D conversion we have to do (throws out 4th dimension)
+glm::vec3 TransformGlmVec3Mat4(const glm::mat4& transform, const glm::vec3& vec);
+
 //
 // Unit conversions
 //

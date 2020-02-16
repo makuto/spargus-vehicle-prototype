@@ -60,3 +60,10 @@ glm::vec3 BulletVectorToGlmVec3(const btVector3& vec)
 	glm::vec3 newVector(vec[0], vec[1], vec[2]);
 	return newVector;
 }
+
+glm::vec3 TransformGlmVec3Mat4(const glm::mat4& transform, const glm::vec3& vec)
+{
+	glm::vec4 transformedVec(vec, 0.f);
+	transformedVec = transform * transformedVec;
+	return glm::vec3(transformedVec);
+}

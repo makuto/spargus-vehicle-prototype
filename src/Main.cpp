@@ -22,7 +22,9 @@
 #include "Camera.hpp"
 #include "Color.hpp"
 #include "DebugDisplay.hpp"
+#include "GameVehicle.hpp"
 #include "GraphicsInterface.hpp"
+#include "GraphicsObject.hpp"
 #include "Joystick.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
@@ -263,8 +265,8 @@ int main()
 
 	// World/meshes
 	PhysicsWorld physicsWorld;
-	PhysicsVehicle vehicle(physicsWorld);
-	PhysicsVehicle otherVehicle(physicsWorld);
+	PhysicsVehicle* vehicle = GameVehicles::CreateVehicle(physicsWorld);
+	PhysicsVehicle* otherVehicle = GameVehicles::CreateVehicle(physicsWorld);
 	Graphics::Object worldRender;
 	{
 		PerfTimeNamedScope(worldInit, "Level/world initialization", tracy::Color::MediumPurple);
@@ -331,6 +333,9 @@ int main()
 	timer frameTimer;
 	frameTimer.start();
 
+	// All gameplay code should use this
+	float simulationDeltaTime = previousFrameTime * timeStepScale;
+
 	Camera camera(mainWindow);
 
 	mainWindow.shouldClear(false);
@@ -347,14 +352,14 @@ int main()
 		{
 			PerfTimeNamedScope(inputScope, "Input", tracy::Color::Sienna);
 
-			handleConfigurationInput(input, vehicle);
+			handleConfigurationInput(input, *vehicle);
 
 			handleCameraInput(camera, previousFrameTime);
 
 			if (useJoystick)
-				processVehicleInputJoystick(vehicle, previousFrameTime);
+				processVehicleInputJoystick(*vehicle, previousFrameTime);
 			else
-				processVehicleInputKeyboard(input, vehicle);
+				processVehicleInputKeyboard(input, *vehicle);
 		}
 
 		// Physics
@@ -363,71 +368,66 @@ int main()
 
 			// Vehicle updates
 			{
-				PerfTimeNamedScope(physicsVehicleScope, "Physics Vehicles",
-				                   tracy::Color::OrangeRed);
-
 				// Ricky Suicide
 				{
-					if (glm::distance2(otherVehicle.GetPosition(), vehicle.GetPosition()) <
+					if (glm::distance2(otherVehicle->GetPosition(), vehicle->GetPosition()) <
 					    glm::pow(10.f, 2))
 					{
 						// Stop near player
-						otherVehicle.ThrottlePercent = 0.f;
-						otherVehicle.BrakingForce = otherVehicle.maxBrakingForce;
+						otherVehicle->ThrottlePercent = 0.f;
+						otherVehicle->BrakingForce = otherVehicle->maxBrakingForce;
 					}
 					else
 					{
-						otherVehicle.ThrottlePercent = 1.f;
+						otherVehicle->ThrottlePercent = 1.f;
 						// Steer towards player
 						glm::vec3 playerDelta =
-						    glm::normalize(vehicle.GetPosition() - otherVehicle.GetPosition());
-						glm::vec4 vehicleLeft4d =
-						    otherVehicle.GetTransform() * glm::vec4(LeftAxis, 0.f);
-						glm::vec3 vehicleLeft = glm::normalize(glm::vec3(vehicleLeft4d));
-						float targetDot = glm::dot(vehicleLeft, playerDelta);
-						float angleToPlayer = glm::angle(vehicleLeft, playerDelta);
-						LOGV << glm::degrees(angleToPlayer) << " angle; dot " << targetDot;
+						    glm::normalize(vehicle->GetPosition() - otherVehicle->GetPosition());
+						glm::vec3 vehicleLeft =
+						    TransformGlmVec3Mat4(otherVehicle->GetTransform(), LeftAxis);
+						glm::vec3 vehicleLeftNormalized = glm::normalize(vehicleLeft);
+						float targetDot = glm::dot(vehicleLeftNormalized, playerDelta);
+						// float angleToPlayer = glm::angle(vehicleLeftNormalized, playerDelta);
+						// LOGV << glm::degrees(angleToPlayer) << " angle; dot " << targetDot;
 						if (targetDot > 0.f)
-							otherVehicle.VehicleSteering = otherVehicle.steeringClamp;
+							otherVehicle->VehicleSteering = otherVehicle->steeringClamp;
 						else if (glm::abs(targetDot) < 0.1f)
-							otherVehicle.VehicleSteering = 0.f;
+							otherVehicle->VehicleSteering = 0.f;
 						else
-							otherVehicle.VehicleSteering = -otherVehicle.steeringClamp;
-						DebugDraw::addLine(otherVehicle.GetPosition(), vehicle.GetPosition(),
+							otherVehicle->VehicleSteering = -otherVehicle->steeringClamp;
+						DebugDraw::addLine(otherVehicle->GetPosition(), vehicle->GetPosition(),
 						                   Color::Orange, Color::Blue,
 						                   DebugDraw::Lifetime_OneFrame);
-						DebugDraw::addLine(otherVehicle.GetPosition(),
-						                   otherVehicle.GetPosition() + vehicleLeft, Color::Orange,
-						                   Color::Blue, DebugDraw::Lifetime_OneFrame);
+						DebugDraw::addLine(otherVehicle->GetPosition(),
+						                   otherVehicle->GetPosition() + vehicleLeftNormalized,
+						                   Color::Orange, Color::Blue,
+						                   DebugDraw::Lifetime_OneFrame);
 					}
 				}
 
-				const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
-				for (PhysicsVehicle* currentVehicle : g_vehicles)
-				{
-					// Make sure vehicle isn't falling through the world
-					if (currentVehicle->GetPosition()[1] < -20.f)
-					{
-						// TODO: Make this put you back in the last known good position?
-						currentVehicle->Reset();
-					}
-					currentVehicle->Update(previousFrameTime * timeStepScale);
-				}
+				GameVehicles::UpdatePhysics(simulationDeltaTime);
 			}
 
 			{
 				PerfTimeNamedScope(physicsWorldScope, "Physics World", tracy::Color::Red);
 
-				physicsWorld.Update(previousFrameTime * timeStepScale);
+				physicsWorld.Update(simulationDeltaTime);
 			}
 		}
 
-		PickUpObjectives::Update(previousFrameTime);
+		PickUpObjectives::Update(simulationDeltaTime);
 
 		PerfManualZoneEnd(GameplayContext);
 
 		// Audio
-		updateAudio(vehicle, previousFrameTime);
+		{
+			PerfTimeNamedScope(globalAudioScope, "Audio", tracy::Color::DodgerBlue3);
+
+			// Use player 1's position as the global listener
+			updateAudio(vehicle->GetTransform(), previousFrameTime);
+
+			GameVehicles::UpdateAudio(previousFrameTime);
+		}
 
 		// Camera
 		{
@@ -439,7 +439,7 @@ int main()
 			// Use vehicle transform to position camera
 			if (useChaseCam)
 			{
-				glm::mat4 vehicleTransform = vehicle.GetTransform();
+				glm::mat4 vehicleTransform = vehicle->GetTransform();
 				camera.ChaseCamera(vehicleTransform);
 			}
 			camera.UpdateEnd();
@@ -447,22 +447,24 @@ int main()
 			// Debug lines for camera
 			{
 				glm::vec3 scaledWorldCameraTargetDirection = camera.targetCameraDirection * 3.f;
-				glm::vec3 vehiclePosition = vehicle.GetPosition();
+				glm::vec3 vehiclePosition = vehicle->GetPosition();
 				scaledWorldCameraTargetDirection += vehiclePosition;
 				DebugDraw::addLine(vehiclePosition, scaledWorldCameraTargetDirection, Color::Blue,
 				                   Color::Blue, DebugDraw::Lifetime_OneFrame);
 
 				glm::vec4 vehicleFacingIntermediate(0.f, 0.f, 3.f, 1.f);
-				vehicleFacingIntermediate = vehicle.GetTransform() * vehicleFacingIntermediate;
+				vehicleFacingIntermediate = vehicle->GetTransform() * vehicleFacingIntermediate;
 				glm::vec3 vehicleFacing(vehicleFacingIntermediate);
-				DebugDraw::addLine(vehicle.GetPosition(), vehicleFacing, Color::Green, Color::Green,
-				                   DebugDraw::Lifetime_OneFrame);
+				DebugDraw::addLine(vehicle->GetPosition(), vehicleFacing, Color::Green,
+				                   Color::Green, DebugDraw::Lifetime_OneFrame);
 			}
 		}
 
 		// Rendering
 		{
 			PerfTimeNamedScope(renderingScope, "Rendering", tracy::Color::Yellow1);
+
+			GameVehicles::UpdateRender(previousFrameTime);
 
 			// glCallList(groundCallList);
 
@@ -485,7 +487,7 @@ int main()
 
 				// Draw bottom screen
 				{
-					glm::mat4 vehicleTransform = otherVehicle.GetTransform();
+					glm::mat4 vehicleTransform = otherVehicle->GetTransform();
 					camera.ChaseCamera(vehicleTransform);
 
 					Graphics::SetViewport(0, windowHalfHeight, WindowWidth, windowHalfHeight);
@@ -561,19 +563,19 @@ int main()
 
 				// Vehicle
 				{
-					btScalar speedKmHour = vehicle.vehicle->getCurrentSpeedKmHour();
+					btScalar speedKmHour = vehicle->vehicle->getCurrentSpeedKmHour();
 					std::ostringstream output;
 					output << "speedKmHour = " << speedKmHour
 					       << " (mph = " << KilometersToMiles(speedKmHour)
-					       << ") throttle = " << vehicle.ThrottlePercent * 100.f
-					       << "% brake = " << vehicle.BrakingForce
-					       << " gear = " << vehicle.SelectedGear << " rpm = " << vehicle.engineRpm
+					       << ") throttle = " << vehicle->ThrottlePercent * 100.f
+					       << "% brake = " << vehicle->BrakingForce
+					       << " gear = " << vehicle->SelectedGear << " rpm = " << vehicle->engineRpm
 					       << "\n";
 					DebugDisplay::print(output.str());
 
-					for (int i = 0; i < vehicle.vehicle->getNumWheels(); i++)
+					for (int i = 0; i < vehicle->vehicle->getNumWheels(); i++)
 					{
-						const btWheelInfo& wheelInfo = vehicle.vehicle->getWheelInfo(i);
+						const btWheelInfo& wheelInfo = vehicle->vehicle->getWheelInfo(i);
 						// LOGD << "Wheel " << i << " skid " << wheelInfo.m_skidInfo << "\n";
 
 						std::ostringstream outputSuspension;
@@ -583,7 +585,7 @@ int main()
 					}
 
 					const btTransform& vehicleTransform =
-					    vehicle.vehicle->getChassisWorldTransform();
+					    vehicle->vehicle->getChassisWorldTransform();
 					btScalar vehicleMat[16];
 					vehicleTransform.getOpenGLMatrix(vehicleMat);
 					std::ostringstream outputPosition;
@@ -627,6 +629,7 @@ int main()
 
 		previousFrameTime = frameTimer.getTime();
 		frameTimer.start();
+		simulationDeltaTime = previousFrameTime * timeStepScale;
 	}
 
 	Graphics::Destroy();

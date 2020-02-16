@@ -29,7 +29,7 @@ src/PickUpObjective.cpp
 src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/Terrain.cpp
-
+src/GameVehicle.cpp
 #Third party
 Dependencies/tracy/TracyClient.cpp
 ;

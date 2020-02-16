@@ -139,18 +139,6 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		numGears = gearboxRatios.size();
 	}
 
-	// Initialize graphics
-	chassisRender.Initialize("BasicBuggy_Chassis");
-	wheelRender.resize(vehicle->getNumWheels());
-	for (int i = 0; i < vehicle->getNumWheels(); ++i)
-	{
-		Graphics::Object& wheelNode = wheelRender[i];
-		// Disable front wheel for now, because the model isn't ready
-		wheelNode.Initialize(i < 2 && false ? "Wheel_Front" : "Wheel_Rear");
-	}
-
-	basicDriver.Initialize("BasicDriver");
-
 	{
 		const std::lock_guard<std::mutex> lock(g_vehiclesMutex);
 		g_vehicles.push_back(this);
@@ -236,7 +224,7 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 		return maxEngineForce * throttlePercent;
 
 	float gearboxRatio = 1.f;
-	if (selectedGear >= gearboxRatios.size())
+	if (selectedGear >= static_cast<int>(gearboxRatios.size()))
 		LOGE << "Gear " << selectedGear << " is not in range of gearbox (" << gearboxRatios.size()
 		     << "gears)";
 	else
@@ -263,8 +251,9 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 	}
 
 	// TODO Need to take the same step from the wheel update calculations to get the same result
-	engineRpmOut =
-	    (engineRadiansPerStep * (1 / deltaTime)) * (1.f / (2.f * glm::pi<float>())) * (60.f / 1.f);
+	// TODO Some scary constants in here (like the 60)
+	engineRpmOut = (engineRadiansPerStep * (1.f / (deltaTime == 0.f ? 0.001f : deltaTime))) *
+	               (1.f / (2.f * glm::pi<float>())) * (60.f / 1.f);
 
 	// TODO This is not good
 	// Handle idle (manuals should stall I think? need to do some research on this)
@@ -275,7 +264,6 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 	if (glm::abs(engineRpmOut) > maxEngineRpm)
 		engineRpmOut = engineRpmOut < 0.f ? -maxEngineRpm : maxEngineRpm;
 
-	// TODO: Fix reverse always using 1st gear (limit reverse speed)
 	engineRpmOut = glm::abs(engineRpmOut);
 
 	// TODO: Consider engine speed
@@ -294,6 +282,7 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 
 void PhysicsVehicle::Update(float deltaTime)
 {
+	// Engine force
 	float engineForce = 0.f;
 	{
 		// TODO Technically we need the lock only for setting here.. messy
@@ -317,6 +306,7 @@ void PhysicsVehicle::Update(float deltaTime)
 	// LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
 	// << " output force: " << engineForce;
 
+	// Apply forces
 	// Rear-wheel drive
 	for (int wheelIndex = 2; wheelIndex < vehicle->getNumWheels(); ++wheelIndex)
 	{
@@ -330,25 +320,19 @@ void PhysicsVehicle::Update(float deltaTime)
 		vehicle->setSteeringValue(VehicleSteering, wheelIndex);
 	}
 
-	glm::mat4 chassisTransform = GetInterpolatedTransform();
 	// Update position. This is what everything outside the physics engine will use from now on
+	glm::mat4 chassisTransform = GetInterpolatedTransform();
 	lastUpdateTransform = chassisTransform;
 
-	// Chassis rendering
-	chassisRender.SetTransform(chassisTransform);
-	basicDriver.SetTransform(chassisTransform);
-
-	// Wheel rendering
+	// Update wheel transforms. It's important to do this near GetInterpolatedTransform() so they
+	// match each other
 	for (int i = 0; i < vehicle->getNumWheels(); i++)
 	{
-		// synchronize the wheels with the (interpolated) chassis worldtransform
+		// Synchronize the wheels with the (interpolated) chassis worldtransform
 		vehicle->updateWheelTransform(i, true);
 
 		btTransform tr = vehicle->getWheelInfo(i).m_worldTransform;
-		float wheelGraphicsMatrix[16];
-		BulletTransformToHordeMatrix(tr, wheelGraphicsMatrix);
-		glm::mat4 wheelMatrix;
-		openGlMatrixToGlmMat4(wheelGraphicsMatrix, wheelMatrix);
+		glm::mat4 wheelMatrix = BulletTransformToGlmMat4(tr);
 		// Rotate wheels 1 and 3 (right side) so hubcap faces outwards
 		if (i % 2 != 0)
 		{
@@ -358,8 +342,13 @@ void PhysicsVehicle::Update(float deltaTime)
 			wheelMatrix = wheelMatrix * rotateTireY;
 		}
 
-		wheelRender[i].SetTransform(wheelMatrix);
+		lastUpdateWheelTransforms[i] = wheelMatrix;
 	}
+}
+
+glm::mat4 PhysicsVehicle::GetWheelTransform(int wheelIndex) const
+{
+	return lastUpdateWheelTransforms[wheelIndex];
 }
 
 glm::mat4 PhysicsVehicle::GetTransform() const

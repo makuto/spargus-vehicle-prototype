@@ -31,6 +31,9 @@ const int NUM_JOYSTICKS_SUPPORTED = 8;
 
 void listConnectedJoysticks()
 {
+	// This isn't normally required during the game loop. This function can be called at any time
+	// though, so we will make sure we have up-to-date information
+	sf::Joystick::update();
 	for (int i = 0; i < NUM_JOYSTICKS_SUPPORTED; ++i)
 	{
 		if (sf::Joystick::isConnected(i))
@@ -277,7 +280,7 @@ void handleCameraInput(Camera& camera, float frameTime)
 	targetDirection = targetDirection * camRotateMat;
 	for (int i = 0; i < 3; ++i)
 		camera.targetCameraDirection[i] = targetDirection[i];
-	
+
 	// LOGV << "Delta rotation: " << deltaRotation;
 	// LOGV << "Rotation matrix: " << camRotateMat;
 	// LOGV << "Target direction: " << camera.targetCameraDirection;

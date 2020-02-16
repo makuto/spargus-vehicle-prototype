@@ -244,8 +244,8 @@ void SimulationTickCallback(btDynamicsWorld* const world, btScalar const timeSte
 		{
 			// this is a new contact, which wasn't in our list before.  send an event to the game.
 			// physicsWorld->SendCollisionPairAddEvent(manifold, body0, body1);
-			LOGD << "Now colliding: " << (void*)body0 << (void*)body1;
-			LOGD << "\tUser pointers: " << (void*)aUserPointer << (void*)bUserPointer;
+			LOGD << "Now colliding: " << (void*)body0 << " " << (void*)body1;
+			LOGD << "\tUser pointers: " << (void*)aUserPointer << " " << (void*)bUserPointer;
 
 			for (const CollisionListener& listener : physicsWorld->collisionListeners)
 				listener(body0, body1, CollisionState::NowColliding);
@@ -268,7 +268,7 @@ void SimulationTickCallback(btDynamicsWorld* const world, btScalar const timeSte
 		btRigidBody const* const body0 = it->first;
 		btRigidBody const* const body1 = it->second;
 
-		LOGD << "No longer colliding: " << (void*)body0 << (void*)body1;
+		LOGD << "No longer colliding: " << (void*)body0 << " " << (void*)body1;
 
 		for (const CollisionListener& listener : physicsWorld->collisionListeners)
 			listener(body0, body1, CollisionState::Separating);

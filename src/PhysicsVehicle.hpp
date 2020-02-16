@@ -2,7 +2,6 @@
 
 #include "BulletDynamics/Vehicle/btRaycastVehicle.h"
 
-#include "GraphicsObject.hpp"
 #include "PhysicsWorld.hpp"
 
 #include <glm/mat4x4.hpp>  // mat4
@@ -13,6 +12,8 @@
 #include <vector>
 
 class PhysicsWorld;
+
+#define VEHICLE_MAX_NUM_WHEELS 4
 
 // TODO: Add destructor
 class PhysicsVehicle
@@ -45,6 +46,7 @@ public:
 	// synchronization issues
 	glm::vec3 GetPosition() const;
 	glm::mat4 GetTransform() const;
+	glm::mat4 GetWheelTransform(int wheelIndex) const;
 
 	bool WheelsContactingSurface();
 
@@ -66,6 +68,7 @@ private:
 	btVehicleRaycaster* vehicleRayCaster;
 
 	glm::mat4 lastUpdateTransform;
+	glm::mat4 lastUpdateWheelTransforms[VEHICLE_MAX_NUM_WHEELS];
 
 	PhysicsWorld& ownerWorld;
 
@@ -74,11 +77,6 @@ private:
 
 	// Used to get from a collision shape to this structure
 	CollisionShapeOwnerReference shapeReference;
-
-	// Rendering
-	Graphics::Object chassisRender;
-	std::vector<Graphics::Object> wheelRender;
-	Graphics::Object basicDriver;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constants

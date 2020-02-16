@@ -2,6 +2,7 @@
 
 #include "DebugDisplay.hpp"
 #include "Logging.hpp"
+#include "Math.hpp"
 #include "Performance.hpp"
 #include "PhysicsVehicle.hpp"
 #include "Utilities.hpp"
@@ -11,6 +12,7 @@
 #include "sound/sound.hpp"
 
 // For abs
+#include <glm/vec3.hpp>  // vec3
 #include "glm/common.hpp"
 
 // #include <SFML/Sound.hpp>
@@ -101,7 +103,22 @@ void loadAudio()
 		                  soundFxFilePairs[i].filename);
 
 		if (!soundFxFilePairs[i].soundFx->load(soundFxFilePairs[i].filename))
-			std::cout << "Failed to load " << soundFxFilePairs[i].filename << "\n";
+		{
+			LOGE << "Failed to load " << soundFxFilePairs[i].filename << "\n";
+			continue;
+		}
+
+		switch (soundFxFilePairs[i].location)
+		{
+			case SoundLocation::World:
+				// From SFML docs:
+				// Making a sound relative to the listener will ensure that it will always be played
+				// the same way regardless of the position of the listener
+				soundFxFilePairs[i].soundFx->getBase()->setRelativeToListener(true);
+				break;
+			default:
+				break;
+		}
 	}
 }
 
@@ -127,133 +144,125 @@ void debugPrintAudio()
 	}
 }
 
-typedef short SoundSample;
-class EngineAudioStream : public sf::SoundStream
+void VehicleEngineAudioStream::initializeEngineAudio()
 {
-public:
-	void initializeNoiseStream()
+	// TODO: Properly zero
+	for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
+		sampleBuffer[i] = 0;
+
+	bufferOffset = 0;
+	unsigned int channelCount = 1;
+	sampleRate = 44100;
+	initialize(channelCount, sampleRate);
+
+	lastEngineRpm = 0.f;
+}
+
+void VehicleEngineAudioStream::setEngineRpm(float newRpm)
+{
+	const std::lock_guard<std::mutex> lock(engineRpmMutex);
+	lastEngineRpm = newRpm;
+}
+
+bool VehicleEngineAudioStream::onGetData(sf::SoundStream::Chunk& data)
+{
+	PerfTimeNamedScope(audioScope, "Audio: Engine stream", tracy::Color::RoyalBlue1);
+
+	float engineRpm = 0.f;
 	{
-		// TODO: Properly zero
-		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
-			sampleBuffer[i] = 0;
-
-		bufferOffset = 0;
-
-		unsigned int channelCount = 1;
-		sampleRate = 44100;
-		initialize(channelCount, sampleRate);
+		const std::lock_guard<std::mutex> lock(engineRpmMutex);
+		engineRpm = lastEngineRpm;
 	}
 
-private:
-	SoundSample sampleBuffer[100];
-	unsigned int bufferOffset;
-	unsigned int sampleRate;
-
-	virtual bool onGetData(sf::SoundStream::Chunk& data)
+	const SoundSample maxMotion = 10;
+	const float pi = std::acos(-1);
+	SoundSample lastSample = sampleBuffer[ArraySize(sampleBuffer) - 1];
+	int triangleWaveDirection = 1;
+	int triangleWaveSpeed = 1000;
+	unsigned int engineUpSquareNextNSamples = 0;
+	for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
 	{
-		PerfTimeNamedScope(audioScope, "Audio: Engine stream", tracy::Color::RoyalBlue1);
+		// TODO Overflow protection
+		// sampleBuffer[i] = lastSample + ((rand() % maxMotion) - maxMotion / 2);
 
-		float engineRpm = GetPlayerVehicleEngineRpmThreadSafe();
+		// Sawtooth wave
+		// sampleBuffer[i] = ((i * 7) / (float)ArraySize(sampleBuffer)) *
+		// std::numeric_limits<short>::max();
 
-		const SoundSample maxMotion = 10;
-		const float pi = std::acos(-1);
-		SoundSample lastSample = sampleBuffer[ArraySize(sampleBuffer) - 1];
-		int triangleWaveDirection = 1;
-		int triangleWaveSpeed = 1000;
-		unsigned int engineUpSquareNextNSamples = 0;
-		for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
+		// Square wave
+		// if (i < ArraySize(sampleBuffer) / 2)
+		// 	sampleBuffer[i] = std::numeric_limits<short>::max();
+		// else
+		// 	sampleBuffer[i] = std::numeric_limits<short>::min();
+
+		// Triangle wave
+		// if (i == 0)
+		// 	sampleBuffer[i] = std::numeric_limits<short>::min();
+		// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() +
+		// triangleWaveSpeed) 	triangleWaveDirection = 1; else if (sampleBuffer[i - 1] >=
+		// std::numeric_limits<short>::max() - triangleWaveSpeed) 	triangleWaveDirection = -1;
+		// if (i > 0) 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection *
+		// triangleWaveSpeed);
+
+		// Sine wave - Not working
+		// sampleBuffer[i] =
+		//     std::sin(((i % ArraySize(sampleBuffer)) * pi * 2 * (engineRpm / 1000.f)) *
+		//              (std::numeric_limits<short>::max() / 2));
+
+		// Engine rpm
+		if (i + bufferOffset % 100 == 0)
+		// if (i + bufferOffset % (int)(sampleRate / (engineRpm / 60.f)) == 0)
 		{
-			// TODO Overflow protection
-			// sampleBuffer[i] = lastSample + ((rand() % maxMotion) - maxMotion / 2);
-
-			// Sawtooth wave
-			// sampleBuffer[i] = ((i * 7) / (float)ArraySize(sampleBuffer)) *
-			// std::numeric_limits<short>::max();
-
-			// Square wave
-			// if (i < ArraySize(sampleBuffer) / 2)
-			// 	sampleBuffer[i] = std::numeric_limits<short>::max();
-			// else
-			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
-
-			// Triangle wave
-			// if (i == 0)
-			// 	sampleBuffer[i] = std::numeric_limits<short>::min();
-			// else if (sampleBuffer[i - 1] <= std::numeric_limits<short>::min() +
-			// triangleWaveSpeed) 	triangleWaveDirection = 1; else if (sampleBuffer[i - 1] >=
-			// std::numeric_limits<short>::max() - triangleWaveSpeed) 	triangleWaveDirection = -1;
-			// if (i > 0) 	sampleBuffer[i] = sampleBuffer[i - 1] + (triangleWaveDirection *
-			// triangleWaveSpeed);
-
-			// Sine wave - Not working
-			// sampleBuffer[i] =
-			//     std::sin(((i % ArraySize(sampleBuffer)) * pi * 2 * (engineRpm / 1000.f)) *
-			//              (std::numeric_limits<short>::max() / 2));
-
-			// Engine rpm
-			if (i + bufferOffset % 100 == 0)
-			// if (i + bufferOffset % (int)(sampleRate / (engineRpm / 60.f)) == 0)
-			{
-				engineUpSquareNextNSamples = 10;
-			}
-
-			if (engineUpSquareNextNSamples > 0)
-			{
-				engineUpSquareNextNSamples--;
-				sampleBuffer[i] = std::numeric_limits<short>::max();
-			}
-			else
-			{
-				sampleBuffer[i] = std::numeric_limits<short>::min();
-			}
-
-			// if (i < 10)
-			// LOGD << sampleBuffer[i];
-
-			lastSample = sampleBuffer[i];
+			engineUpSquareNextNSamples = 10;
 		}
 
-		data.sampleCount = ArraySize(sampleBuffer);
-		data.samples = sampleBuffer;
-
-		bufferOffset += data.sampleCount;
-
-		// Keep playing forever
-		return true;
-	}
-
-	virtual void onSeek(sf::Time timeOffset)
-	{
-	}
-};
-
-void updateAudio(PhysicsVehicle& vehicle, float frameTime)
-{
-	PerfTimeNamedScope(audioScope, "Audio", tracy::Color::Ivory4);
-
-	const glm::vec3 vehiclePosition = vehicle.GetPosition();
-
-	// if (false)
-	{
-		static EngineAudioStream noiseStream;
-		static bool initialized = false;
-		if (!initialized)
+		if (engineUpSquareNextNSamples > 0)
 		{
-			noiseStream.initializeNoiseStream();
-			initialized = true;
-			noiseStream.play();
+			engineUpSquareNextNSamples--;
+			sampleBuffer[i] = std::numeric_limits<short>::max();
+		}
+		else
+		{
+			sampleBuffer[i] = std::numeric_limits<short>::min();
 		}
 
-		noiseStream.setPitch(vehicle.engineRpm / 10000.f);
-		noiseStream.setVolume(40.f);
+		// if (i < 10)
+		// LOGD << sampleBuffer[i];
 
-		noiseStream.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
+		lastSample = sampleBuffer[i];
 	}
 
-	audioListener.setPosition(vehiclePosition[0], vehiclePosition[1], vehiclePosition[2]);
+	data.sampleCount = ArraySize(sampleBuffer);
+	data.samples = sampleBuffer;
 
-	// Temporarily disable audio
-	// return;
+	bufferOffset += data.sampleCount;
+
+	// Keep playing forever
+	return true;
+}
+
+void VehicleEngineAudioStream::onSeek(sf::Time timeOffset)
+{
+}
+
+// Support only one listener, even in splitscreen. I'm not sure how this is handled normally
+// TODO: Add multiplayer 3D audio support (do some research)
+void updateAudio(const glm::mat4& mainListenerTransform, float frameTime)
+{
+	PerfTimeNamedScope(globalAudioScope, "Global Audio", tracy::Color::Ivory4);
+
+	audioListener.setPosition(mainListenerTransform[3][0], mainListenerTransform[3][1],
+	                          mainListenerTransform[3][2]);
+	// TODO Add to base2.0
+	{
+		glm::vec3 mainListenerDirection = TransformGlmVec3Mat4(mainListenerTransform, ForwardAxis);
+		sf::Listener::setDirection(mainListenerDirection[0], mainListenerDirection[1],
+		                           mainListenerDirection[2]);
+
+		glm::vec3 mainListenerUpAxis = TransformGlmVec3Mat4(mainListenerTransform, UpAxis);
+		sf::Listener::setUpVector(mainListenerUpAxis[0], mainListenerUpAxis[1],
+		                          mainListenerUpAxis[2]);
+	}
 
 	static bool worldAudioStarted = false;
 	if (!worldAudioStarted)
@@ -279,9 +288,29 @@ void updateAudio(PhysicsVehicle& vehicle, float frameTime)
 		switch (soundFxFilePairs[i].location)
 		{
 			case SoundLocation::World:
-				soundFxFilePairs[i].soundFx->setPosition(vehiclePosition[0], vehiclePosition[1],
-				                                         vehiclePosition[2]);
+				// soundFxFilePairs[i].soundFx->setPosition(
+				//     mainListenerPosition[0], mainListenerPosition[1], mainListenerPosition[2]);
+				// This is handled by setRelativePosition(true)
 				break;
+			default:
+				break;
+		}
+	}
+}
+
+// Currently not used
+void updateVehicleAudio(PhysicsVehicle& vehicle, float frameTime)
+{
+	PerfTimeNamedScope(audioScope, "Vehice Audio", tracy::Color::Ivory4);
+
+	const glm::vec3 vehiclePosition = vehicle.GetPosition();
+
+	// Update sound positions
+	// TODO: This won't work for multiple vehicles (each needs their own sound effects)
+	for (size_t i = 0; i < sizeof(soundFxFilePairs) / sizeof(SoundEffect); ++i)
+	{
+		switch (soundFxFilePairs[i].location)
+		{
 			case SoundLocation::Vehicle:
 				soundFxFilePairs[i].soundFx->setPosition(vehiclePosition[0], vehiclePosition[1],
 				                                         vehiclePosition[2]);
