@@ -3,6 +3,8 @@
 #include "PhysicsWorld.hpp"
 
 #include "Audio.hpp"
+#include "Color.hpp"
+#include "DebugDraw.hpp"
 #include "Logging.hpp"
 #include "Math.hpp"
 #include "Performance.hpp"
@@ -22,13 +24,6 @@ std::mutex g_vehiclesMutex;
 std::vector<PhysicsVehicle*> g_vehicles;
 
 ////////////////////////////////////////////////////////////////////////////////
-// Vehicle constants
-//
-
-const btVector3 wheelDirectionCS0(0, -1, 0);
-const btVector3 wheelAxleCS(-1, 0, 0);
-
-////////////////////////////////////////////////////////////////////////////////
 // Vehicle implementation
 //
 
@@ -38,6 +33,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 	float chassisWidthHalfExtents = chassisWidth / 2.f;
 	float chassisLengthHalfExtents = chassisLength / 2.f;
+
+	glm::vec3 chassisOrigin;
 
 	// Create chassis
 	{
@@ -56,7 +53,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		localTransform.setIdentity();
 		// TODO: Figure this out
 		// localTransform effectively shifts the center of mass with respect to the chassis
-		localTransform.setOrigin(btVector3(0, 1, 0));
+		localTransform.setOrigin(chassisLocalOffset);
 
 		compound->addChildShape(localTransform, chassisShape);
 
@@ -72,13 +69,20 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 
 		btTransform transform;
 		transform.setIdentity();
-		transform.setOrigin(btVector3(0, 0, 0));
+		transform.setOrigin(btVector3(0.f, 0.f, 0.f));
 
 		carChassis = physicsWorld.localCreateRigidBody(massKg, transform, compound);
 		// carChassis->setDamping(0.2,0.2);
 
 		/// never deactivate the vehicle
 		carChassis->setActivationState(DISABLE_DEACTIVATION);
+
+		{
+			chassisOrigin = BulletVectorToGlmVec3(transform.getOrigin());
+			glm::vec3 localOrigin = BulletVectorToGlmVec3(localTransform.getOrigin());
+			DebugDraw::addLine(chassisOrigin, localOrigin + chassisOrigin, Color::Yellow,
+			                   Color::Purple, 400.f);
+		}
 	}
 
 	vehicleRayCaster = new btDefaultVehicleRaycaster(physicsWorld.world);
@@ -97,22 +101,59 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		                             chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+		{
+			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
+
+			// Wheel connection point (top of wheel relative to chassis origin)
+			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
+			                   Color::Blue, 400.f);
+			// Axle (normal)
+			DebugDraw::addLine(chassisOrigin, BulletVectorToGlmVec3(wheelAxleCS) + chassisOrigin,
+			                   Color::Orange, Color::Red, 400.f);
+			// Wheel radius
+			DebugDraw::addLine(connectionPoint,
+			                   connectionPoint + chassisOrigin + glm::vec3(0.f, -wheelRadius, 0.f),
+			                   Color::Green, Color::Red, 400.f);
+			// Wheel direction (normal) (normally -UpAxis)
+			DebugDraw::addLine(chassisOrigin,
+			                   chassisOrigin + BulletVectorToGlmVec3(wheelDirectionCS0),
+			                   Color::Green, Color::Red, 400.f);
+			// Connection height (offset)
+			DebugDraw::addLine(chassisOrigin + glm::vec3(1.f, 0.f, 0.f),
+			                   chassisOrigin + glm::vec3(1.f, connectionHeight, 0.f), Color::Blue,
+			                   Color::Orange, 400.f);
+		}
 
 		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
 		                               connectionHeight, chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+		{
+			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
+			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
+			                   Color::Blue, 400.f);
+		}
 
 		isFrontWheel = false;
 		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth),
 		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+		{
+			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
+			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
+			                   Color::Blue, 400.f);
+		}
 
 		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
 		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+		{
+			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
+			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
+			                   Color::Blue, 400.f);
+		}
 
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{

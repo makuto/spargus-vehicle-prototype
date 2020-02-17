@@ -44,12 +44,9 @@ PhysicsWorld::PhysicsWorld()
 	world = new btDiscreteDynamicsWorld(collisionDispatcher, overlappingPairCache, constraintSolver,
 	                                    collisionConfiguration);
 
-	// debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe  //|
-	                         // btIDebugDraw::DBG_DrawAabb |
-	                         // btIDebugDraw::DBG_DrawContactPoints
-	                         // btIDebugDraw::DBG_DrawNormals
-	);
+	debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	// debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawAabb | btIDebugDraw::DBG_DrawContactPoints |
+	                         // btIDebugDraw::DBG_DrawNormals);
 
 	world->setDebugDrawer(&debugDrawer);
 

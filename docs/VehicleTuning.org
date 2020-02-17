@@ -1,0 +1,21 @@
+#+TITLE: Tuning a Vehicle
+* Dimensions
+First, you should have a vehicle model (including wheels). Scale it based on a human reference so it fits in the rest of the world.
+
+** Chassis
+The chassis is the main mass and collision body of the vehicle. Here are the steps to set it up:
+
+- Decide on your chassis origin. For me, it is the floor of the chassis, in-between both wheels. This will be ~{0.f, 0.f, 0.f}~ in PhysicsVehicle-space
+- ~chassisLocalOffset~: I will want to offset the chassis collision shape upwards such that the floor of the chassis is at (0, 0, 0). To do this, measure the distance from the floor of the chassis to the top of the chassis, then half that to get the local transform Y coordinate. This offset does not affect any of the wheel connection points (etc.)
+- ~chassisWidth~: You may want to measure from right rear wheel center to left rear wheel center for width of the chassis to approximate wheel collision, and increase balance
+- ~chassisHeight~: Measure height from chassis origin to top of chassis
+- ~chassisLength~: Measure end to end length
+- ~chassisLocalTransform~: Relative to your chassis origin
+** Wheel connection points
+To set up the wheel variables, follow these steps:
+
+- ~connectionHeight~: Measure the offset between the chassis origin and the top of the rear wheel
+- ~wheelRadius~, ~wheelWidth~: You should be able to measure these in your 3D modeling program
+- ~wheelDirectionCS0~: The -Up Axis of your wheels. This probably doesn't need to be changed from ~{0.f, -1.f, 0.f}~ unless you're doing something creative
+- ~wheelAxleCS~: The Right Axis of your wheels. This probably doesn't need to be changed from ~{-1.f, 0.f, 0.f}~ unless you're doing something creative
+* Drivetrain

@@ -116,23 +116,30 @@ private:
 	// float chassisLength = 2.f;
 
 	// Double width of the chassis to approximate wheel collision, and increase balance
-	float chassisWidth = 2.25f;
+	// float chassisWidth = 1.17871f; // Actual
+	float chassisWidth = 2.3029f; // Wheelbase to wheelbase
 	// float chassisWidth = 1.418f;
 	// Use the height at the middle of the chassis until we get nonrectangular collision set up
 	// float chassisHeight = 1.029375f;
-	float chassisHeight = 1.28671875f;
+	float chassisHeight = 1.022;
 	// float chassisHeight = 0.5f;
-	float chassisLength = 3.0926175f;
+	float chassisLength = 3.37965f;
+
+	// chassisLocalOffset shifts the chassis collision shape relative to the vehicle origin
+	// If chassisLocalOffset = {0.f, 0.f, 0.f}, the chassis half-width, half-height, half-length
+	// bounding box will be centered around 0, 0, 0
+	const btVector3 chassisLocalOffset = {0.f, 1.022f / 2.f, 0.f};
 
 	float defaultBrakingForce = 20.f;
 
-	// The axle height relative to the vehicle (I think)
+	// Offset the top of the wheel relative to the origin
 	// float connectionHeight = 0.827f;  // 1.2f;
-	float connectionHeight = 0.54525f;  // 1.2f;
-	// float connectionHeight = 0.7525f;  // 1.2f;
+	// float connectionHeight = 0.54525f;  // 1.2f;
+	float connectionHeight = 0.7436f;  // 1.2f;
 	// Use same radius wheels for now
 	// TODO add support for different rear/front wheel sizes
-	float wheelRadius = 1.23f / 2.f;
+	// float wheelRadius = 1.23f / 2.f;
+	float wheelRadius = 0.7436f - 0.1227f;
 	// Tread width
 	float wheelWidth = 0.375f;
 	// Default by bullet
@@ -140,6 +147,13 @@ private:
 	// Pretty slidey here, with some good characteristics (reverse 180s are fun)
 	// float wheelFriction = 1.5f;  // BT_LARGE_FLOAT;
 	float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
+
+	// Not really necessary to customize these, unless you're making something weird
+	// These need to be normalized, otherwise they scale the wheels
+	const btVector3 wheelDirectionCS0 = {0.f, -1.f, 0.f};
+	// The normal of the hubcap, basically
+	const btVector3 wheelAxleCS = {-1.f, 0.f, 0.f};
+	// const btVector3 wheelAxleCS = {0.f, 0.f, -1.f};
 
 	float suspensionStiffness = 20.f;
 	float suspensionDamping = 2.3f;

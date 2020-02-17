@@ -54,25 +54,34 @@ int getPlayerJoystickId()
 	return playerJoystickId;
 }
 
-void printJoystickButtonPresses()
+bool isJoystickValid(int playerJoystickId)
 {
-	int playerJoystickId = getPlayerJoystickId();
-	if (playerJoystickId < 0)
+	if (!sf::Joystick::isConnected(playerJoystickId))
+	{
+		LOGE << "Player Joystick " << playerJoystickId << " is not connected";
+		return false;
+	}
+	return true;
+}
+
+void printJoystickButtonPresses(int playerJoystickId)
+{
+	if (!isJoystickValid(playerJoystickId))
 		return;
+
 	// How many buttons does joystick #0 support?
 	unsigned int buttons = sf::Joystick::getButtonCount(playerJoystickId);
 	for (unsigned int i = 0; i < buttons; ++i)
 	{
 		bool buttonPressed = sf::Joystick::isButtonPressed(playerJoystickId, i);
 		if (buttonPressed)
-			LOGD << "Pressed button " << i;
+			LOGD << "[" << playerJoystickId << "] Pressed button " << i;
 	}
 }
 
-void printJoystickInput()
+void printJoystickInput(int playerJoystickId)
 {
-	int playerJoystickId = getPlayerJoystickId();
-	if (playerJoystickId < 0)
+	if (!isJoystickValid(playerJoystickId))
 		return;
 
 	// Is joystick #0 connected?
@@ -95,12 +104,12 @@ void printJoystickInput()
 	// Right joystick Y forward -100
 	float positionV = sf::Joystick::getAxisPosition(playerJoystickId, sf::Joystick::V);
 
-	LOGD << "connected = " << connected << " buttons = " << buttons << " hasX = " << hasX
-	     << " \npositionX = " << positionX << " positionY = " << positionY
+	LOGD << "[" << playerJoystickId << "] connected = " << connected << " buttons = " << buttons
+	     << " hasX = " << hasX << " \npositionX = " << positionX << " positionY = " << positionY
 	     << " positionZ = " << positionZ << " positionR = " << positionR
 	     << " positionU = " << positionU << " positionV = " << positionV;
 
-	printJoystickButtonPresses();
+	printJoystickButtonPresses(playerJoystickId);
 }
 
 void applyDeadzone(float& joystickValue)
@@ -110,21 +119,11 @@ void applyDeadzone(float& joystickValue)
 		joystickValue = 0.f;
 }
 
-bool isJoystickValid(int playerJoystickId)
-{
-	if (!sf::Joystick::isConnected(playerJoystickId))
-	{
-		LOGE << "Player Joystick " << playerJoystickId << " is not connected";
-		return false;
-	}
-	return true;
-}
-
 void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime, int playerJoystickId)
 {
 	bool debugPrint = false;
 
-	printJoystickButtonPresses();
+	printJoystickButtonPresses(playerJoystickId);
 
 	if (!isJoystickValid(playerJoystickId))
 		return;
@@ -135,19 +134,22 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime, int p
 		vehicle.Reset();
 
 	// Change tuning via shoulder buttons
-	if (sf::Joystick::isButtonPressed(playerJoystickId, 5))
+	if (false)
 	{
-		vehicle.maxEngineForce += 100.f;
-		LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
-	}
-	else if (sf::Joystick::isButtonPressed(playerJoystickId, 4))
-	{
-		vehicle.maxEngineForce -= 100.f;
-		LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
-	}
+		if (sf::Joystick::isButtonPressed(playerJoystickId, 5))
+		{
+			vehicle.maxEngineForce += 100.f;
+			LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
+		}
+		else if (sf::Joystick::isButtonPressed(playerJoystickId, 4))
+		{
+			vehicle.maxEngineForce -= 100.f;
+			LOGD << "Set maxEngineForce to " << vehicle.maxEngineForce;
+		}
 
-	if (vehicle.maxEngineForce < 0.f)
-		vehicle.maxEngineForce = 0.f;
+		if (vehicle.maxEngineForce < 0.f)
+			vehicle.maxEngineForce = 0.f;
+	}
 
 	// -100 = left thumbstick up, 100 = down
 	// float position = sf::Joystick::getAxisPosition(0, sf::Joystick::Y);
@@ -245,6 +247,7 @@ void processVehicleInputJoystick(PhysicsVehicle& vehicle, float frameTime, int p
 	}
 
 	// Gearbox/shifting
+	if (false)
 	{
 		// TODO Destroy this code
 		static float lastGearChangeTime = 0.f;

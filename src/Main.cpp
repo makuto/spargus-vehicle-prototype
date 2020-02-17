@@ -44,7 +44,7 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
-bool splitScreen = true;
+bool splitScreen = false;
 bool twoPlayer = true;
 
 bool useChaseCam = true;
@@ -458,6 +458,7 @@ int main()
 			otherCamera.UpdateEnd();
 
 			// Debug lines for camera
+			if (false)
 			{
 				glm::vec3 scaledWorldCameraTargetDirection = camera.targetCameraDirection * 3.f;
 				glm::vec3 vehiclePosition = vehicle->GetPosition();
@@ -483,6 +484,9 @@ int main()
 
 			if (!splitScreen)
 			{
+				if (useChaseCam)
+					camera.ChaseCamera(vehicle->GetTransform());
+
 				PerfTimeNamedScope(singleViewportScope, "Render single viewport",
 				                   tracy::Color::Goldenrod1);
 

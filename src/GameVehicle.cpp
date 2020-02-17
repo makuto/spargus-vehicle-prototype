@@ -109,16 +109,6 @@ void UpdateRender(float deltaTime)
 		for (int i = 0; i < currentVehicle->vehicle->getNumWheels(); i++)
 		{
 			glm::mat4 wheelMatrix = currentVehicle->GetWheelTransform(i);
-			// Rotate wheels 1 and 3 (right side) so hubcap faces outwards
-			if (i % 2 != 0)
-			{
-				glm::vec3 rotateYAxis = {0.f, 1.f, 0.f};
-
-				glm::mat4 rotateTireY =
-				    glm::rotate(glm::mat4(1.f), glm::radians(180.f), rotateYAxis);
-				wheelMatrix = wheelMatrix * rotateTireY;
-			}
-
 			currentGraphics.wheelRender[i].SetTransform(wheelMatrix);
 		}
 	}
