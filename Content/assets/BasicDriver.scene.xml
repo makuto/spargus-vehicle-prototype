@@ -1,5 +1,5 @@
 <Model name="BasicDriver" geometry="assets/BasicDriver.geo">
-	<Joint name="Root" tx="0.0179806" ty="-0.437115" tz="-0.86792" rx="90" ry="0" rz="-90" jointIndex="1">
+	<Joint name="Root" tx="0" ty="-0.0493342" tz="-0.64224" rx="90" ry="0" rz="-90" jointIndex="1">
 		<Joint name="pelvis" tx="-0.0337464" ty="-1.4751e-09" tz="-0.975892" rx="-0" ry="0" rz="90" jointIndex="2">
 			<Joint name="spine_01" tx="0" ty="-0.0323008" tz="-0.0890886" jointIndex="3">
 				<Joint name="spine_02" tx="0" ty="0.00966962" tz="-0.0730516" jointIndex="4">
@@ -93,10 +93,10 @@
 		</Joint>
 	</Joint>
 
-	<Mesh name="test-base" material="assets/BasicDriver_middleage_cauasian_male.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="0" batchCount="51768" vertRStart="0" vertREnd="9415" />
-	<Mesh name="test-short04" material="assets/BasicDriver_short04.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="51768" batchCount="3150" vertRStart="9416" vertREnd="10398" />
-	<Mesh name="test-low_poly" material="assets/BasicDriver_Eyeblue.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="54918" batchCount="516" vertRStart="10399" vertREnd="10494" />
-	<Mesh name="test-eyebrow012" material="assets/BasicDriver_eyebrow012.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="55434" batchCount="576" vertRStart="10495" vertREnd="10618" />
-	<Mesh name="test-shoes04" material="assets/BasicDriver_shoes04.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="56010" batchCount="9960" vertRStart="10619" vertREnd="12464" />
-	<Mesh name="test-male_casualsuit06" material="assets/BasicDriver_male_casualsuit06.material.xml" tx="0.0179806" ty="-0.437115" tz="-0.84132" rx="90" ry="0" rz="-0" batchStart="65970" batchCount="21504" vertRStart="12465" vertREnd="16399" />
+	<Mesh name="test-base" material="assets/BasicDriver_middleage_cauasian_male.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="0" batchCount="51768" vertRStart="0" vertREnd="9415" />
+	<Mesh name="test-short04" material="assets/BasicDriver_short04.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="51768" batchCount="3150" vertRStart="9416" vertREnd="10398" />
+	<Mesh name="test-low_poly" material="assets/BasicDriver_Eyeblue.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="54918" batchCount="516" vertRStart="10399" vertREnd="10494" />
+	<Mesh name="test-eyebrow012" material="assets/BasicDriver_eyebrow012.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="55434" batchCount="576" vertRStart="10495" vertREnd="10618" />
+	<Mesh name="test-shoes04" material="assets/BasicDriver_shoes04.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="56010" batchCount="9960" vertRStart="10619" vertREnd="12464" />
+	<Mesh name="test-male_casualsuit06" material="assets/BasicDriver_male_casualsuit06.material.xml" tx="0" ty="-0.0493342" tz="-0.61564" rx="90" ry="0" rz="-0" batchStart="65970" batchCount="21504" vertRStart="12465" vertREnd="16399" />
 </Model>

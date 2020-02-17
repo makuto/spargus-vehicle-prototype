@@ -1,8 +1,0 @@
-<Material>
-	<Shader source="shaders/model.shader" />
-	<ShaderFlag name="_F01_Skinning" />
-	
-	<Uniform name="matDiffuseCol" a="1.0" b="0.16163891" c="0" d="1" />
-	<Sampler name="albedoMap" map="textures/BuggySkin.png" />
-	<!-- <Sampler name="envMap" map="models/skybox/skybox.dds" /> -->
-</Material>

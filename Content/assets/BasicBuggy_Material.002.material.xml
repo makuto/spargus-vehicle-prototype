@@ -1,5 +1,0 @@
-<Material>
-	<Shader source="shaders/model.shader" />
-
-	<Uniform name="matDiffuseCol" a="0.0" b="1.0" c="1.0" d="1" />
-</Material>

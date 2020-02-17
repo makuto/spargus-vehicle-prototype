@@ -1,17 +1,5 @@
 SubDir . ;
 
-# Main spargus_vehicle_prototype : src/Main.cpp
-# src/Render_Horde3D.cpp
-# src/Camera.cpp
-# src/ModelUtilities/ModelLoader.cpp
-# src/ModelUtilities/ObjLoader.cpp
-# src/ModelUtilities/ModelToBullet.cpp
-# src/PhysicsVehicle.cpp
-# src/PhysicsWorld.cpp
-# src/DebugDraw.cpp
-# ;
-
-
 Main spargus_vehicle_prototype : src/Main.cpp
 src/Audio.cpp
 src/Camera.cpp
@@ -46,17 +34,41 @@ LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
 # src/Camera.cpp
 # ;
 
+# LinkLibraries spargus_vehicle_prototype : libBase20 ;
+
+
 #
 # Export models etc. from Blender
 #
 BuildAsset assets/BasicBuggy_Chassis : assets/BasicBuggy_Chassis.blend ;
+# Special case: BasicBuggy_Chassis uses linked buggy. Depend on buggy so it updates
+Includes assets/BasicBuggy_Chassis.blend : assets/BasicBuggy.blend ;
+
+# Copy textures
+# TODO Compress textures
+Bulk Content/assets :
+# Buggy
+assets/BuggySkin.jpg
+assets/Chassis_Interior.png
+assets/Seat.png
+
+# BasicDriver
+assets/middleage_lightskinned_male_diffuse.png
+assets/short04_diffuse.png
+assets/blue_eye.png
+assets/eyebrow012.png
+assets/shoes04_diffuse.png
+assets/male_casualsuit06_diffuse.png
+;
+
+Bulk Content/textures : assets/Wheel_Rear.png
+assets/TestGrid_Sandy.png ;
+
 BuildAsset assets/Wheel_Rear : assets/Wheel_Rear.blend ;
 BuildAsset assets/Wheel_Front : assets/Wheel_Front.blend ;
 BuildAsset assets/World : assets/World.blend ;
 BuildAsset assets/PickUp : assets/PickUp.blend ;
 BuildAsset assets/BasicDriver : assets/BasicDriver.blend ;
 
-# LinkLibraries spargus_vehicle_prototype : libBase20 ;
-
 SubInclude . src RenderLibs Horde3D ;
-
+# SubInclude . assets ;

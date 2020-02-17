@@ -1,7 +1,8 @@
 <Model name="BasicBuggy_Chassis" geometry="assets/BasicBuggy_Chassis.geo">
 
-	<Mesh name="Chassis" material="assets/BasicBuggy_Chassis_Material.material.xml" sx="0.75" sy="0.75" sz="0.75" batchStart="0" batchCount="66" vertRStart="0" vertREnd="47">
-		<Mesh name="Chassis_RollCage" material="assets/BasicBuggy_Chassis_Material.001.material.xml" tx="0" ty="0.163561" tz="-1.65471" batchStart="66" batchCount="27060" vertRStart="48" vertREnd="25628" />
-		<Mesh name="Seat" material="assets/BasicBuggy_Chassis_Material.002.material.xml" tx="0" ty="-0.552563" tz="-1.08555" rx="0.0351758" ry="87.7048" rz="-4.41618" sx="1.00129" sy="1.00001" sz="1.61802" batchStart="27126" batchCount="324" vertRStart="25629" vertREnd="25846" />
+	<Mesh name="Chassis" material="assets/BasicBuggy_Chassis_Chassis_Exterior.material.xml" sx="0.75" sy="0.75" sz="0.75" batchStart="0" batchCount="66" vertRStart="0" vertREnd="47">
+		<Mesh name="Chassis_Interior" material="assets/BasicBuggy_Chassis_Chassis_Interior.material.xml" batchStart="66" batchCount="60" vertRStart="48" vertREnd="91" />
+		<Mesh name="Chassis_RollCage" material="assets/BasicBuggy_Chassis_RollCage.material.xml" tx="0" ty="0.163561" tz="-1.65471" batchStart="126" batchCount="27060" vertRStart="92" vertREnd="25672" />
+		<Mesh name="Seat" material="assets/BasicBuggy_Chassis_Seat.material.xml" tx="0" ty="-0.552563" tz="-1.08555" rx="0.0351758" ry="87.7048" rz="-4.41618" sx="1.00129" sy="1.00001" sz="1.61802" batchStart="27186" batchCount="324" vertRStart="25673" vertREnd="25895" />
 	</Mesh>
 </Model>
