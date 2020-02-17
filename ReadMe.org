@@ -78,6 +78,7 @@ In order to create models, textures, and audio effectively, you need the followi
 *** Toolchain
 Source to executable toolchain (Linux x86_64):
 
+- [[https://clang.llvm.org/docs/ClangFormat.html][ClangFormat]] /6.0.0-1/: Code format
 - [[https://swarm.workshop.perforce.com/projects/perforce_software-jam/][Jam]] /2.6/: Build system. Builds both code and assets
 - [[https://clang.llvm.org/][clang++]] /6.0.0-1/: C++ compiler/linker
 - [[https://ftp.gnu.org/old-gnu/Manuals/binutils-2.12/html_chapter/binutils_1.html][GNU ar]] /2.30/: Library archive creation (e.g. ~.a~)
