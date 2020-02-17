@@ -48,6 +48,8 @@ public:
 	glm::mat4 GetTransform() const;
 	glm::mat4 GetWheelTransform(int wheelIndex) const;
 
+	void SetTransform(const glm::mat4& transform) const;
+
 	bool WheelsContactingSurface();
 
 	void ApplyTorque(const glm::vec3& torque);
@@ -110,19 +112,13 @@ private:
 	// 1000lbs = ~453kg.
 	float massKg = 453.f;
 
-	// Example defaults
-	// float chassisWidth = 1.f;
-	// float chassisHeight = 0.5f;
-	// float chassisLength = 2.f;
-
 	// Double width of the chassis to approximate wheel collision, and increase balance
 	// float chassisWidth = 1.17871f; // Actual
-	float chassisWidth = 2.3029f; // Wheelbase to wheelbase
+	float chassisWidth = 2.3029f;  // Wheelbase to wheelbase
 	// float chassisWidth = 1.418f;
 	// Use the height at the middle of the chassis until we get nonrectangular collision set up
-	// float chassisHeight = 1.029375f;
 	float chassisHeight = 1.022;
-	// float chassisHeight = 0.5f;
+
 	float chassisLength = 3.37965f;
 
 	// chassisLocalOffset shifts the chassis collision shape relative to the vehicle origin
@@ -150,16 +146,27 @@ private:
 
 	// Not really necessary to customize these, unless you're making something weird
 	// These need to be normalized, otherwise they scale the wheels
+	// The direction of the raycast from connectionHeight to (suspensionRestLength + wheelRadius)
 	const btVector3 wheelDirectionCS0 = {0.f, -1.f, 0.f};
 	// The normal of the hubcap, basically
 	const btVector3 wheelAxleCS = {-1.f, 0.f, 0.f};
 	// const btVector3 wheelAxleCS = {0.f, 0.f, -1.f};
 
-	float suspensionStiffness = 20.f;
-	float suspensionDamping = 2.3f;
-	float suspensionCompression = 4.4f;
-	float rollInfluence = 0.1f;  // 1.0f;
-	btScalar suspensionRestLength = 0.6f;
+	// How much force it takes to compress the spring.
+	// Ray distance change * suspensionStiffness = suspension force (paraphrasing)
+	float suspensionStiffness = 50.f;  // 20.f;
+	// Damping removes energy from the springs, eliminating bounce
+	// Each update, remove this much force from the suspension, depending on force sign
+	float suspensionDampingRelaxation = 7.f;   // 2.3f;
+	float suspensionDampingCompression = 10.f;  // 4.4f;
+	float rollInfluence = 0.1f;               // 1.0f;
+	// How far the wheel will drift from the hardpoint (connectionHeight) when not under load
+	// This influences the total length of the raycast vector, which is determined as follows:
+	// raycast vector = hardpoint (connectionHeight) + wheelDirectionCS0 of magnitide
+	// (suspensionRestLength + wheelRadius)
+	// The bottom of the wheel starts at the end of the raycast vector
+	// float suspensionRestLength = 0.6f;
+	float suspensionRestLength = 0.8f;
 
 	std::vector<float> gearboxRatios;
 

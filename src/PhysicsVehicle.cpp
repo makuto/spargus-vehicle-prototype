@@ -31,6 +31,9 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 {
 	PerfTimeNamedScope(vehicleInit, "Vehicle constructor", tracy::Color::Tomato);
 
+	// Draw the positions of wheels and various other things at 0, 0, 0
+	bool debugDrawLayout = true;
+
 	float chassisWidthHalfExtents = chassisWidth / 2.f;
 	float chassisLengthHalfExtents = chassisLength / 2.f;
 
@@ -77,6 +80,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		/// never deactivate the vehicle
 		carChassis->setActivationState(DISABLE_DEACTIVATION);
 
+		if (debugDrawLayout)
 		{
 			chassisOrigin = BulletVectorToGlmVec3(transform.getOrigin());
 			glm::vec3 localOrigin = BulletVectorToGlmVec3(localTransform.getOrigin());
@@ -101,6 +105,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		                             chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+
+		if (debugDrawLayout)
 		{
 			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
 
@@ -122,12 +128,25 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 			DebugDraw::addLine(chassisOrigin + glm::vec3(1.f, 0.f, 0.f),
 			                   chassisOrigin + glm::vec3(1.f, connectionHeight, 0.f), Color::Blue,
 			                   Color::Orange, 400.f);
+
+			// Example raycast
+			glm::vec3 wheelConnectionWithOffset =
+			    connectionPoint + chassisOrigin + glm::vec3(1.f, 0.f, 0.f);
+			float rayLength = wheelRadius + suspensionRestLength;
+			glm::vec3 wheelRay =
+			    wheelConnectionWithOffset + glm::vec3(wheelDirectionCS0[0] * rayLength,
+			                                          wheelDirectionCS0[1] * rayLength,
+			                                          wheelDirectionCS0[2] * rayLength);
+			DebugDraw::addLine(wheelConnectionWithOffset, wheelRay, Color::Purple, Color::Purple,
+			                   400.f);
 		}
 
 		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
 		                               connectionHeight, chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+
+		if (debugDrawLayout)
 		{
 			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
 			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
@@ -139,6 +158,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+
+		if (debugDrawLayout)
 		{
 			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
 			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
@@ -149,6 +170,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		                               connectionHeight, -chassisLengthHalfExtents);
 		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
 		                  wheelRadius, tuning, isFrontWheel);
+
+		if (debugDrawLayout)
 		{
 			glm::vec3 connectionPoint = BulletVectorToGlmVec3(connectionPointCS0);
 			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
@@ -159,8 +182,8 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		{
 			btWheelInfo& wheel = vehicle->getWheelInfo(i);
 			wheel.m_suspensionStiffness = suspensionStiffness;
-			wheel.m_wheelsDampingRelaxation = suspensionDamping;
-			wheel.m_wheelsDampingCompression = suspensionCompression;
+			wheel.m_wheelsDampingRelaxation = suspensionDampingRelaxation;
+			wheel.m_wheelsDampingCompression = suspensionDampingCompression;
 			wheel.m_frictionSlip = wheelFriction;
 			wheel.m_rollInfluence = rollInfluence;
 		}
@@ -435,6 +458,11 @@ glm::vec3 PhysicsVehicle::GetInterpolatedPosition() const
 		return glm::vec3(vehicleTransform.getOrigin().getX(), vehicleTransform.getOrigin().getY(),
 		                 vehicleTransform.getOrigin().getZ());
 	}
+}
+
+void PhysicsVehicle::SetTransform(const glm::mat4& transform) const
+{
+	carChassis->setCenterOfMassTransform(GlmMat4ToBulletTransform(transform));
 }
 
 void PhysicsVehicle::ApplyTorque(const glm::vec3& torque)

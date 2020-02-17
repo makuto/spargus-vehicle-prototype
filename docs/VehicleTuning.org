@@ -2,6 +2,8 @@
 * Dimensions
 First, you should have a vehicle model (including wheels). Scale it based on a human reference so it fits in the rest of the world.
 
+THe following parameters are from Bullet3's ~btRaycastVehicle~ module and the provided ~ForkLift~ example.
+
 ** Chassis
 The chassis is the main mass and collision body of the vehicle. Here are the steps to set it up:
 
@@ -14,8 +16,20 @@ The chassis is the main mass and collision body of the vehicle. Here are the ste
 ** Wheel connection points
 To set up the wheel variables, follow these steps:
 
-- ~connectionHeight~: Measure the offset between the chassis origin and the top of the rear wheel
+- ~connectionHeight~: Measure the offset between the chassis origin and the top of the rear wheel. This will be the height at which the raycast starts. It is the abolute *highest* the wheels may go
 - ~wheelRadius~, ~wheelWidth~: You should be able to measure these in your 3D modeling program
-- ~wheelDirectionCS0~: The -Up Axis of your wheels. This probably doesn't need to be changed from ~{0.f, -1.f, 0.f}~ unless you're doing something creative
+- ~wheelDirectionCS0~: The direction of the wheel raycast from connectionHeight to (suspensionRestLength + wheelRadius). This probably doesn't need to be changed from ~{0.f, -1.f, 0.f}~ unless you're doing something creative
 - ~wheelAxleCS~: The Right Axis of your wheels. This probably doesn't need to be changed from ~{-1.f, 0.f, 0.f}~ unless you're doing something creative
+** Suspension
+- ~suspensionRestLength~: How far the wheel will drift from the hardpoint (~connectionHeight~) when not under load.
+This influences the total length of the raycast vector, which is determined as follows:
+raycast vector = hardpoint (~connectionHeight~) + ~wheelDirectionCS0~ with magnitide (~suspensionRestLength~ + ~wheelRadius~). The bottom of the wheel starts at the end of the raycast vector, and is the *lowest* the wheels can go
+- ~suspensionStiffness~: The force needed to compress a spring is called stiffness (Hooke's Law, ~F = kx~, where ~k~ is the stiffness and ~x~ is the distance). In Bullet, it looks like this: 
+#+BEGIN_SRC C
+  force = wheel_info.m_suspensionStiffness * length_diff * wheel_info.m_clippedInvContactDotSuspension;
+#+END_SRC
+More stiffness and less damping gives a very bouncy behavior
+- ~suspensionDamping~: Actually ~DampingRelaxation~. Damping removes energy from the springs, eliminating bounce. Each vehicle update, in ~btRaycastVehicle::updateSuspension()~, the suspension force is reduced by ~suspensionDamping~ when the suspension is moving up (relaxing) and ~suspensionCompression~ when moving down (compressing)
+- ~suspensionCompression~: Actually ~DampingCompression~. See ~suspensionDamping~
+- ~rollInfluence~: Happens in ~btRaycastVehicle::updateFriction()~. Not sure what it is yet
 * Drivetrain

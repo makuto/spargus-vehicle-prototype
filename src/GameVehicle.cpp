@@ -45,12 +45,14 @@ struct GameVehicleData
 
 GameVehicleData g_gameVehicles;
 
-PhysicsVehicle* CreateVehicle(PhysicsWorld& world)
+PhysicsVehicle* CreateVehicle(PhysicsWorld& world, const glm::mat4& startTransform)
 {
 	PerfTimeNamedScope(physicsVehicleScope, "Vehicle creation", tracy::Color::OrangeRed);
 
 	PhysicsVehicle* newVehicle = new PhysicsVehicle(world);
 	g_gameVehicles.physicsVehicles.push_back(newVehicle);
+
+	newVehicle->SetTransform(startTransform);
 
 	// Create associated structures
 	g_gameVehicles.vehicleGraphics.emplace_back();

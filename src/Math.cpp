@@ -33,6 +33,13 @@ void BulletTransformToHordeMatrix(const btTransform& transform, float* hordeMatr
 	}
 }
 
+btTransform GlmMat4ToBulletTransform(const glm::mat4& mat)
+{
+	btTransform newTransform;
+	newTransform.setFromOpenGLMatrix(glmMatrixToHordeMatrixRef(mat));
+	return newTransform;
+}
+
 glm::mat4 BulletTransformToGlmMat4(const btTransform& transform)
 {
 	glm::mat4 convertedMatrix;

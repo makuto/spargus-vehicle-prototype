@@ -22,6 +22,7 @@ void openGlMatrixToGlmMat4(const double* openGlMatrix, glm::mat4& matOut);
 class btTransform;
 void BulletTransformToHordeMatrix(const btTransform& transform, float* hordeMatrixOut);
 glm::mat4 BulletTransformToGlmMat4(const btTransform& transform);
+btTransform GlmMat4ToBulletTransform(const glm::mat4& mat);
 // Does not copy
 inline float* glmMatrixToHordeMatrixRef(glm::mat4& mat)
 {
