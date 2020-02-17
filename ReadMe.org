@@ -2,7 +2,7 @@
 
 This is a 3D vehicle game prototype inspired by the gameplay and feel of the dune buggies in [[https://en.wikipedia.org/wiki/Jak_3][Jak 3]].
 
-* Videos
+** Videos
 Progress videos, newest to oldest:
 - [[https://www.youtube.com/watch?v=c43dq7xYvuA][Split-screen and better "AI"]] (the top screen is the AI follower)
 - [[https://www.youtube.com/watch?v=LXAsL04EPDY][First "AI" driver]]. WIP Procedural terrain can be seen in the far background
@@ -13,76 +13,76 @@ Progress videos, newest to oldest:
 
 I created a [[https://www.youtube.com/watch?v=sUenByjCijM][reference video]] so I could emulate the Jak 3 behavior. It gives you an idea what the inspiration and goal behavior is
 
-* Setup
-** Clone repository
+** Setup
+*** Clone repository
 Clone and init submodules for dependencies:
 
 #+BEGIN_SRC sh
 git clone --recurse-submodules https://github.com/makuto/spargus-vehicle-prototype
 #+END_SRC
 
-** Set up build system
+*** Set up build system
 Jam is used to build the project. Install Jam:
 
 #+BEGIN_SRC sh
 sudo apt install jam
 #+END_SRC
 
-** Build dependencies
+*** Build dependencies
 
 #+BEGIN_SRC sh
 cd spargus-vehicle-prototype
 ./BuildDependencies.sh
 #+END_SRC
 
-*** Building with Debug symbols
+**** Building with Debug symbols
 
 #+BEGIN_SRC sh
 ./BuildDependencies_Debug.sh
 #+END_SRC
-** Build Spargus
+*** Build Spargus
 
 #+BEGIN_SRC sh
 ./Build.sh
 #+END_SRC
 
-*** Building with Debug symbols
+**** Building with Debug symbols
 
 #+BEGIN_SRC sh
 ./Build_Debug.sh
 #+END_SRC
 
-** Run Spargus
+*** Run Spargus
 ~spargus_vehicle_prototype~ should be run in the root directory of the repository.
-* Asset pipeline
-** Create the asset in your desired modeling program
-** Add the asset to the Jamfile
-** Add textures to Jamfile
-** Run ~jam~
+** Asset pipeline
+*** Create the asset in your desired modeling program
+*** Add the asset to the Jamfile
+*** Add textures to Jamfile
+*** Run ~jam~
 This will build the assets only if necessary.
-** By hand: Export Collada and Wavefront Obj
+*** By hand: Export Collada and Wavefront Obj
 Collada is used by Horde3D to display the mesh, while the Obj is used to create the collision mesh. The meshes can differ if desired (e.g. for a low-poly collision mesh).
 On export, ensure *Triangulate Mesh* and *Apply Modifiers* are checked.
 
-* Supporting programs
+** Supporting programs
 It takes many programs to make a game. This list serves as a working set of everything needed to create Spargus (with the exception of low-level operating system etc.).
 
 Versions are in Italics. They indicate the last working version I used. It is not necessarily required to have the exact same version.
 
-** Asset creation
+*** Asset creation
 In order to create models, textures, and audio effectively, you need the following programs:
 
 - [[https://www.gimp.org/][GIMP]] /(2.8.22)/: Textures are created in GIMP and stored in GIMP's ~.xcf~ format
 - [[https://www.blender.org/][Blender]] /2.82/: Models and animations are created and stored in ~.blend~. Make sure Collada ~.dae~ and Wavefront ~.obj~ exporting are enabled
 - [[https://www.audacityteam.org/][Audacity]]: Audio creation/editing
-** Toolchain
+*** Toolchain
 Source to executable toolchain (Linux x86_64):
 
 - [[https://swarm.workshop.perforce.com/projects/perforce_software-jam/][Jam]] /2.6/: Build system. Builds both code and assets
 - [[https://clang.llvm.org/][clang++]] /6.0.0-1/: C++ compiler/linker
 - [[https://ftp.gnu.org/old-gnu/Manuals/binutils-2.12/html_chapter/binutils_1.html][GNU ar]] /2.30/: Library archive creation (e.g. ~.a~)
 
-** Runtime tools
+*** Runtime tools
 These tools aren't necessary for creating assets, building or running the game, but they are useful for inspecting the game as it is running.
 
 - [[https://bitbucket.org/wolfpld/tracy/src][tracy]] /Feb 2020/: Used for profiling runtime performance
@@ -90,8 +90,8 @@ These tools aren't necessary for creating assets, building or running the game, 
 
 Some of these are included in the ~Dependencies~ directory.
 
-* Dependency notes
-** SFML Setup
+** Dependency notes
+*** SFML Setup
 SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL.
 
 Running ~BuildDependencies.sh~ will build base2.0. You will need to have [[https://www.sfml-dev.org/tutorials/2.5/start-linux.php][installed SFML 2]] already:
@@ -100,7 +100,7 @@ Running ~BuildDependencies.sh~ will build base2.0. You will need to have [[https
 sudo apt-get install libsfml-dev
 #+END_SRC
 
-** Bullet3 Setup
+*** Bullet3 Setup
 Spargus Vehicle Prototype uses [[https://github.com/bulletphysics/bullet3][Bullet3]] for physics.
 
 Build bullet3:
