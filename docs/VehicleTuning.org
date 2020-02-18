@@ -1,8 +1,8 @@
-#+TITLE: Tuning a Vehicle
+#+TITLE: Tuning a Game Vehicle
 * Dimensions
 First, you should have a vehicle model (including wheels). Scale it based on a human reference so it fits in the rest of the world.
 
-THe following parameters are from Bullet3's ~btRaycastVehicle~ module and the provided ~ForkLift~ example.
+The following parameters are from Bullet3's ~btRaycastVehicle~ module and the provided ~ForkLift~ example.
 
 ** Chassis
 The chassis is the main mass and collision body of the vehicle. Here are the steps to set it up:
@@ -32,4 +32,42 @@ More stiffness and less damping gives a very bouncy behavior
 - ~suspensionDamping~: Actually ~DampingRelaxation~. Damping removes energy from the springs, eliminating bounce. Each vehicle update, in ~btRaycastVehicle::updateSuspension()~, the suspension force is reduced by ~suspensionDamping~ when the suspension is moving up (relaxing) and ~suspensionCompression~ when moving down (compressing)
 - ~suspensionCompression~: Actually ~DampingCompression~. See ~suspensionDamping~
 - ~rollInfluence~: Happens in ~btRaycastVehicle::updateFriction()~. Not sure what it is yet
-* Drivetrain
+* Powertrain/Drivetrain
+** How powertrains work
+It took me a while thinking about powertrains to actually grok what each component was doing. There were two realizations I had to make.
+
+I had these realizations after mulling over the drivetrain section from ~references/A Vehicle Dynamics Model for Driving Simulators.pdf~.
+
+*** Pressing the throttle does not determine engine speed/RPMs
+RPM can be imagined as a measurement of the speed of the entire system, but happens to measure the engine speed. The speed of the wheels directly informs RPMs, unless the clutch is engaged.
+
+The throttle can be thought of as a valve, where opening the valve adds more force to the powertrain system, and closing it adds none. 
+
+An internal combustion engine is a machine which converts an explosion (pressure) into linear force by pushing a piston. The piston's connection to the crankshaft converts that linear force into an angular torque, which then goes through the clutch, the gearbox, then the wheels. The throttle says "make more explosive linear energy" but does not necessarily determine how fast the pistons are moving.
+*** The engine and wheels are directly connected
+The transmission makes the engine torque greater or lessor. However, it does the same for the wheel force sent back to the engine. The systems are not disconnected (unless the clutch is pressed). When compared to a bicycle, the powertrain is a "fixie". 
+
+This means you can't have too large a gear ratio because the force from the wheels is transferred to the engine with that ratio, causing your engine to spin faster than it could support (or, with too low a force, slow enough to choke it out).
+
+** Fundamental Powertrain features
+Because I'm creating an arcade vehicle simulation, I shouldn't concern myself with real-world/realistic force values. There are fundamental relationships which must be preserved from the real world in order to get a satisfying arcade simulation.
+*** Engine and wheels are connected
+The engine speed needs to be determined by the wheel speed, unless:
+
+- The wheels are not in contact with the ground
+- The clutch is engaged
+
+The system feeds back into itself this way: the engine adds force to the drivetrain, which sends it to the wheels. The kinetic energy from the chassis is then transferred into the wheels, which send that energy all the way back to the engine.
+*** Transmission
+The transmission/gearbox provides us with fast acceleration at low speeds, giving the player a more responsive car from a stop. It's especially important to have high acceleration at low speeds when performing a three-point turn, for example, because it is very frustrating otherwise. 
+
+The transmission also gives us the ability to set a top speed via a much lower gear ratio in higher gears. At the highest gear, the powertrain is applying less force to the wheels at high speed, and will eventually reach the speed where the max force output is not enough to beat friction and air resistance
+*** Engine speed range 
+By selecting a minimum and maximum RPM speed of the engine, the transmission gear ratios follow. At low speeds, a high gear ratio is necessary because too low of speed will stall the engine. This also means the engine applies more force at low speeds, giving better acceleration. 
+
+Having the RPM range established also informs things like automatic shifting, stalling, and blown engines, if those are relevant to the game.
+
+** Engine audio
+It is important to hook up audio to the engine because it tells the player a lot about the engine's state. It's also really fun. 
+
+The easiest way is to have a very short "blip" sound (procedural or sampled) then pitch shift it based on the engine RPM.
