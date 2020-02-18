@@ -44,7 +44,7 @@ void Object::Initialize(const char* requestedResource)
 	// See https://www.sfml-dev.org/tutorials/2.5/window-opengl.php
 	{
 		PerfTimeNamedScope(HordeRenderScope, "Graphics Object Load Resources", tracy::Color::Red1);
-		h3dutLoadResourcesFromDisk("Content");
+		HordeLoadResources();
 	}
 
 	// TODO: Remove node on destroy

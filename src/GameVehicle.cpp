@@ -2,6 +2,7 @@
 
 #include "Audio.hpp"
 #include "GraphicsObject.hpp"
+#include "Logging.hpp"
 #include "Math.hpp"
 #include "Performance.hpp"
 #include "PhysicsVehicle.hpp"
@@ -20,6 +21,8 @@ struct VehicleGraphics
 	std::vector<Graphics::Object> wheelRender;
 	Graphics::Object basicDriver;
 };
+
+const size_t MAX_ENGINE_AUDIO_STREAMS = 8;
 
 struct GameVehicleData
 {
@@ -65,13 +68,26 @@ PhysicsVehicle* CreateVehicle(PhysicsWorld& world, const glm::mat4& startTransfo
 			Graphics::Object& wheelNode = newGraphics.wheelRender[i];
 			// Disable front wheel for now, because the model isn't ready
 			wheelNode.Initialize(i < 2 && false ? "Wheel_Front" : "Wheel_Rear");
+
+			// TODO: This will cause a visible flicker as wheels reposition during update
+			wheelNode.SetTransform(startTransform);
 		}
 
 		newGraphics.basicDriver.Initialize("BasicDriver");
+
+		// Prevent flicker in from 0, 0, 0 by setting the transforms now
+		newGraphics.chassisRender.SetTransform(startTransform);
+		newGraphics.basicDriver.SetTransform(startTransform);
 	}
 
-	g_gameVehicles.vehicleAudio.push_back(new VehicleEngineAudioStream());
-	g_gameVehicles.vehicleAudio.back()->initializeEngineAudio();
+	// TODO Handle this better (e.g. by player-oriented audio, or a fixed stream pool)
+	if (g_gameVehicles.vehicleAudio.size() < MAX_ENGINE_AUDIO_STREAMS)
+	{
+		g_gameVehicles.vehicleAudio.push_back(new VehicleEngineAudioStream());
+		g_gameVehicles.vehicleAudio.back()->initializeEngineAudio();
+	}
+	else
+		LOGE << "Too many engine audio streams";
 
 	return newVehicle;
 }

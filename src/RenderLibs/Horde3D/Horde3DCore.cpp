@@ -6,6 +6,7 @@
 #include <Horde3D.h>
 #include <Horde3DUtils.h>
 
+#include "Logging.hpp"
 #include "Math.hpp"
 #include "Performance.hpp"
 #include "Utilities.hpp"
@@ -23,6 +24,45 @@ const float cameraNearPlane = 0.5f;
 const float cameraFarPlane = 4096.0f;
 
 bool g_graphicsIntialized = false;
+
+bool enableResourceLoadTimings = true;
+
+// Log the messages for understanding resource load times
+void HordeLoadResources()
+{
+	int level = 0;
+	float time = 0;
+
+	// Flush messages before load
+	const char* hordeMessage = nullptr;
+
+	if (enableResourceLoadTimings)
+	{
+		hordeMessage = h3dGetMessage(&level, &time);
+		while (hordeMessage && hordeMessage[0])
+		{
+			hordeMessage = h3dGetMessage(&level, &time);
+		}
+	}
+
+	h3dutLoadResourcesFromDisk("Content");
+
+	if (enableResourceLoadTimings)
+	{
+		// First one won't be accurate because we don't know what time to base it off of
+		float previousTime = 0.f;
+		hordeMessage = h3dGetMessage(&level, &time);
+		while (hordeMessage && hordeMessage[0])
+		{
+			if (previousTime)
+				LOGI << "(took " << time - previousTime << "s) " << hordeMessage;
+			else
+				LOGI << "(took unknown time) " << hordeMessage;
+			previousTime = time;
+			hordeMessage = h3dGetMessage(&level, &time);
+		}
+	}
+}
 
 // Note that the name must be unique (because Horde3D uses strings as references)
 H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned int* indices,
@@ -43,7 +83,7 @@ H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned 
 		// Material resource used by Mesh node
 		H3DRes materialRes =
 		    h3dAddResource(H3DResTypes::Material, "assets/World_Material.001.material.xml", 0);
-		h3dutLoadResourcesFromDisk("Content");
+		HordeLoadResources();
 
 		// first triangle index of mesh in Geometry resource of parent Model node
 		int batchStart = 0;
@@ -170,7 +210,7 @@ void Initialize(int winWidth, int winHeight)
 	// Load added resources
 	{
 		PerfTimeNamedScope(HordeRenderScope, "Horde Init Load resources", tracy::Color::Red2);
-		h3dutLoadResourcesFromDisk("Content");
+		HordeLoadResources();
 	}
 
 	// Add environment
@@ -260,8 +300,7 @@ void SetViewport(int x, int y, int width, int height)
 
 	// Set virtual camera parameters
 	float aspectRatio = (float)width / height;
-	h3dSetupCameraView(hordeCamera, cameraFov, aspectRatio, cameraNearPlane,
-	                   cameraFarPlane);
+	h3dSetupCameraView(hordeCamera, cameraFov, aspectRatio, cameraNearPlane, cameraFarPlane);
 
 	// This is a slow operation, so only do it if a change happened
 	if (viewportSizeChanged)
@@ -298,7 +337,8 @@ void Update(float fps)
 		//                     1, 1, 1);             // Scale
 	}
 
-	// h3dutShowText("Test", /*x, y*/ 10, 10, /*size*/ 10, /*r,g,b*/ 1.f, 0.f, 0.f, fontMaterialRes);
+	// h3dutShowText("Test", /*x, y*/ 10, 10, /*size*/ 10, /*r,g,b*/ 1.f, 0.f, 0.f,
+	// fontMaterialRes);
 
 	// Render scene
 	h3dRender(hordeCamera);

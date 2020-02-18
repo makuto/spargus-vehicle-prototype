@@ -34,3 +34,5 @@ H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned 
                                  float* texture1UVs, float* texture2UVs,
                                  // Required
                                  int numVertices, int numIndices);
+
+void HordeLoadResources();

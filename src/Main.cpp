@@ -326,6 +326,12 @@ int main()
 
 	loadAudio();
 
+	// For performance testing only: Spawn a vehicle above the player every N seconds
+	// Disable:
+	float performanceTestManyVehiclesSpawnRate = 0.f;
+	// float performanceTestManyVehiclesSpawnRate = 1.f;
+	float performanceTestManyVehiclesTime = 0.f;
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Game loop
 	//
@@ -415,6 +421,17 @@ int main()
 						                   Color::Orange, Color::Blue,
 						                   DebugDraw::Lifetime_OneFrame);
 					}
+				}
+
+				performanceTestManyVehiclesTime += simulationDeltaTime;
+
+				if (performanceTestManyVehiclesSpawnRate &&
+				    performanceTestManyVehiclesTime > performanceTestManyVehiclesSpawnRate)
+				{
+					GameVehicles::CreateVehicle(
+					    physicsWorld,
+					    glm::translate(vehicle->GetTransform(), glm::vec3(0.f, 10.f, 0.f)));
+					performanceTestManyVehiclesTime = 0.f;
 				}
 
 				GameVehicles::UpdatePhysics(simulationDeltaTime);
