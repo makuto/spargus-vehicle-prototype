@@ -33,6 +33,13 @@ More stiffness and less damping gives a very bouncy behavior
 - ~suspensionCompression~: Actually ~DampingCompression~. See ~suspensionDamping~
 - ~rollInfluence~: Happens in ~btRaycastVehicle::updateFriction()~. Not sure what it is yet
 * Powertrain/Drivetrain
+The [[https://en.wikipedia.org/wiki/Powertrain][Powertrain]] generates power and delivers it to the wheels.
+
+Here are some terms you need to understand:
+- RPM: Rate Per minute. This is the engine speed, or how fast the crankshaft is rotating per minute
+- Throttle: The throttle is usually controlled by a "gas pedal" in cars
+- Stalling: An engine which is spinning too slow to continue operating correctly
+- Blowing the engine: An engine which is spinning too fast to continue operating correctly. This is not necessarily the official term for this :D
 ** How powertrains work
 It took me a while thinking about powertrains to actually grok what each component was doing. There were two realizations I had to make.
 
@@ -66,7 +73,14 @@ The transmission also gives us the ability to set a top speed via a much lower g
 By selecting a minimum and maximum RPM speed of the engine, the transmission gear ratios follow. At low speeds, a high gear ratio is necessary because too low of speed will stall the engine. This also means the engine applies more force at low speeds, giving better acceleration. 
 
 Having the RPM range established also informs things like automatic shifting, stalling, and blown engines, if those are relevant to the game.
+*** Automatic vs. Manual transmissions
+Automatics still have the same fundamental powertrain components. The main difference is concerning the clutch: automatics have [[https://en.wikipedia.org/wiki/Automatic_transmission][automatic transmissions]] which are mechanical devices that change gear ratios automatically. From Wikipedia:
 
+="[An automatic transmission] uses a fluid coupling in place of a friction clutch, and accomplishes gear changes by hydraulically locking and unlocking a system of planetary gears."=
+
+Automatics do not stall when idling because the fluid coupling automatically disengages the engine from the rest of the drivetrain. (How? I don't know, but I do want to learn eventually).
+
+For our purposes, we will simulate a manual which shifts instantly (i.e. without the need of engaging the clutch first). It will also automatically shift based on engine speed. This is similar to a [[https://en.wikipedia.org/wiki/Semi-automatic_transmission][Semi-automatic transmission]] (a manual transmission with an automated clutch and gear selection).
 ** Engine audio
 It is important to hook up audio to the engine because it tells the player a lot about the engine's state. It's also really fun. 
 
