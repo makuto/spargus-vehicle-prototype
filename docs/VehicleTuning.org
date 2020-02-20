@@ -108,6 +108,8 @@ I have not yet found a method other than intuition and experimentation for deter
 **** Staying within acceptable engine speeds
 Tuning a transmission without knowing that gear ratios should descend in power is not a problem. If you understand the wheel-engine connection, you'll naturally discover that it's the only acceptable way to tune your transmission, because having a higher gear ratio in the next higher gear will cause the engine to spin too quickly, blowing it.
 
+You will also notice that selecting acceptable engine speeds informs the next and previous gears relative to the current one. If the ratios differ too much, the engine will either stall out or blow up when shifting to the gear. Engine speed restrictions naturally enforce wheel speed, so you need to make sure that the wheel speed ranges between gears have some overlap.
+
 If any of your gears result in the engine easily escaping the acceptable RPM range (engine speed), you need to change that gear to a higher ratio (if the engine is stalling) or lower ratio (if the engine is blowing up).
 
 Note that your simulation will not actually have any behavior changes if the engine stalls or blows unless you implement those cases. It will run just fine at one million RPM unless you say that isn't okay. We're not dealing with reality here, but it is informing our simulation.
