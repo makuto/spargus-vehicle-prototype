@@ -45,7 +45,8 @@ int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
 bool splitScreen = false;
-bool twoPlayer = true;
+// bool twoPlayer = true;
+bool twoPlayer = false;
 
 bool useChaseCam = true;
 // bool useChaseCam = false;
@@ -367,7 +368,8 @@ int main()
 			int player2Joystick = 1;
 
 			handleCameraInput(camera, previousFrameTime, player1Joystick);
-			handleCameraInput(otherCamera, previousFrameTime, player2Joystick);
+			if (twoPlayer)
+				handleCameraInput(otherCamera, previousFrameTime, player2Joystick);
 
 			if (useJoystick)
 			{
@@ -388,7 +390,9 @@ int main()
 				// Ricky Suicide
 				if (!twoPlayer)
 				{
-					if (glm::distance2(otherVehicle->GetPosition(), vehicle->GetPosition()) <
+					glm::vec3 targetPosition =
+					    TransformGlmVec3ByMat4(vehicle->GetTransform(), glm::vec3(5.f, 0.f, 10.f));
+					if (glm::distance2(otherVehicle->GetPosition(), targetPosition) <
 					    glm::pow(10.f, 2))
 					{
 						// Stop near player
@@ -400,9 +404,9 @@ int main()
 						otherVehicle->ThrottlePercent = 1.f;
 						// Steer towards player
 						glm::vec3 playerDelta =
-						    glm::normalize(vehicle->GetPosition() - otherVehicle->GetPosition());
+						    glm::normalize(targetPosition - otherVehicle->GetPosition());
 						glm::vec3 vehicleLeft =
-						    TransformGlmVec3Mat4(otherVehicle->GetTransform(), LeftAxis);
+						    RotateGlmVec3ByMat4(otherVehicle->GetTransform(), LeftAxis);
 						glm::vec3 vehicleLeftNormalized = glm::normalize(vehicleLeft);
 						float targetDot = glm::dot(vehicleLeftNormalized, playerDelta);
 						// float angleToPlayer = glm::angle(vehicleLeftNormalized, playerDelta);
@@ -413,7 +417,7 @@ int main()
 							otherVehicle->VehicleSteering = 0.f;
 						else
 							otherVehicle->VehicleSteering = -otherVehicle->steeringClamp;
-						DebugDraw::addLine(otherVehicle->GetPosition(), vehicle->GetPosition(),
+						DebugDraw::addLine(otherVehicle->GetPosition(), targetPosition,
 						                   Color::Orange, Color::Blue,
 						                   DebugDraw::Lifetime_OneFrame);
 						DebugDraw::addLine(otherVehicle->GetPosition(),

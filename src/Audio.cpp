@@ -120,6 +120,9 @@ void loadAudio()
 				break;
 		}
 	}
+
+	// Disable audio
+	// sf::Listener::setGlobalVolume(0.f);
 }
 
 void debugPrintAudio()
@@ -255,11 +258,11 @@ void updateAudio(const glm::mat4& mainListenerTransform, float frameTime)
 	                          mainListenerTransform[3][2]);
 	// TODO Add to base2.0
 	{
-		glm::vec3 mainListenerDirection = TransformGlmVec3Mat4(mainListenerTransform, ForwardAxis);
+		glm::vec3 mainListenerDirection = RotateGlmVec3ByMat4(mainListenerTransform, ForwardAxis);
 		sf::Listener::setDirection(mainListenerDirection[0], mainListenerDirection[1],
 		                           mainListenerDirection[2]);
 
-		glm::vec3 mainListenerUpAxis = TransformGlmVec3Mat4(mainListenerTransform, UpAxis);
+		glm::vec3 mainListenerUpAxis = RotateGlmVec3ByMat4(mainListenerTransform, UpAxis);
 		sf::Listener::setUpVector(mainListenerUpAxis[0], mainListenerUpAxis[1],
 		                          mainListenerUpAxis[2]);
 	}
