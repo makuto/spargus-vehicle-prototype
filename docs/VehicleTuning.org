@@ -39,7 +39,7 @@ More stiffness and less damping gives a very bouncy behavior
 The [[https://en.wikipedia.org/wiki/Powertrain][Powertrain]] generates power and delivers it to the wheels.
 
 Here are some terms you need to understand:
-- RPM: Rate Per minute. This is the engine speed, or how fast the crankshaft is rotating per minute
+- RPM: Revolutions per minute. This is the engine speed, or how fast the crankshaft is rotating per minute
 - Throttle: The throttle is usually controlled by a "gas pedal" in cars
 - Stalling: An engine which is spinning too slow to continue operating correctly
 - Blowing the engine: An engine which is spinning too fast to continue operating correctly. This is not necessarily the official term for this :D
