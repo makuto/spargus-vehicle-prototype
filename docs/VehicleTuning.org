@@ -1,4 +1,7 @@
 #+TITLE: Tuning a Game Vehicle
+The following document outlines how to set up and tune a raycast-based 3D vehicle simulation. My focus is on arcade/game-feel simulation rather than realistic simulation, but you'll find a certain degree of realism is necessary to get the right feel.
+
+The nitty gritty physics engine details (collision, impulses, constraint solving, etc.) are out of the scope of this document. I use [[https://github.com/bulletphysics/bullet3/blob/master/src/BulletDynamics/Vehicle][btRaycastVehicle]] from the free and open-source library [[https://github.com/bulletphysics/bullet3][Bullet3]] to obtain a basic working 3D vehicle. Using raycasts for vehicle wheels is an extremely common technique in the game industry, so you can expect other libraries and engines to use similar models.
 * Dimensions
 First, you should have a vehicle model (including wheels). Scale it based on a human reference so it fits in the rest of the world.
 
@@ -41,9 +44,11 @@ Here are some terms you need to understand:
 - Stalling: An engine which is spinning too slow to continue operating correctly
 - Blowing the engine: An engine which is spinning too fast to continue operating correctly. This is not necessarily the official term for this :D
 ** How powertrains work
+*Properly understanding the fundamental operation of powertrains is crucial to confidently implementing this important part of a vehicle simulation.* If you don't understand it yet, do some research and contemplate it for a while before attempting to write any code.
+
 It took me a while thinking about powertrains to actually grok what each component was doing. There were two realizations I had to make.
 
-I had these realizations after mulling over the drivetrain section from ~references/A Vehicle Dynamics Model for Driving Simulators.pdf~.
+I had these realizations after mulling over the drivetrain section from ~references/A Vehicle Dynamics Model for Driving Simulators.pdf~, which was an invaluable reference. Read it first before continuing here for the most benefit.
 
 *** Pressing the throttle does not determine engine speed/RPMs
 RPM can be imagined as a measurement of the speed of the entire system, but happens to measure the engine speed. The speed of the wheels directly informs RPMs, unless the clutch is engaged.
