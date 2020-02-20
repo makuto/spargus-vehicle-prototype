@@ -71,3 +71,21 @@ Having the RPM range established also informs things like automatic shifting, st
 It is important to hook up audio to the engine because it tells the player a lot about the engine's state. It's also really fun. 
 
 The easiest way is to have a very short "blip" sound (procedural or sampled) then pitch shift it based on the engine RPM.
+
+** Tuning the Powertrain
+*** Desired forces
+Pick a range for how much force you want your engine to output at minimum throttle (0) and maximum throttle (1). For me, I picked ~0.f~ and ~250.f~ mostly arbitrarily as my engine output "torque" range. This is a game without real-world physics, so it doesn't really matter which numbers you choose here.
+
+Determine how much force needs to be delivered to the wheels to get the car to accelerate from a stop. This can be done by powering the vehicle with direct force input. For my 453kg vehicle (a reasonable-sounding weight for a sandrail), a satisfying amount of force from a stop is maxed at 3,750 N (I say Newtons, but again, we are in our own world. I do think it is accurate given my weight is in kilograms and units are in meters). A force that large isn't sustainable for a long time because the car will quickly exceed speed limits which cause tunnelling in the physics engine.
+
+
+*** Transmission
+From the starting force, determine the first gear ratio. This is simple math: given your max engine output force/torque (ours is ~250.f~), map that to your desired output force to the wheels (3,750 N). ~3,750 / 250 = 15~. Gears simply multiply the engine force/torque and deliver the result to the wheels.
+
+Before tuning further, you need to decide on your engine's acceptable RPM range. This is mostly up to you, but it is based on your final gear ratios. I chose a range of ~300~ RPM at idle and ~3000~ RPM at max, which differs from a real-world car, which is more like ~700~ RPM idle and ~7000~ RPM max. Increasing your engine output force lowers your needed transmission ratios, which comes back and changes your engine RPM (TODO: does it raise or lower RPM?).
+
+I have not yet found a method other than intuition and experimentation for determining how many gears you want and what their ratios should be. I chose 4 forward gears (same as Jak 3) with ratios of 15:1, 10:1, 7:1, and 5:1 for 4th gear. 
+
+You may notice that tuning a vehicle without knowing that gear ratios should descend in power is not a problem. If you understand the wheel-engine connection, you'll naturally discover that it's the only acceptable way to tune your transmission, because having a higher gear ratio in the next higher gear will cause the engine to spin too quickly, blowing it. 
+
+If any of your gears result in the engine easily escaping the acceptable RPM range (engine speed), you need to change that gear to a higher ratio (if the engine is stalling) or lower ratio (if the engine is blowing up).
