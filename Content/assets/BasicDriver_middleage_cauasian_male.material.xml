@@ -2,5 +2,5 @@
 	<Shader source="shaders/model.shader" />
 	<ShaderFlag name="_F01_Skinning" />
 
-	<Sampler name="albedoMap" map="assets/middleage_lightskinned_male_diffuse.png" />
+	<Sampler name="albedoMap" map="assets/middleage_lightskinned_male_diffuse.dds" />
 </Material>

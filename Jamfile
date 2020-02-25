@@ -53,7 +53,10 @@ assets/Chassis_Interior.png
 assets/Seat.png
 
 # BasicDriver
-assets/middleage_lightskinned_male_diffuse.png
+# TODO: Make the dds come from blender collada export (there are some errors printed)
+# Or, make blender still use PNGs and export them, but convert to DDS instead of Bulk
+# assets/middleage_lightskinned_male_diffuse.png
+assets/middleage_lightskinned_male_diffuse.dds
 assets/short04_diffuse.png
 assets/blue_eye.png
 assets/eyebrow012.png
