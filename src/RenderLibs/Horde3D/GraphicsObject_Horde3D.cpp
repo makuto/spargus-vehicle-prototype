@@ -102,4 +102,22 @@ void ProceduralMesh::Initialize(const char* geoName, float* vertices, unsigned i
 	// Set the transform in case this node has an updated transform already
 	TransformUpdated();
 }
+
+void Light::Initialize(const char* lightName)
+{
+	PerfTimeNamedScope(HordeRenderScope, "Graphics Light Init", tracy::Color::Chocolate4);
+	PerfSetNameFormat(HordeRenderScope, "Graphics Light Init '%s'", lightName);
+
+	// If you're getting this, make sure to call Graphics::Initialize() before any nodes initialize
+	assert(g_graphicsIntialized);
+
+	// TODO: Remove allocation
+	object.resource = new ResourceReference();
+
+	object.resource->node = h3dAddLightNode(H3DRootNode, lightName, 0, "LIGHTING", "SHADOWMAP");
+	h3dSetNodeParamF(object.resource->node, H3DLight::RadiusF, 0, 50.0f);
+
+	// Set the transform in case this node has an updated transform already
+	object.TransformUpdated();
+}
 }  // namespace Graphics

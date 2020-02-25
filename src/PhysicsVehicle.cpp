@@ -27,22 +27,23 @@ std::vector<PhysicsVehicle*> g_vehicles;
 // Vehicle implementation
 //
 
-PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsWorld)
+PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld, PhysicsVehicleTuning* newVehicleTuning)
+    : ownerWorld(physicsWorld), vehicleTuning(newVehicleTuning)
 {
 	PerfTimeNamedScope(vehicleInit, "Vehicle constructor", tracy::Color::Tomato);
 
 	// Draw the positions of wheels and various other things at 0, 0, 0
 	bool debugDrawLayout = true;
 
-	float chassisWidthHalfExtents = chassisWidth / 2.f;
-	float chassisLengthHalfExtents = chassisLength / 2.f;
+	float chassisWidthHalfExtents = vehicleTuning->chassisWidth / 2.f;
+	float chassisLengthHalfExtents = vehicleTuning->chassisLength / 2.f;
 
 	glm::vec3 chassisOrigin;
 
 	// Create chassis
 	{
-		btCollisionShape* chassisShape = new btBoxShape(
-		    btVector3(chassisWidthHalfExtents, chassisHeight / 2, chassisLengthHalfExtents));
+		btCollisionShape* chassisShape = new btBoxShape(btVector3(
+		    chassisWidthHalfExtents, vehicleTuning->chassisHeight / 2, chassisLengthHalfExtents));
 		collisionShapes.push_back(chassisShape);
 
 		// Make it possible to go from the chassis shape to the vehicle
@@ -56,7 +57,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		localTransform.setIdentity();
 		// TODO: Figure this out
 		// localTransform effectively shifts the center of mass with respect to the chassis
-		localTransform.setOrigin(chassisLocalOffset);
+		localTransform.setOrigin(vehicleTuning->chassisLocalOffset);
 
 		compound->addChildShape(localTransform, chassisShape);
 
@@ -74,10 +75,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		transform.setIdentity();
 		transform.setOrigin(btVector3(0.f, 0.f, 0.f));
 
-		carChassis = physicsWorld.localCreateRigidBody(massKg, transform, compound);
+		carChassis = physicsWorld.localCreateRigidBody(vehicleTuning->massKg, transform, compound);
 		// carChassis->setDamping(0.2,0.2);
 
 		/// never deactivate the vehicle
+		// TODO: This may be a good optimization in the future to do for stationary vehicles
 		carChassis->setActivationState(DISABLE_DEACTIVATION);
 
 		if (debugDrawLayout)
@@ -90,7 +92,7 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 	}
 
 	vehicleRayCaster = new btDefaultVehicleRaycaster(physicsWorld.world);
-	vehicle = new btRaycastVehicle(tuning, carChassis, vehicleRayCaster);
+	vehicle = new btRaycastVehicle(suspensionAndFrictionTuning, carChassis, vehicleRayCaster);
 
 	physicsWorld.world->addVehicle(vehicle);
 
@@ -101,10 +103,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		// choose coordinate system
 		vehicle->setCoordinateSystem(rightAxisIndex, upAxisIndex, forwardAxisIndex);
 
-		btVector3 connectionPointCS0(chassisWidthHalfExtents - (0.3 * wheelWidth), connectionHeight,
-		                             chassisLengthHalfExtents);
-		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-		                  wheelRadius, tuning, isFrontWheel);
+		btVector3 connectionPointCS0(chassisWidthHalfExtents - (0.3 * vehicleTuning->wheelWidth),
+		                             vehicleTuning->connectionHeight, chassisLengthHalfExtents);
+		vehicle->addWheel(connectionPointCS0, vehicleTuning->wheelDirectionCS0,
+		                  vehicleTuning->wheelAxleCS, vehicleTuning->suspensionRestLength,
+		                  vehicleTuning->wheelRadius, suspensionAndFrictionTuning, isFrontWheel);
 
 		if (debugDrawLayout)
 		{
@@ -114,37 +117,38 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 			DebugDraw::addLine(chassisOrigin, connectionPoint + chassisOrigin, Color::Green,
 			                   Color::Blue, 400.f);
 			// Axle (normal)
-			DebugDraw::addLine(chassisOrigin, BulletVectorToGlmVec3(wheelAxleCS) + chassisOrigin,
+			DebugDraw::addLine(chassisOrigin, BulletVectorToGlmVec3(vehicleTuning->wheelAxleCS) + chassisOrigin,
 			                   Color::Orange, Color::Red, 400.f);
 			// Wheel radius
 			DebugDraw::addLine(connectionPoint,
-			                   connectionPoint + chassisOrigin + glm::vec3(0.f, -wheelRadius, 0.f),
+			                   connectionPoint + chassisOrigin + glm::vec3(0.f, -vehicleTuning->wheelRadius, 0.f),
 			                   Color::Green, Color::Red, 400.f);
 			// Wheel direction (normal) (normally -UpAxis)
 			DebugDraw::addLine(chassisOrigin,
-			                   chassisOrigin + BulletVectorToGlmVec3(wheelDirectionCS0),
+			                   chassisOrigin + BulletVectorToGlmVec3(vehicleTuning->wheelDirectionCS0),
 			                   Color::Green, Color::Red, 400.f);
 			// Connection height (offset)
 			DebugDraw::addLine(chassisOrigin + glm::vec3(1.f, 0.f, 0.f),
-			                   chassisOrigin + glm::vec3(1.f, connectionHeight, 0.f), Color::Blue,
+			                   chassisOrigin + glm::vec3(1.f, vehicleTuning->connectionHeight, 0.f), Color::Blue,
 			                   Color::Orange, 400.f);
 
 			// Example raycast
 			glm::vec3 wheelConnectionWithOffset =
 			    connectionPoint + chassisOrigin + glm::vec3(1.f, 0.f, 0.f);
-			float rayLength = wheelRadius + suspensionRestLength;
-			glm::vec3 wheelRay =
-			    wheelConnectionWithOffset + glm::vec3(wheelDirectionCS0[0] * rayLength,
-			                                          wheelDirectionCS0[1] * rayLength,
-			                                          wheelDirectionCS0[2] * rayLength);
+			float rayLength = vehicleTuning->wheelRadius + vehicleTuning->suspensionRestLength;
+			glm::vec3 wheelRay = wheelConnectionWithOffset +
+			                     glm::vec3(vehicleTuning->wheelDirectionCS0[0] * rayLength,
+			                               vehicleTuning->wheelDirectionCS0[1] * rayLength,
+			                               vehicleTuning->wheelDirectionCS0[2] * rayLength);
 			DebugDraw::addLine(wheelConnectionWithOffset, wheelRay, Color::Purple, Color::Purple,
 			                   400.f);
 		}
 
-		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
-		                               connectionHeight, chassisLengthHalfExtents);
-		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * vehicleTuning->wheelWidth),
+		                               vehicleTuning->connectionHeight, chassisLengthHalfExtents);
+		vehicle->addWheel(connectionPointCS0, vehicleTuning->wheelDirectionCS0,
+		                  vehicleTuning->wheelAxleCS, vehicleTuning->suspensionRestLength,
+		                  vehicleTuning->wheelRadius, suspensionAndFrictionTuning, isFrontWheel);
 
 		if (debugDrawLayout)
 		{
@@ -154,10 +158,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		}
 
 		isFrontWheel = false;
-		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * wheelWidth),
-		                               connectionHeight, -chassisLengthHalfExtents);
-		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(chassisWidthHalfExtents - (0.3 * vehicleTuning->wheelWidth),
+		                               vehicleTuning->connectionHeight, -chassisLengthHalfExtents);
+		vehicle->addWheel(connectionPointCS0, vehicleTuning->wheelDirectionCS0,
+		                  vehicleTuning->wheelAxleCS, vehicleTuning->suspensionRestLength,
+		                  vehicleTuning->wheelRadius, suspensionAndFrictionTuning, isFrontWheel);
 
 		if (debugDrawLayout)
 		{
@@ -166,10 +171,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 			                   Color::Blue, 400.f);
 		}
 
-		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * wheelWidth),
-		                               connectionHeight, -chassisLengthHalfExtents);
-		vehicle->addWheel(connectionPointCS0, wheelDirectionCS0, wheelAxleCS, suspensionRestLength,
-		                  wheelRadius, tuning, isFrontWheel);
+		connectionPointCS0 = btVector3(-chassisWidthHalfExtents + (0.3 * vehicleTuning->wheelWidth),
+		                               vehicleTuning->connectionHeight, -chassisLengthHalfExtents);
+		vehicle->addWheel(connectionPointCS0, vehicleTuning->wheelDirectionCS0,
+		                  vehicleTuning->wheelAxleCS, vehicleTuning->suspensionRestLength,
+		                  vehicleTuning->wheelRadius, suspensionAndFrictionTuning, isFrontWheel);
 
 		if (debugDrawLayout)
 		{
@@ -181,11 +187,11 @@ PhysicsVehicle::PhysicsVehicle(PhysicsWorld& physicsWorld) : ownerWorld(physicsW
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{
 			btWheelInfo& wheel = vehicle->getWheelInfo(i);
-			wheel.m_suspensionStiffness = suspensionStiffness;
-			wheel.m_wheelsDampingRelaxation = suspensionDampingRelaxation;
-			wheel.m_wheelsDampingCompression = suspensionDampingCompression;
-			wheel.m_frictionSlip = wheelFriction;
-			wheel.m_rollInfluence = rollInfluence;
+			wheel.m_suspensionStiffness = vehicleTuning->suspensionStiffness;
+			wheel.m_wheelsDampingRelaxation = vehicleTuning->suspensionDampingRelaxation;
+			wheel.m_wheelsDampingCompression = vehicleTuning->suspensionDampingCompression;
+			wheel.m_frictionSlip = vehicleTuning->wheelFriction;
+			wheel.m_rollInfluence = vehicleTuning->rollInfluence;
 		}
 	}
 
@@ -221,7 +227,7 @@ PhysicsVehicle::~PhysicsVehicle()
 void PhysicsVehicle::Reset()
 {
 	VehicleSteering = 0.f;
-	BrakingForce = defaultBrakingForce;
+	BrakingForce = vehicleTuning->defaultBrakingForce;
 	ThrottlePercent = 0.f;
 
 	carChassis->setCenterOfMassTransform(btTransform::getIdentity());
@@ -367,8 +373,8 @@ void PhysicsVehicle::Update(float deltaTime)
 		playVehicleShifting();
 	}
 
-	// LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
-	// << " output force: " << engineForce;
+	LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
+	     << " output force: " << engineForce;
 
 	// Apply forces
 	// Rear-wheel drive

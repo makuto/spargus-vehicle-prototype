@@ -44,6 +44,7 @@ int WindowWidth = 1920;
 int WindowHeight = 1080;
 #define WIN_BACKGROUND_COLOR 20, 20, 20, 255
 
+// bool splitScreen = true;
 bool splitScreen = false;
 // bool twoPlayer = true;
 bool twoPlayer = false;

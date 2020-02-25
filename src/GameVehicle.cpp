@@ -13,6 +13,8 @@
 #include <glm/trigonometric.hpp>  //radians
 #include <glm/vec3.hpp>           // vec3
 
+#include <sstream>
+
 namespace GameVehicles
 {
 struct VehicleGraphics
@@ -20,6 +22,7 @@ struct VehicleGraphics
 	Graphics::Object chassisRender;
 	std::vector<Graphics::Object> wheelRender;
 	Graphics::Object basicDriver;
+	Graphics::Light headlights;
 };
 
 const size_t MAX_ENGINE_AUDIO_STREAMS = 8;
@@ -35,6 +38,15 @@ struct GameVehicleData
 	// Audio
 	std::vector<VehicleEngineAudioStream*> vehicleAudio;
 
+	glm::mat4 headlightLocalTransform;
+
+	GameVehicleData()
+	{
+		headlightLocalTransform = glm::rotate(glm::mat4(1.f), glm::radians(180.f), UpAxis);
+		headlightLocalTransform =
+		    glm::translate(headlightLocalTransform, glm::vec3(0.f, 0.f, -2.f));
+	}
+
 	~GameVehicleData()
 	{
 		for (PhysicsVehicle* vehicle : physicsVehicles)
@@ -48,11 +60,13 @@ struct GameVehicleData
 
 GameVehicleData g_gameVehicles;
 
+PhysicsVehicleTuning defaultTuning;
+
 PhysicsVehicle* CreateVehicle(PhysicsWorld& world, const glm::mat4& startTransform)
 {
 	PerfTimeNamedScope(physicsVehicleScope, "Vehicle creation", tracy::Color::OrangeRed);
 
-	PhysicsVehicle* newVehicle = new PhysicsVehicle(world);
+	PhysicsVehicle* newVehicle = new PhysicsVehicle(world, &defaultTuning);
 	g_gameVehicles.physicsVehicles.push_back(newVehicle);
 
 	newVehicle->SetTransform(startTransform);
@@ -75,8 +89,14 @@ PhysicsVehicle* CreateVehicle(PhysicsWorld& world, const glm::mat4& startTransfo
 
 		newGraphics.basicDriver.Initialize("BasicDriver");
 
+		std::ostringstream headlightName;
+		// For uniqueness. TODO This sucks
+		headlightName << "Headlight_" << g_gameVehicles.vehicleGraphics.size();
+		newGraphics.headlights.Initialize(headlightName.str().c_str());
+
 		// Prevent flicker in from 0, 0, 0 by setting the transforms now
 		newGraphics.chassisRender.SetTransform(startTransform);
+		newGraphics.headlights.object.SetTransform(startTransform * g_gameVehicles.headlightLocalTransform);
 		newGraphics.basicDriver.SetTransform(startTransform);
 	}
 
@@ -122,6 +142,8 @@ void UpdateRender(float deltaTime)
 		// Chassis rendering
 		currentGraphics.chassisRender.SetTransform(chassisTransform);
 		currentGraphics.basicDriver.SetTransform(chassisTransform);
+		currentGraphics.headlights.object.SetTransform(chassisTransform *
+		                                               g_gameVehicles.headlightLocalTransform);
 
 		// Wheel rendering
 		for (int i = 0; i < currentVehicle->vehicle->getNumWheels(); i++)

@@ -54,12 +54,15 @@ void HordeLoadResources()
 		hordeMessage = h3dGetMessage(&level, &time);
 		while (hordeMessage && hordeMessage[0])
 		{
-			if (previousTime)
-				LOGI << "(took " << time - previousTime << "s) " << hordeMessage;
-			else
-				LOGI << "(took unknown time) " << hordeMessage;
+			LOGI << hordeMessage << " Timing:";
+
 			previousTime = time;
 			hordeMessage = h3dGetMessage(&level, &time);
+
+			if (hordeMessage && hordeMessage[0])
+				LOGI << "...took " << time - previousTime << "s";
+			else
+				LOGI << "...Last timing unknown without instrumenting Horde3D";
 		}
 	}
 }
@@ -229,9 +232,10 @@ void Initialize(int winWidth, int winHeight)
 		h3dSetNodeTransform(light, /*transform=*/0, 0, 5.f, /*rotation=*/0, 180.f, 0.f,
 		                    /*scale=*/1, 1, 1);
 		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 50.0f);
-		H3DNode matRes = h3dFindResource(H3DResTypes::Material, "pipelines/postHDR.material.xml");
-		h3dSetMaterialUniform(matRes, "hdrExposure", 2.5f, 0, 0, 0);
 	}
+
+	H3DNode matRes = h3dFindResource(H3DResTypes::Material, "pipelines/postHDR.material.xml");
+	h3dSetMaterialUniform(matRes, "hdrExposure", 2.5f, 0, 0, 0);
 
 	// Add skybox
 	H3DNode sky = h3dAddNodes(H3DRootNode, skyBoxRes);

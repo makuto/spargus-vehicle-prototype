@@ -26,6 +26,7 @@ public:
 	void Destroy();
 
 protected:
+	friend class Light;
 	glm::mat4 transform;
 
 	// To be defined by render library
@@ -43,5 +44,14 @@ public:
 	                float* texture2UVs,
 	                // Required
 	                int numVertices, int numIndices);
+};
+
+// Try something different with the whole inheritance thing
+class Light
+{
+public:
+	Object object;
+
+	void Initialize(const char* lightName);
 };
 }  // namespace Graphics

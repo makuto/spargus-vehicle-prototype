@@ -28,7 +28,13 @@ Jam is used to build the project. Install Jam:
 sudo apt install jam
 #+END_SRC
 
+You will also need blender to build the 3D assets:
+#+BEGIN_SRC sh
+sudo apt install blender
+#+END_SRC
+
 *** Build dependencies
+Spargus uses several libraries. Build them from source:
 
 #+BEGIN_SRC sh
 cd spargus-vehicle-prototype
@@ -41,6 +47,7 @@ cd spargus-vehicle-prototype
 ./BuildDependencies_Debug.sh
 #+END_SRC
 *** Build Spargus
+Finally, build Spargus. This builds both code and data assets.
 
 #+BEGIN_SRC sh
 ./Build.sh
@@ -54,6 +61,30 @@ cd spargus-vehicle-prototype
 
 *** Run Spargus
 ~spargus_vehicle_prototype~ should be run in the root directory of the repository.
+** Dependency notes
+*** SFML Setup
+SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL.
+
+Running ~BuildDependencies.sh~ will build base2.0. You will need to have [[https://www.sfml-dev.org/tutorials/2.5/start-linux.php][installed SFML 2]] already:
+
+#+BEGIN_SRC sh
+sudo apt-get install libsfml-dev
+#+END_SRC
+
+*** Bullet3 Setup
+Spargus Vehicle Prototype uses [[https://github.com/bulletphysics/bullet3][Bullet3]] for physics.
+
+Build bullet3:
+#+BEGIN_SRC sh
+cd spargus-vehicle-prototype
+./BuildDependencies.sh
+#+END_SRC
+
+/Optional:/ Test the examples:
+
+#+BEGIN_SRC sh
+./Dependencies/bullet3/build_cmake/examples/ExampleBrowser/App_ExampleBrowser
+#+END_SRC
 ** Asset pipeline
 *** Create the asset in your desired modeling program
 *** Add the asset to the Jamfile
@@ -91,27 +122,3 @@ These tools aren't necessary for creating assets, building or running the game, 
 
 Some of these are included in the ~Dependencies~ directory.
 
-** Dependency notes
-*** SFML Setup
-SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL.
-
-Running ~BuildDependencies.sh~ will build base2.0. You will need to have [[https://www.sfml-dev.org/tutorials/2.5/start-linux.php][installed SFML 2]] already:
-
-#+BEGIN_SRC sh
-sudo apt-get install libsfml-dev
-#+END_SRC
-
-*** Bullet3 Setup
-Spargus Vehicle Prototype uses [[https://github.com/bulletphysics/bullet3][Bullet3]] for physics.
-
-Build bullet3:
-#+BEGIN_SRC sh
-cd spargus-vehicle-prototype
-./BuildDependencies.sh
-#+END_SRC
-
-/Optional:/ Test the examples:
-
-#+BEGIN_SRC sh
-./Dependencies/bullet3/build_cmake/examples/ExampleBrowser/App_ExampleBrowser
-#+END_SRC
