@@ -123,4 +123,4 @@ Division of Vehicle Engineering and Autonomous Systems, Vehicle Dynamics at Chal
 
 [[https://raw.githubusercontent.com/Lumak/Urho3D-Offroad-Vehicle/master/Source/Samples/63_OffroadVehicle/Vehicle.cpp][Urho3D Offroad Vehicle]]. /Urho3D game engine/. MIT License. Retrieved 2020-02-20.
 
-Christensen, Christopher. /Personal email between the author (Macoy Madson), Andy Gavin (co-founder of Naughty Dog), and Christopher Christenen (software engineer of Jak 3's dune buggy system)/. 2019-08-08.
+Christensen, Christopher. /Personal email between the author (Macoy Madson), Andy Gavin (co-founder of Naughty Dog), and Christopher Christensen (software engineer of Jak 3's dune buggy system)/. 2019-08-08.
