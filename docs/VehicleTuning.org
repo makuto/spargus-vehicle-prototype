@@ -115,12 +115,26 @@ You will also notice that selecting acceptable engine speeds informs the next an
 If any of your gears result in the engine easily escaping the acceptable RPM range (engine speed), you need to change that gear to a higher ratio (if the engine is stalling) or lower ratio (if the engine is blowing up).
 
 Note that your simulation will not actually have any behavior changes if the engine stalls or blows unless you implement those cases. It will run just fine at one million RPM unless you say that isn't okay. We're not dealing with reality here, but it is informing our simulation.
-* Traction, skidding, drifting, etc.
+* Traction, skidding, drifting
+This section was assisted by the [[https://raw.githubusercontent.com/Lumak/Urho3D-Offroad-Vehicle/master/Source/Samples/63_OffroadVehicle/Vehicle.cpp][Urho3D Offroad Vehicle listing]].
+** Tire model
+The tire model facilitates the transfer of forces between the ground and the tires (and by their connection, the chassis). This influences [[https://en.wikipedia.org/wiki/Automobile_handling][vehicle handling]], and is important to simulate.
 
-* Sources
+Fernández (2012) lists several different tire models. Christensen (2019) recommended using the [[https://en.wikipedia.org/wiki/Hans_B._Pacejka#The_Pacejka_%22Magic_Formula%22_tire_models][Pacejka magic formula]], which was implemented in some simplified form for Jak 3's tire model.
+** Oversteer and Drifting
+The sliding of the rear wheels sideways is formally known as [[https://en.wikipedia.org/wiki/Understeer_and_oversteer][oversteer]], and the intentional use of oversteer is drifting.
+** Rolling resistance
+I referred to [[https://en.wikipedia.org/wiki/Rolling_resistance][Wikipedia]] for an overview of rolling resistance.
+** Stiction: What is it?
+I don't know! This section is TODO.
+* Suspension tuning
+TODO.
+Balance between velocity, simulation update rate, and ray lengths.
+Ray force is applied purely based on instant distance change, i.e. suspension force isn't taken into account the moment the ray is touching the surface, it's as coarse as how long physics ticks are.
+* References
+Christensen, C. /(Personal communication, 2019-08-08)./ Email between Macoy Madson (the author), Andy Gavin (co-founder of Naughty Dog, the studio that developed Jak 3), and Christopher Christensen (software engineer of Jak 3's dune buggy system).
+
 Fernández, J. G. (2012): /A Vehicle Dynamics Model for Driving Simulators/. Department of Applied Mechanics,
 Division of Vehicle Engineering and Autonomous Systems, Vehicle Dynamics at Chalmers University Of Technology. Göteborg, Sweden.
 
 [[https://raw.githubusercontent.com/Lumak/Urho3D-Offroad-Vehicle/master/Source/Samples/63_OffroadVehicle/Vehicle.cpp][Urho3D Offroad Vehicle]]. /Urho3D game engine/. MIT License. Retrieved 2020-02-20.
-
-Christensen, Christopher. /Personal email between the author (Macoy Madson), Andy Gavin (co-founder of Naughty Dog), and Christopher Christensen (software engineer of Jak 3's dune buggy system)/. 2019-08-08.
