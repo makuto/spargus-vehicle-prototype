@@ -1,4 +1,6 @@
 #+TITLE: Tuning a Game Vehicle
+/by Macoy Madson/
+
 The following document outlines how to set up and tune a raycast-based 3D vehicle simulation. My focus is on arcade/game-feel simulation rather than realistic simulation, but you'll find a certain degree of realism is necessary to get the right feel.
 
 The nitty gritty physics engine details (collision, impulses, constraint solving, etc.) are out of the scope of this document. I use [[https://github.com/bulletphysics/bullet3/blob/master/src/BulletDynamics/Vehicle][btRaycastVehicle]] from the free and open-source library [[https://github.com/bulletphysics/bullet3][Bullet3]] to obtain a basic working 3D vehicle. Using raycasts for vehicle wheels is an extremely common technique in the game industry, so you can expect other libraries and engines to use similar models.
@@ -113,3 +115,12 @@ You will also notice that selecting acceptable engine speeds informs the next an
 If any of your gears result in the engine easily escaping the acceptable RPM range (engine speed), you need to change that gear to a higher ratio (if the engine is stalling) or lower ratio (if the engine is blowing up).
 
 Note that your simulation will not actually have any behavior changes if the engine stalls or blows unless you implement those cases. It will run just fine at one million RPM unless you say that isn't okay. We're not dealing with reality here, but it is informing our simulation.
+* Traction, skidding, drifting, etc.
+
+* Sources
+Fernández, J. G. (2012): /A Vehicle Dynamics Model for Driving Simulators/. Department of Applied Mechanics,
+Division of Vehicle Engineering and Autonomous Systems, Vehicle Dynamics at Chalmers University Of Technology. Göteborg, Sweden.
+
+[[https://raw.githubusercontent.com/Lumak/Urho3D-Offroad-Vehicle/master/Source/Samples/63_OffroadVehicle/Vehicle.cpp][Urho3D Offroad Vehicle]]. /Urho3D game engine/. MIT License. Retrieved 2020-02-20.
+
+Christensen, Christopher. /Personal email between the author (Macoy Madson), Andy Gavin (co-founder of Naughty Dog), and Christopher Christenen (software engineer of Jak 3's dune buggy system)/. 2019-08-08.
