@@ -120,6 +120,7 @@ Source to executable toolchain (Linux x86_64):
 - [[https://swarm.workshop.perforce.com/projects/perforce_software-jam/][Jam]] /2.6/: Build system. Builds both code and assets
 - [[https://clang.llvm.org/][clang++]] /6.0.0-1/: C++ compiler/linker
 - [[https://ftp.gnu.org/old-gnu/Manuals/binutils-2.12/html_chapter/binutils_1.html][GNU ar]] /2.30/: Library archive creation (e.g. ~.a~)
+- [[https://cmake.org/][CMake]] /3.10.2/: Dependency project generation (Spargus itself does not use CMake)
 
 *** Runtime tools
 These tools aren't necessary for creating assets, building or running the game, but they are useful for inspecting the game as it is running.
