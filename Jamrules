@@ -5,6 +5,9 @@
 C++ = clang++ ;
 LINK = clang++ ;
 
+# C++ = g++ ;
+# LINK = g++ ;
+
 # If I was building a library, these would be useful
 # LINKFLAGS = -shared ;
 # if $(UNIX)      { SUFSHR = .so ; }
@@ -13,13 +16,16 @@ LINK = clang++ ;
 ## Compiler arguments
 
 # Arguments used on all projects, regardless of any variables
-C++FLAGS = -std=c++11 -Wall -Wextra -Wno-unused-parameter
+# Note that Tracy 0.6.5 requires c++14 (normally C++11 would be fine)
+C++FLAGS = -std=c++14 -stdlib=libstdc++
+-Wall -Wextra -Wno-unused-parameter
+-g
 # Only for profiling, i.e. not release builds
 -DTRACY_ENABLE
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 # Disabled now that I'm compiling Bullet in single-precision
 # -DBT_USE_DOUBLE_PRECISION
--g ;
+;
 
 HDRS = src
 Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImporter
@@ -28,6 +34,8 @@ Dependencies/tinygltf Dependencies/tinyobjloader
 Dependencies/glm
 Dependencies/Horde3D/Horde3D/Bindings/C++
 Dependencies/tracy ;
+
+
 
 if $(DEBUG_BUILD)
 {
@@ -41,6 +49,16 @@ else
   HORDE3D_BUILD_DIR = Dependencies/Horde3D/build/Horde3D ;
 }
 
+# TODO: Make base hold all this weirdness?
+if $(DEBUG_BUILD)
+{
+  SFML_LINKLIBS = -lsfml-audio-d -lsfml-graphics-d -lsfml-window-d -lsfml-system-d ;
+}
+else
+{
+  SFML_LINKLIBS = -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system ;
+}
+
 OPTIM = -O0 ;
 
 ##
@@ -52,7 +70,8 @@ LINKLIBS =
 -lpthread -ldl
 
 # SFML
--lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
+-LDependencies/base2.0/dependencies/SFML/lib
+$(SFML_LINKLIBS)
 
 # OpenGL
 -lGL
@@ -92,8 +111,8 @@ LINKLIBS =
 # LINKFLAGS = -Wl,-rpath,. ;
 
 # TODO: Copy libs to better directory, or static link?
-LINKFLAGS = -g
--Wl,-rpath,.:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:$(HORDE3D_BUILD_DIR)/Source/Horde3DEngine:$(HORDE3D_BUILD_DIR)/Source/Horde3DUtils ;
+LINKFLAGS = -g -stdlib=libstdc++
+-Wl,-rpath,.:Dependencies/base2.0/dependencies/SFML/lib:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:$(HORDE3D_BUILD_DIR)/Source/Horde3DEngine:$(HORDE3D_BUILD_DIR)/Source/Horde3DUtils ;
 
 ##
 ## Jam stuff

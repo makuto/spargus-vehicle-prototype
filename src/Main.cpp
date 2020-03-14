@@ -257,6 +257,9 @@ int main()
 	{
 		PerfTimeNamedScope(windowInit, "Initialize Graphics", tracy::Color::Navy);
 
+		text testText;
+		testText.loadFont("data/fonts/UbuntuMono-R.ttf");
+
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
 		Graphics::Initialize(WindowWidth, WindowHeight);
