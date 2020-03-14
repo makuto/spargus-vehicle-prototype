@@ -28,13 +28,20 @@ Jam is used to build the project. Install Jam:
 sudo apt install jam
 #+END_SRC
 
-You will also need blender to build the 3D assets:
-#+BEGIN_SRC sh
-sudo apt install blender
-#+END_SRC
+You will also need [[https://www.blender.org/download/][Blender 2.8]] to build the 3D assets. For Ubuntu, 2.8 is not yet in the repository, so you should download it directly.
+
+If you have a system install of Blender which is ~<2.8~, you need to add ~sBLENDER=/path/to/blender2.8~ to ~Build.sh~ and ~Build_Debug.sh~ ~jam~ invocations.
 
 *** Build dependencies
-Spargus uses several libraries. Build them from source:
+Spargus uses several libraries. 
+
+Currently, SFML relies on system installs for its dependencies:
+
+#+BEGIN_SRC sh
+sudo apt install libopenal-dev libvorbis-dev libflac-dev libglew
+#+END_SRC
+
+Build the rest of the dependencies from source:
 
 #+BEGIN_SRC sh
 cd spargus-vehicle-prototype
@@ -65,10 +72,10 @@ Finally, build Spargus. This builds both code and data assets.
 *** SFML Setup
 SFML is used for graphics, window, and input. I used my old [[https://github.com/makuto/base2.0][base2.0]] library to wrap SFML if I ever want to switch to SDL.
 
-Running ~BuildDependencies.sh~ will build base2.0. You will need to have [[https://www.sfml-dev.org/tutorials/2.5/start-linux.php][installed SFML 2]] already:
+Running ~BuildDependencies.sh~ will build base2.0, which builds SFML from source. Currently, SFML relies on system installs for its dependencies:
 
 #+BEGIN_SRC sh
-sudo apt-get install libsfml-dev
+sudo apt install libopenal-dev libvorbis-dev libflac-dev libglew
 #+END_SRC
 
 *** Bullet3 Setup
