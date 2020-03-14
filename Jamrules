@@ -30,11 +30,14 @@ C++FLAGS = -std=c++14 -stdlib=libstdc++
 HDRS = src
 Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImporter
 Dependencies/base2.0
+Dependencies/base2.0/dependencies/SFML/include
+Dependencies/base2.0/dependencies/imgui
+Dependencies/base2.0/dependencies/imgui-sfml
 Dependencies/tinygltf Dependencies/tinyobjloader
 Dependencies/glm
 Dependencies/Horde3D/Horde3D/Bindings/C++
 Dependencies/tracy
-Dependencies/base2.0/dependencies/SFML/include ;
+;
 
 if $(DEBUG_BUILD)
 {
@@ -180,6 +183,8 @@ rule BuildAsset
   # This rule ensures if the .blend is updated, the .obj and .dae are dirty (causing BuildAsset to run)
   Depends $(1:S=.obj) : $(2) ;
   Depends $(1:S=.dae) : $(2) ;
+  
+  # TODO: Add depenencies on collision
   Depends Collision/$(1:S=.obj) : $(1:S=.obj) ;
   
   # TODO: I don't normally want to reprocess assets on clean. Make a separate CleanAssets rule

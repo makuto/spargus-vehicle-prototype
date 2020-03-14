@@ -37,6 +37,9 @@
 #include "PickUpObjective.hpp"
 #include "Terrain.hpp"
 
+#include "imgui.h"
+#include "imgui-SFML.h"
+
 // Window variables
 // int WindowWidth = 1200;
 // int WindowHeight = 700;
@@ -59,6 +62,8 @@ bool debugDraw3D = true;
 // bool debugDraw3D = false;
 bool debugDraw2D = true;
 // bool debugDraw2D = false;
+
+bool enableGui = false;
 
 bool useJoystick = true;
 // bool useJoystick = false;
@@ -263,6 +268,12 @@ int main()
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
 		Graphics::Initialize(WindowWidth, WindowHeight);
+
+		if (enableGui)
+		{
+			PerfTimeNamedScope(imguiInit, "IMGUI Initialization", tracy::Color::Purple);
+			ImGui::SFML::Init(*(mainWindow.getBase()));
+		}
 	}
 
 	inputManager input(&mainWindow);
@@ -353,6 +364,8 @@ int main()
 	Camera otherCamera(mainWindow);
 
 	mainWindow.shouldClear(false);
+
+	sf::Clock imguiDeltaClock;
 
 	PerfManualZoneEnd(InitializeContext);
 
@@ -663,6 +676,17 @@ int main()
 				{
 					PickUpObjectives::RenderUI(mainWindow);
 				}
+			}
+
+			if (enableGui)
+			{
+				PerfTimeNamedScope(imguiScope, "IMGUI", tracy::Color::RosyBrown1);
+
+				ImGui::SFML::Update(*mainWindow.getBase(), imguiDeltaClock.restart());
+
+				ImGui::ShowDemoWindow();
+
+				ImGui::SFML::Render(*mainWindow.getBase());
 			}
 
 			// Finished physics update and drawing; send it on its way
