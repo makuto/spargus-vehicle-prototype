@@ -13,8 +13,6 @@ echo Finished building Base2.0!
 
 echo Building Horde3D...
 cd ../Horde3D && mkdir build && cd build \
-	&& cmake .. -DCMAKE_BUILD_TYPE="Debug" \
-			 -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -std=c++14 -stdlib=libstdc++" \
-			 -DCMAKE_SHARED_LINKER_FLAGS="-stdlib=libstdc++" \
-	&& make -j4
+	&& cmake .. -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-std=c++14 -stdlib=libstdc++"	 -DCMAKE_SHARED_LINKER_FLAGS="-stdlib=libstdc++" -DOpenGL_GL_PREFERENCE="LEGACY" \
+	&& make # Note that -j4 etc. will break Horde make!
 echo Finished building Horde3D!
