@@ -24,6 +24,7 @@ void initialize(window* newOutputWindow)
 
 	displayText.setSize(32);
 	displayText.setColor(232, 30, 34, 255);
+	displayText.setOutlineColor(0, 30, 34, 255);
 
 	outputWindow = newOutputWindow;
 }

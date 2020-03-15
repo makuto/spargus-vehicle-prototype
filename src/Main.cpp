@@ -36,6 +36,7 @@
 #include "PhysicsWorld.hpp"
 #include "PickUpObjective.hpp"
 #include "Terrain.hpp"
+#include "VehicleEditor.hpp"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -63,7 +64,11 @@ bool debugDraw3D = true;
 bool debugDraw2D = true;
 // bool debugDraw2D = false;
 
-bool enableGui = false;
+// Show ImGui dialogs
+// bool enableDevGui = false;
+bool enableDevGui = true;
+bool showImGuiDemo = false;
+bool showVehicleEditor = false;
 
 bool useJoystick = true;
 // bool useJoystick = false;
@@ -219,6 +224,7 @@ void handleConfigurationInput(inputManager& input, PhysicsVehicle& mainVehicle)
 	{
 		debugDraw3D = !debugDraw3D;
 		debugDraw2D = !debugDraw2D;
+		enableDevGui = !enableDevGui;
 	}
 	if (input.WasTapped(inputCode::F10, noKeyRepeat))
 	{
@@ -269,10 +275,14 @@ int main()
 		DebugDisplay::initialize(&mainWindow);
 		Graphics::Initialize(WindowWidth, WindowHeight);
 
-		if (enableGui)
+		if (enableDevGui)
 		{
-			PerfTimeNamedScope(imguiInit, "IMGUI Initialization", tracy::Color::Purple);
+			PerfTimeNamedScope(imguiInit, "ImGui Initialization", tracy::Color::Purple);
 			ImGui::SFML::Init(*(mainWindow.getBase()));
+
+			ImGuiStyle& style = ImGui::GetStyle();
+			style.ScaleAllSizes(1.7f);
+			style.Alpha = 0.75f;
 		}
 	}
 
@@ -369,9 +379,20 @@ int main()
 
 	PerfManualZoneEnd(InitializeContext);
 
-	while (!mainWindow.shouldClose() && !input.isPressed(inputCode::Escape))
+	while (!input.isPressed(inputCode::Escape))
 	{
 		PerfTimeNamedScope(timeFrameScope, "Frame", tracy::Color::SlateBlue);
+
+		{
+			PerfTimeNamedScope(windowEventsScope, "Poll Window Events", tracy::Color::Red);
+
+			bool shouldClose =
+			    mainWindow.pollEventsUpdateState([](sf::RenderWindow* win, const sf::Event& event) {
+				    ImGui::SFML::ProcessEvent(event);
+			    });
+			if (shouldClose)
+				break;
+		}
 
 		PerfManualZoneBegin(GameplayContext, "Gameplay", tracy::Color::RoyalBlue);
 
@@ -678,13 +699,44 @@ int main()
 				}
 			}
 
-			if (enableGui)
+			if (enableDevGui)
 			{
-				PerfTimeNamedScope(imguiScope, "IMGUI", tracy::Color::RosyBrown1);
+				PerfTimeNamedScope(imguiScope, "ImGui update and render", tracy::Color::RosyBrown1);
 
 				ImGui::SFML::Update(*mainWindow.getBase(), imguiDeltaClock.restart());
 
-				ImGui::ShowDemoWindow();
+				ImGui::Begin("Options");
+				{
+					ImGui::Checkbox("Enable Dev UI", &enableDevGui);
+					ImGui::Checkbox("Show ImGui Demo", &showImGuiDemo);
+					ImGui::Checkbox("Show Vehicle Editor", &showVehicleEditor);
+					ImGui::Separator();
+
+					ImGui::Checkbox("Draw physics", &debugPhysicsDraw);
+					ImGui::Checkbox("Draw 3D lines", &debugDraw3D);
+					ImGui::Checkbox("Draw 2D overlays", &debugDraw2D);
+					ImGui::Separator();
+
+					ImGui::Checkbox("Use Joystick input", &useJoystick);
+
+					ImGui::Checkbox("Toggle free/chase camera", &useChaseCam);
+
+					bool splitscreenBeforeUI = splitScreen;
+					ImGui::Checkbox("Splitscreen", &splitScreen);
+					if (splitScreen != splitscreenBeforeUI)
+					{
+						Graphics::SetViewport(0, 0, WindowWidth, WindowHeight);
+					}
+
+					ImGui::Checkbox("Two player", &twoPlayer);
+				}
+				ImGui::End();
+
+				if (showVehicleEditor)
+					updateVehicleEditor(physicsWorld, &vehicle);
+
+				if (showImGuiDemo)
+					ImGui::ShowDemoWindow();
 
 				ImGui::SFML::Render(*mainWindow.getBase());
 			}

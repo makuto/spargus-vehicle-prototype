@@ -33,7 +33,7 @@ struct PhysicsVehicleTuning
 	// chassisLocalOffset shifts the chassis collision shape relative to the vehicle origin
 	// If chassisLocalOffset = {0.f, 0.f, 0.f}, the chassis half-width, half-height, half-length
 	// bounding box will be centered around 0, 0, 0
-	const btVector3 chassisLocalOffset = {0.f, 1.022f / 2.f, 0.f};
+	btVector3 chassisLocalOffset = {0.f, 1.022f / 2.f, 0.f};
 
 	// Offset the top of the wheel relative to the origin
 	// float connectionHeight = 0.827f;  // 1.2f;
@@ -54,9 +54,9 @@ struct PhysicsVehicleTuning
 	// Not really necessary to customize these, unless you're making something weird
 	// These need to be normalized, otherwise they scale the wheels
 	// The direction of the raycast from connectionHeight to (suspensionRestLength + wheelRadius)
-	const btVector3 wheelDirectionCS0 = {0.f, -1.f, 0.f};
+	btVector3 wheelDirectionCS0 = {0.f, -1.f, 0.f};
 	// The normal of the hubcap, basically
-	const btVector3 wheelAxleCS = {-1.f, 0.f, 0.f};
+	btVector3 wheelAxleCS = {-1.f, 0.f, 0.f};
 	// const btVector3 wheelAxleCS = {0.f, 0.f, -1.f};
 
 	// How much force it takes to compress the spring.

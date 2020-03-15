@@ -22,7 +22,7 @@
 static int s_gridSize = 20 + 1;  // must be (2^N) + 1
 // static int s_gridSize = 16 + 1;  // must be (2^N) + 1
 // static int s_gridSize = 8 + 1;  // must be (2^N) + 1
-static btScalar s_gridSpacing = 1.0;
+// static btScalar s_gridSpacing = 1.0;
 static const int upAxis = 1;
 
 static const int worldSeed = 51388234;
@@ -142,8 +142,8 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	// Note that this origin will be center of heightfield, so it will need to be adjusted if bounds
 	// change
 	transform.setOrigin(btVector3(-17.f, -5.f, 250.f));
-	btRigidBody* body =
-	    world.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, transform, heightfieldShape);
+	// btRigidBody* body =
+	world.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, transform, heightfieldShape);
 
 	// Rendering: create render geo from the heightfield
 	{

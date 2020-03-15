@@ -113,64 +113,64 @@ H3DNode CreateProceduralGeometry(const char* geoName, float* vertices, unsigned 
 
 namespace Graphics
 {
-static void TestProceduralGeometry_Cube()
-{
-	float size = 10.f;
-	float vertices[] = {
-	    // Top fl [0]
-	    -1.f * size,
-	    1.f * size,
-	    -1.f * size,
-	    // Top fr [1]
-	    1.f * size,
-	    1.f * size,
-	    -1.f * size,
-	    // Top bl [2]
-	    -1.f * size,
-	    1.f * size,
-	    1.f * size,
-	    // Top br [3]
-	    1.f * size,
-	    1.f * size,
-	    1.f * size,
-	    // Bottom fl [4]
-	    -1.f * size,
-	    -1.f * size,
-	    -1.f * size,
-	    // Bottom fr [5]
-	    1.f * size,
-	    -1.f * size,
-	    -1.f * size,
-	    // Bottom bl [6]
-	    -1.f * size,
-	    -1.f * size,
-	    1.f * size,
-	    // Bottom br [7]
-	    1.f * size,
-	    -1.f * size,
-	    1.f * size,
-	};
+// static void TestProceduralGeometry_Cube()
+// {
+// 	float size = 10.f;
+// 	float vertices[] = {
+// 	    // Top fl [0]
+// 	    -1.f * size,
+// 	    1.f * size,
+// 	    -1.f * size,
+// 	    // Top fr [1]
+// 	    1.f * size,
+// 	    1.f * size,
+// 	    -1.f * size,
+// 	    // Top bl [2]
+// 	    -1.f * size,
+// 	    1.f * size,
+// 	    1.f * size,
+// 	    // Top br [3]
+// 	    1.f * size,
+// 	    1.f * size,
+// 	    1.f * size,
+// 	    // Bottom fl [4]
+// 	    -1.f * size,
+// 	    -1.f * size,
+// 	    -1.f * size,
+// 	    // Bottom fr [5]
+// 	    1.f * size,
+// 	    -1.f * size,
+// 	    -1.f * size,
+// 	    // Bottom bl [6]
+// 	    -1.f * size,
+// 	    -1.f * size,
+// 	    1.f * size,
+// 	    // Bottom br [7]
+// 	    1.f * size,
+// 	    -1.f * size,
+// 	    1.f * size,
+// 	};
 
-	unsigned int numVertices = ArraySize(vertices) / 3;
+// 	unsigned int numVertices = ArraySize(vertices) / 3;
 
-	unsigned int indices[] = {// Top
-	                          0, 2, 1, 1, 2, 3,
-	                          // Front
-	                          0, 1, 4, 4, 1, 5,
-	                          // Left
-	                          6, 2, 4, 4, 2, 0,
-	                          // Back
-	                          3, 2, 6, 6, 7, 3,
-	                          // Right
-	                          5, 1, 7, 7, 1, 3,
-	                          // Bottom
-	                          6, 4, 7, 7, 4, 5};
+// 	unsigned int indices[] = {// Top
+// 	                          0, 2, 1, 1, 2, 3,
+// 	                          // Front
+// 	                          0, 1, 4, 4, 1, 5,
+// 	                          // Left
+// 	                          6, 2, 4, 4, 2, 0,
+// 	                          // Back
+// 	                          3, 2, 6, 6, 7, 3,
+// 	                          // Right
+// 	                          5, 1, 7, 7, 1, 3,
+// 	                          // Bottom
+// 	                          6, 4, 7, 7, 4, 5};
 
-	unsigned int numIndices = ArraySize(indices);
+// 	unsigned int numIndices = ArraySize(indices);
 
-	CreateProceduralGeometry("ProceduralGeo_Cube", vertices, indices, nullptr, nullptr, nullptr,
-	                         nullptr, nullptr, numVertices, numIndices);
-}
+// 	CreateProceduralGeometry("ProceduralGeo_Cube", vertices, indices, nullptr, nullptr, nullptr,
+// 	                         nullptr, nullptr, numVertices, numIndices);
+// }
 
 void Initialize(int winWidth, int winHeight)
 {

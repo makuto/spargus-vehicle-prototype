@@ -373,8 +373,8 @@ void PhysicsVehicle::Update(float deltaTime)
 		playVehicleShifting();
 	}
 
-	LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
-	     << " output force: " << engineForce;
+	// LOGV << "Input throttle: " << ThrottlePercent << " Gear: " << SelectedGear
+	     // << " output force: " << engineForce;
 
 	// Apply forces
 	// Rear-wheel drive

@@ -45,7 +45,7 @@ bool objTest()
 		size_t index_offset = 0;
 		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
 		{
-			int fv = shapes[s].mesh.num_face_vertices[f];
+			size_t fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
 
 			// Loop over vertices in the face.
 			for (size_t v = 0; v < fv; v++)
@@ -55,11 +55,11 @@ bool objTest()
 				tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
 				tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
 				tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-				tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-				tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-				tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
-				tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
-				tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
+				// tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
+				// tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
+				// tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
+				// tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
+				// tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 				// Optional: vertex colors
 				// tinyobj::real_t red = attrib.colors[3*idx.vertex_index+0];
 				// tinyobj::real_t green = attrib.colors[3*idx.vertex_index+1];
@@ -120,7 +120,7 @@ bool objToBulletTriangleMesh(PhysicsWorld& world, const char* filename)
 		size_t numFaces = shapes[s].mesh.num_face_vertices.size();
 		for (size_t f = 0; f < numFaces; f++)
 		{
-			int fv = shapes[s].mesh.num_face_vertices[f];
+			size_t fv = static_cast<size_t>(shapes[s].mesh.num_face_vertices[f]);
 
 			// Loop over vertices in the face.
 			for (size_t v = 0; v < fv; v++)
@@ -130,11 +130,11 @@ bool objToBulletTriangleMesh(PhysicsWorld& world, const char* filename)
 				tinyobj::real_t vx = attrib.vertices[3 * idx.vertex_index + 0];
 				tinyobj::real_t vy = attrib.vertices[3 * idx.vertex_index + 1];
 				tinyobj::real_t vz = attrib.vertices[3 * idx.vertex_index + 2];
-				tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
-				tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
-				tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
-				tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
-				tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
+				// tinyobj::real_t nx = attrib.normals[3 * idx.normal_index + 0];
+				// tinyobj::real_t ny = attrib.normals[3 * idx.normal_index + 1];
+				// tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
+				// tinyobj::real_t tx = attrib.texcoords[2 * idx.texcoord_index + 0];
+				// tinyobj::real_t ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 				// Optional: vertex colors
 				// tinyobj::real_t red = attrib.colors[3*idx.vertex_index+0];
 				// tinyobj::real_t green = attrib.colors[3*idx.vertex_index+1];
@@ -144,7 +144,7 @@ bool objToBulletTriangleMesh(PhysicsWorld& world, const char* filename)
 
 				btVector3 vertex = {vx, vy, vz};
 				// Make room (TODO: Preallocate)
-				if (idx.vertex_index >= bulletVertices->size())
+				if (static_cast<size_t>(idx.vertex_index) >= bulletVertices->size())
 					bulletVertices->resize(idx.vertex_index + 1);
 				(*bulletVertices)[idx.vertex_index] = vertex;
 				bulletIndicies->push_back(idx.vertex_index);

@@ -177,11 +177,11 @@ bool VehicleEngineAudioStream::onGetData(sf::SoundStream::Chunk& data)
 		engineRpm = lastEngineRpm;
 	}
 
-	const SoundSample maxMotion = 10;
-	const float pi = std::acos(-1);
+	// const SoundSample maxMotion = 10;
+	// const float pi = std::acos(-1);
 	SoundSample lastSample = sampleBuffer[ArraySize(sampleBuffer) - 1];
-	int triangleWaveDirection = 1;
-	int triangleWaveSpeed = 1000;
+	// int triangleWaveDirection = 1;
+	// int triangleWaveSpeed = 1000;
 	unsigned int engineUpSquareNextNSamples = 0;
 	for (unsigned int i = 0; i < ArraySize(sampleBuffer); ++i)
 	{

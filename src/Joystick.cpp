@@ -58,7 +58,7 @@ bool isJoystickValid(int playerJoystickId)
 {
 	if (!sf::Joystick::isConnected(playerJoystickId))
 	{
-		LOGE << "Player Joystick " << playerJoystickId << " is not connected";
+		// LOGE << "Player Joystick " << playerJoystickId << " is not connected";
 		return false;
 	}
 	return true;

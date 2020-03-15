@@ -18,7 +18,9 @@ src/PhysicsVehicle.cpp
 src/PhysicsWorld.cpp
 src/Terrain.cpp
 src/GameVehicle.cpp
-#Third party
+# Editors
+src/VehicleEditor.cpp
+# Third party
 Dependencies/tracy/TracyClient.cpp
 ;
 
@@ -66,6 +68,13 @@ assets/male_casualsuit06_diffuse.png
 
 Bulk Content/textures : assets/Wheel_Rear.png
 assets/TestGrid_Sandy.png ;
+
+# TODO: Make sure textures get copied if assets are updated
+# This doesn't work
+# NotFile Content/textures ;
+# NotFile Content/assets ;
+# Depends Content/textures : dataAssets ;
+# Depends Content/assets : dataAssets ;
 
 BuildAsset assets/Wheel_Rear : assets/Wheel_Rear.blend ;
 BuildAsset assets/Wheel_Front : assets/Wheel_Front.blend ;
