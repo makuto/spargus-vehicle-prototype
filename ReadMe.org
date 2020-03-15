@@ -4,6 +4,7 @@ This is a 3D vehicle game prototype inspired by the gameplay and feel of the dun
 
 ** Videos
 Progress videos, newest to oldest:
+- [[https://youtu.be/oFrNrme3Kp4][Development tools]], featuring [[https://github.com/ocornut/imgui][dear ImGui]] integration
 - [[https://www.youtube.com/watch?v=c43dq7xYvuA][Split-screen and better "AI"]] (the top screen is the AI follower)
 - [[https://www.youtube.com/watch?v=LXAsL04EPDY][First "AI" driver]]. WIP Procedural terrain can be seen in the far background
 - [[https://www.youtube.com/watch?v=JNJRJw6R5xY][Drivetrain and engine audio]]
@@ -33,7 +34,15 @@ You will also need [[https://www.blender.org/download/][Blender 2.8]] to build t
 If you have a system install of Blender which is ~<2.8~, you need to add ~sBLENDER=/path/to/blender2.8~ to ~Build.sh~ and ~Build_Debug.sh~ ~jam~ invocations.
 
 *** Build dependencies
-Spargus uses several libraries. 
+Spargus uses several libraries:
+
+- *Bullet 3*: Physics, raycast vehicle
+- *SFML*: 2D graphics, debug 3D graphics, audio, input, window
+- *Horde3D*: 3D graphics
+- *dear ImGui*: Debug GUI/editors
+- *glm*: Math
+- *tinyobjloader*: .obj loading, for collision meshes
+- *tracy*: Profiling
 
 Currently, SFML relies on system installs for its dependencies:
 
