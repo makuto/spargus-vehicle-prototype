@@ -13,7 +13,7 @@ echo "Finished building Base2.0!"
 
 echo "Building Horde3D..."
 cd Dependencies/Horde3D
-mkdir build && cd build
+mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE="Debug" \
          -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-std=c++14 -stdlib=libstdc++" -DCMAKE_SHARED_LINKER_FLAGS="-stdlib=libstdc++" \
            -DOpenGL_GL_PREFERENCE="LEGACY" || exit 1

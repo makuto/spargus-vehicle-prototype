@@ -49,7 +49,8 @@ struct PhysicsVehicleTuning
 	// float wheelFriction = 1000;  // BT_LARGE_FLOAT;
 	// Pretty slidey here, with some good characteristics (reverse 180s are fun)
 	// float wheelFriction = 1.5f;  // BT_LARGE_FLOAT;
-	float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
+	// float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
+	float wheelFriction = 0.5f;  // BT_LARGE_FLOAT;
 
 	// Not really necessary to customize these, unless you're making something weird
 	// These need to be normalized, otherwise they scale the wheels
@@ -64,7 +65,7 @@ struct PhysicsVehicleTuning
 	float suspensionStiffness = 50.f;  // 20.f;
 	// Damping removes energy from the springs, eliminating bounce
 	// Each update, remove this much force from the suspension, depending on force sign
-	float suspensionDampingRelaxation = 7.f;   // 2.3f;
+	float suspensionDampingRelaxation = 7.f;    // 2.3f;
 	float suspensionDampingCompression = 10.f;  // 4.4f;
 	// This resists rolling for cars with high centers of gravity. Not sure how it works yet
 	// See
@@ -79,6 +80,16 @@ struct PhysicsVehicleTuning
 	float suspensionRestLength = 0.8f;
 
 	float defaultBrakingForce = 20.f;
+};
+
+class CustomRaycastVehicle : public btRaycastVehicle
+{
+public:
+	CustomRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis,
+	                     btVehicleRaycaster* raycaster);
+
+	// We need to make friction a factor of velocity
+	virtual void updateFriction(btScalar timeStep) override;
 };
 
 // TODO: Add destructor
@@ -105,7 +116,7 @@ public:
 	// Directly tie throttle percent to max possible force output
 	bool simpleDrivetrain = false;
 
-	btRaycastVehicle* vehicle;
+	CustomRaycastVehicle* vehicle;
 
 	// Note that these cache the last position since Update() was called. This is because the
 	// btMotionState interpolation will happen for each call to the chassis GetTransform, which

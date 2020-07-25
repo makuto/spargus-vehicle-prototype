@@ -1,6 +1,6 @@
 [submodule "bullet3"]
 	path = Dependencies/bullet3
-	url = https://github.com/bulletphysics/bullet3
+	url = https://github.com/makuto/bullet3
 [submodule "base2.0"]
 	path = Dependencies/base2.0
 	url = https://github.com/makuto/base2.0
