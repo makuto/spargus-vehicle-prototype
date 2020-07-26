@@ -137,7 +137,11 @@ Christensen, C. /(Personal communication, 2019-08-08)./ Email between Macoy Mads
 Fernández, J. G. (2012): /A Vehicle Dynamics Model for Driving Simulators/. Department of Applied Mechanics,
 Division of Vehicle Engineering and Autonomous Systems, Vehicle Dynamics at Chalmers University Of Technology. Göteborg, Sweden.
 
+Khan, James. [[https://github.com/jayfella/jme-vehicles][JME Vehicles]]. Retrieved 2020-07-25.
+
 Marco Monster (2003). /[[https://web.archive.org/web/20040604214333fw_/http://home.planet.nl/~MONSTROUS/tutcar.html][Car Physics for Games]]/. Retrieved 2020-03-15.
+
+Racer.nl. [[racer.nl/reference/pacejka.htm][Pacejka's Magic Formula]]. Retrieved 2020-07-25.
 
 [[https://raw.githubusercontent.com/Lumak/Urho3D-Offroad-Vehicle/master/Source/Samples/63_OffroadVehicle/Vehicle.cpp][Urho3D Offroad Vehicle]]. /Urho3D game engine/. MIT License. Retrieved 2020-02-20.
 

@@ -49,8 +49,8 @@ struct PhysicsVehicleTuning
 	// float wheelFriction = 1000;  // BT_LARGE_FLOAT;
 	// Pretty slidey here, with some good characteristics (reverse 180s are fun)
 	// float wheelFriction = 1.5f;  // BT_LARGE_FLOAT;
-	// float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
-	float wheelFriction = 0.5f;  // BT_LARGE_FLOAT;
+	float wheelFriction = 5.f;  // BT_LARGE_FLOAT;
+	// float wheelFriction = 0.5f;  // BT_LARGE_FLOAT;
 
 	// Not really necessary to customize these, unless you're making something weird
 	// These need to be normalized, otherwise they scale the wheels
@@ -85,6 +85,9 @@ struct PhysicsVehicleTuning
 class CustomRaycastVehicle : public btRaycastVehicle
 {
 public:
+	bool debugOutput = false;
+	bool isSliding = false;
+
 	CustomRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis,
 	                     btVehicleRaycaster* raycaster);
 
@@ -101,6 +104,8 @@ public:
 	void Update(float deltaTime);
 
 	void Reset();
+
+	bool debugOutput = false;
 
 	// Controls
 	// Percent means 0.f through 1.f

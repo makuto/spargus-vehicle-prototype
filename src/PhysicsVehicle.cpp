@@ -11,9 +11,10 @@
 #include "Utilities.hpp"
 
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/mat4x4.hpp>         // mat4
-#include <glm/trigonometric.hpp>  //radians
-#include <glm/vec3.hpp>           // vec3
+#include <glm/gtx/vector_angle.hpp>  // angle
+#include <glm/mat4x4.hpp>            // mat4
+#include <glm/trigonometric.hpp>     //radians
+#include <glm/vec3.hpp>              // vec3
 
 #include "BulletDynamics/ConstraintSolver/btContactConstraint.h"
 #include "BulletDynamics/Vehicle/btWheelInfo.h"
@@ -30,7 +31,7 @@ std::vector<PhysicsVehicle*> g_vehicles;
 // Vehicle implementation
 //
 
-static btScalar sideFrictionStiffness2 = btScalar(1.0);
+static btScalar sideFrictionStiffness2 = btScalar(1.0f);
 
 CustomRaycastVehicle::CustomRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis,
                                            btVehicleRaycaster* raycaster)
@@ -41,6 +42,8 @@ CustomRaycastVehicle::CustomRaycastVehicle(const btVehicleTuning& tuning, btRigi
 // We need to make friction a factor of velocity
 void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 {
+	bool hackySlide = false;
+
 	// calculate the impulse, so that the wheels don't move sidewards
 	int numWheel = getNumWheels();
 	if (!numWheel)
@@ -102,6 +105,12 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 	btScalar sideFactor = btScalar(1.);
 	btScalar fwdFactor = 0.5;
 
+	glm::vec3 vehicleNormalVelocity =
+	    glm::normalize(BulletVectorToGlmVec3(m_chassisBody->getLinearVelocity()));
+	glm::vec3 chassisOrigin = BulletVectorToGlmVec3(m_chassisBody->getCenterOfMassPosition());
+	DebugDraw::addLine(chassisOrigin, vehicleNormalVelocity + chassisOrigin, Color::Blue,
+	                   Color::Purple, 0.f);
+
 	bool sliding = false;
 	{
 		for (int wheel = 0; wheel < getNumWheels(); wheel++)
@@ -153,7 +162,48 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 				btScalar x = (m_forwardImpulse[wheel]) * fwdFactor;
 				btScalar y = (m_sideImpulse[wheel]) * sideFactor;
 
+				if (hackySlide)
+				{
+					btScalar impulseAbs =
+					    m_sideImpulse[wheel] < 0.f ? -m_sideImpulse[wheel] : m_sideImpulse[wheel];
+					if (impulseAbs > 200.f)
+					{
+						maximpSquared = 0.f;
+						maximp = 0.f;
+						if (debugOutput)
+							LOGV << "[" << wheel << "] " << y << " side impulse";
+					}
+				}
+
 				btScalar impulseSquared = (x * x + y * y);
+
+				glm::mat4 wheelWSTransform = BulletTransformToGlmMat4(getWheelTransformWS(wheel));
+				glm::vec3 wheelNormalDirection = RotateGlmVec3ByMat4(wheelWSTransform, ForwardAxis);
+				glm::mat4 chassisTransform =
+				    BulletTransformToGlmMat4(m_chassisBody->getCenterOfMassTransform());
+				glm::vec3 chassisDirection = RotateGlmVec3ByMat4(chassisTransform, ForwardAxis);
+				// TODO: front tires need their rotation added
+				float slipAngle = glm::angle(vehicleNormalVelocity, chassisDirection);
+				isSliding = slipAngle > glm::radians(4.f);
+				if (isSliding)
+					m_wheelInfo[wheel].m_skidInfo = 0.4f;
+
+				if (debugOutput && isSliding)
+				{
+					// glm::vec3 wheelOrigin = BulletVectorToGlmVec3(localTransform.getOrigin());
+					const btTransform& wheelTrans = getWheelTransformWS(wheel);
+					glm::vec3 wheelPosWorldSpace = BulletVectorToGlmVec3(wheelTrans.getOrigin());
+					// TODO Use actual ground offset
+					glm::vec3 offsetToGround =
+					    RotateGlmVec3ByMat4(chassisTransform, glm::vec3(0.f, -0.6209f, 0.f));
+					DebugDraw::addLine(offsetToGround + wheelPosWorldSpace,
+					                   (wheelPosWorldSpace + chassisDirection) + offsetToGround,
+					                   Color::Red, Color::Red, 10.f);
+					// The fun version
+					// DebugDraw::addLine(chassisOrigin, wheelNormalDirection + chassisOrigin,
+					// Color::Yellow, Color::Purple, 10.f);
+					LOGV << "[" << wheel << "] " << slipAngle << " slip";
+				}
 
 				if (impulseSquared > maximpSquared)
 				{
@@ -177,6 +227,8 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 				{
 					m_forwardImpulse[wheel] *= m_wheelInfo[wheel].m_skidInfo;
 					m_sideImpulse[wheel] *= m_wheelInfo[wheel].m_skidInfo;
+					if (debugOutput)
+						LOGV << "[" << wheel << "] " << m_sideImpulse[wheel] << " side impulse";
 				}
 			}
 		}
@@ -551,6 +603,8 @@ float PhysicsVehicle::EngineForceFromThrottle(float deltaTime, float throttlePer
 
 void PhysicsVehicle::Update(float deltaTime)
 {
+	vehicle->debugOutput = debugOutput;
+
 	// Engine force
 	float engineForce = 0.f;
 	{
