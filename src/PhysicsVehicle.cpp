@@ -105,8 +105,8 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 	btScalar sideFactor = btScalar(1.);
 	btScalar fwdFactor = 0.5;
 
-	glm::vec3 vehicleNormalVelocity =
-	    glm::normalize(BulletVectorToGlmVec3(m_chassisBody->getLinearVelocity()));
+	glm::vec3 vehicleVelocity = BulletVectorToGlmVec3(m_chassisBody->getLinearVelocity());
+	glm::vec3 vehicleNormalVelocity = glm::normalize(vehicleVelocity);
 	glm::vec3 chassisOrigin = BulletVectorToGlmVec3(m_chassisBody->getCenterOfMassPosition());
 	DebugDraw::addLine(chassisOrigin, vehicleNormalVelocity + chassisOrigin, Color::Blue,
 	                   Color::Purple, 0.f);
@@ -170,8 +170,8 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 					{
 						maximpSquared = 0.f;
 						maximp = 0.f;
-						if (debugOutput)
-							LOGV << "[" << wheel << "] " << y << " side impulse";
+						// if (debugOutput)
+							// LOGV << "[" << wheel << "] " << y << " side impulse";
 					}
 				}
 
@@ -181,14 +181,25 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 				glm::vec3 wheelNormalDirection = RotateGlmVec3ByMat4(wheelWSTransform, ForwardAxis);
 				glm::mat4 chassisTransform =
 				    BulletTransformToGlmMat4(m_chassisBody->getCenterOfMassTransform());
-				glm::vec3 chassisDirection = RotateGlmVec3ByMat4(chassisTransform, ForwardAxis);
+				// Rotate front wheels by steering angle
+				glm::vec3 wheelDirectionLocalSpace = RotateGlmVec3ByMat4(
+				    glm::rotate(glm::mat4(1.f), glm::radians(wheelInfo.m_steering), UpAxis),
+				    ForwardAxis);
+				glm::vec3 wheelDirection =
+				    RotateGlmVec3ByMat4(chassisTransform, wheelDirectionLocalSpace);
 				// TODO: front tires need their rotation added
-				float slipAngle = glm::angle(vehicleNormalVelocity, chassisDirection);
-				isSliding = slipAngle > glm::radians(4.f);
+				float slipAngle = glm::angle(vehicleNormalVelocity, wheelDirection);
+				isSliding = glm::length(vehicleVelocity) > 1.f &&
+				            glm::abs(slipAngle) > glm::radians(1.f);
+				if (debugOutput)
+				{
+					LOGV << "[" << wheel << "] " << glm::degrees(glm::abs(slipAngle))
+					     << " slip angle steering " << wheelInfo.m_steering;
+				}
 				if (isSliding)
-					m_wheelInfo[wheel].m_skidInfo = 0.4f;
+					m_wheelInfo[wheel].m_skidInfo = 0.2f;
 
-				if (debugOutput && isSliding)
+				if (isSliding)
 				{
 					// glm::vec3 wheelOrigin = BulletVectorToGlmVec3(localTransform.getOrigin());
 					const btTransform& wheelTrans = getWheelTransformWS(wheel);
@@ -197,12 +208,8 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 					glm::vec3 offsetToGround =
 					    RotateGlmVec3ByMat4(chassisTransform, glm::vec3(0.f, -0.6209f, 0.f));
 					DebugDraw::addLine(offsetToGround + wheelPosWorldSpace,
-					                   (wheelPosWorldSpace + chassisDirection) + offsetToGround,
+					                   (wheelPosWorldSpace + wheelDirection) + offsetToGround,
 					                   Color::Red, Color::Red, 10.f);
-					// The fun version
-					// DebugDraw::addLine(chassisOrigin, wheelNormalDirection + chassisOrigin,
-					// Color::Yellow, Color::Purple, 10.f);
-					LOGV << "[" << wheel << "] " << slipAngle << " slip";
 				}
 
 				if (impulseSquared > maximpSquared)
