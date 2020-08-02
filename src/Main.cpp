@@ -293,7 +293,7 @@ int main()
 	// World/meshes
 	PhysicsWorld physicsWorld;
 	PhysicsVehicle* vehicle = GameVehicles::CreateVehicle(physicsWorld, glm::mat4(1.f));
-	vehicle->debugOutput = true;
+	// vehicle->debugOutput = true;
 	PhysicsVehicle* otherVehicle = GameVehicles::CreateVehicle(
 	    physicsWorld, glm::translate(glm::mat4(1.f), glm::vec3(10.f, 0.f, 0.f)));
 	Graphics::Object worldRender;

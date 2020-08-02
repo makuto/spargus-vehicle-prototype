@@ -116,6 +116,13 @@ void Light::Initialize(const char* lightName)
 
 	object.resource->node = h3dAddLightNode(H3DRootNode, lightName, 0, "LIGHTING", "SHADOWMAP");
 	h3dSetNodeParamF(object.resource->node, H3DLight::RadiusF, 0, 50.0f);
+	h3dSetNodeParamF(object.resource->node, H3DLight::FovF, 0, 90);
+	h3dSetNodeParamI(object.resource->node, H3DLight::ShadowMapCountI, 1);
+	h3dSetNodeParamF(object.resource->node, H3DLight::ShadowMapBiasF, 0, 0.01f);
+	h3dSetNodeParamF(object.resource->node, H3DLight::ColorF3, 0, 1.0f);
+	h3dSetNodeParamF(object.resource->node, H3DLight::ColorF3, 1, 0.8f);
+	h3dSetNodeParamF(object.resource->node, H3DLight::ColorF3, 2, 0.7f);
+	h3dSetNodeParamF(object.resource->node, H3DLight::ColorMultiplierF, 0, 2.0f);
 
 	// Set the transform in case this node has an updated transform already
 	object.TransformUpdated();

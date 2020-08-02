@@ -267,7 +267,7 @@ void Initialize(int winWidth, int winHeight)
 		H3DNode light =
 		    h3dAddLightNode(H3DRootNode, "Light1", lightMatRes, "LIGHTING", "SHADOWMAP");
 		h3dSetNodeTransform(light, 0, 15, 10, -60, 0, 0, 1, 1, 1);
-		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 30);
+		h3dSetNodeParamF(light, H3DLight::RadiusF, 0, 60);
 		h3dSetNodeParamF(light, H3DLight::FovF, 0, 90);
 		h3dSetNodeParamI(light, H3DLight::ShadowMapCountI, 1);
 		h3dSetNodeParamF(light, H3DLight::ShadowMapBiasF, 0, 0.01f);
@@ -278,9 +278,9 @@ void Initialize(int winWidth, int winHeight)
 
 		// Customize post processing effects
 		H3DNode matRes = h3dFindResource(H3DResTypes::Material, "pipelines/postHDR.material.xml");
-		h3dSetMaterialUniform(matRes, "hdrExposure", 2.5f, 0, 0, 0);
-		h3dSetMaterialUniform(matRes, "hdrBrightThres", 0.5f, 0, 0, 0);
-		h3dSetMaterialUniform(matRes, "hdrBrightOffset", 0.08f, 0, 0, 0);
+		h3dSetMaterialUniform(matRes, "hdrExposure", 5.5f, 0, 0, 0);
+		h3dSetMaterialUniform(matRes, "hdrBrightThres", 0.8f, 0, 0, 0);
+		h3dSetMaterialUniform(matRes, "hdrBrightOffset", 0.12f, 0, 0, 0);
 	}
 
 	g_graphicsIntialized = true;
