@@ -14,6 +14,7 @@
 #include <glm/gtx/norm.hpp>          // distance2
 #include <glm/gtx/vector_angle.hpp>  // angle
 #include <glm/mat4x4.hpp>            // mat4
+#include <glm/vec3.hpp>
 
 #include <map>
 #include <sstream>
@@ -308,7 +309,20 @@ int main()
 
 		// Terrain
 		{
-			createCollisionHeightfield(physicsWorld);
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 0.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 1.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 2.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 3.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 4.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 5.f)));
+			createCollisionHeightfield(physicsWorld,
+			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 6.f)));
 		}
 
 		// objTest();

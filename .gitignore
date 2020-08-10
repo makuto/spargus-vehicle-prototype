@@ -56,3 +56,4 @@ hlmsDiskCache*
 Content/assets/**/*.geo
 *.gltf
 Collision/
+imgui.ini

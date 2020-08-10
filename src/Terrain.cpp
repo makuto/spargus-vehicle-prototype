@@ -1,6 +1,7 @@
 #include "Terrain.hpp"
 
 #include <algorithm>
+#include <cstdio>  //  sprintf
 #include <limits>
 
 #include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
@@ -19,17 +20,16 @@
 #include "PhysicsWorld.hpp"
 
 // This must be crap is probably not true I think
-static int s_gridSize = 20 + 1;  // must be (2^N) + 1
-// static int s_gridSize = 16 + 1;  // must be (2^N) + 1
-// static int s_gridSize = 8 + 1;  // must be (2^N) + 1
+int g_TerrainGridSize = 20 + 1;  // must be (2^N) + 1
+float scaleHeightfield = 5.0f;
+
+// static int g_TerrainGridSize = 16 + 1;  // must be (2^N) + 1
+// static int g_TerrainGridSize = 8 + 1;  // must be (2^N) + 1
 // static btScalar s_gridSpacing = 1.0;
 static const int upAxis = 1;
 
 static const int worldSeed = 51388234;
 static Noise2d noiseGenerator(worldSeed);
-
-// TODO This is fucked up
-HeightfieldCell* g_rawHeightfieldData = new HeightfieldCell[s_gridSize * s_gridSize];
 
 class TerrainTriangleCollector : public btTriangleCallback
 {
@@ -83,7 +83,7 @@ public:
 
 // TODO Memory leaks
 // Note that heightfield data is not owned by Bullet
-void createCollisionHeightfield(PhysicsWorld& world)
+void createCollisionHeightfield(PhysicsWorld& world, const glm::vec3& worldPosition)
 {
 	PerfTimeNamedScope(terrainInit, "Terrain creation", tracy::Color::LawnGreen);
 
@@ -92,26 +92,31 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	// getRawHeightfieldData(model, type, minHeight, maxHeight);
 	// btAssert(g_rawHeightfieldData && "failed to create raw heightfield");
 
-	float xOffset = 0.f;
-	float zOffset = 0.f;
+	// Do noise in unscaled space so that changing the scale doesn't necessitate a change of neise
+	const float xNoiseSpaceOffset = worldPosition[0] / scaleHeightfield;
+	const float zNoiseSpaceOffset = worldPosition[2] / scaleHeightfield;
+
+	// TODO: Leak!
+	HeightfieldCell* rawHeightfieldData =
+	    new HeightfieldCell[g_TerrainGridSize * g_TerrainGridSize];
 
 	float minY = 0.f;
 	float maxY = 0.f;
 	{
 		PerfTimeNamedScope(terrainNoise, "Terrain noise generation", tracy::Color::ForestGreen);
 
-		for (int cellZ = 0; cellZ < s_gridSize; cellZ++)
+		for (int cellZ = 0; cellZ < g_TerrainGridSize; cellZ++)
 		{
-			for (int cellX = 0; cellX < s_gridSize; cellX++)
+			for (int cellX = 0; cellX < g_TerrainGridSize; cellX++)
 			{
 				float noiseScale = 0.7f;
-				float noiseX = (cellX + xOffset) * noiseScale;
-				float noiseZ = (cellZ + zOffset) * noiseScale;
+				float noiseX = (cellX + xNoiseSpaceOffset) * noiseScale;
+				float noiseZ = (cellZ + zNoiseSpaceOffset) * noiseScale;
 
 				float value = noiseGenerator.scaledOctaveNoise2d(noiseX, noiseZ, 0.f, 10.f, 4, 0.1f,
 				                                                 0.22f, 2.f);
 
-				g_rawHeightfieldData[(cellZ * s_gridSize) + cellX] = value;
+				rawHeightfieldData[(cellZ * g_TerrainGridSize) + cellX] = value;
 				minY = std::min(minY, value);
 				maxY = std::max(maxY, value);
 			}
@@ -121,10 +126,10 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	bool flipQuadEdges = false;
 	const PHY_ScalarType heightfieldDataType = PHY_FLOAT;
 	// HeightScale is ignored when using the float heightfield data type.
-	btScalar gridHeightScale = 1.0;
-	btHeightfieldTerrainShape* heightfieldShape =
-	    new btHeightfieldTerrainShape(s_gridSize, s_gridSize, g_rawHeightfieldData, gridHeightScale,
-	                                  minY, maxY, upAxis, heightfieldDataType, flipQuadEdges);
+	btScalar gridHeightScale = 1.f;
+	btHeightfieldTerrainShape* heightfieldShape = new btHeightfieldTerrainShape(
+	    g_TerrainGridSize, g_TerrainGridSize, rawHeightfieldData, gridHeightScale, minY, maxY,
+	    upAxis, heightfieldDataType, flipQuadEdges);
 
 	// BuildAccelerator is optional, it may not support all features.
 	// Builds a grid data structure storing the min and max heights of the terrain in chunks.
@@ -132,16 +137,17 @@ void createCollisionHeightfield(PhysicsWorld& world)
 	// If you modify the heights, you need to rebuild this accelerator.
 	heightfieldShape->buildAccelerator();
 
-	btScalar scaleHeightfield = 5.0f;
 	heightfieldShape->setLocalScaling(
 	    btVector3(scaleHeightfield, scaleHeightfield, scaleHeightfield));
 
 	// Set origin to middle of heightfield
 	btTransform transform;
 	transform.setIdentity();
-	// Note that this origin will be center of heightfield, so it will need to be adjusted if bounds
-	// change
-	transform.setOrigin(btVector3(-17.f, -5.f, 250.f));
+	// Bullet computes the origin of the heightfield to be in the center. Because the geometry is
+	// procedural, we need to adjust its transform up or down based on where the origin ended up
+	glm::vec3 adjustedOrigin(worldPosition);
+	adjustedOrigin[1] += ((maxY - minY) / 2.f) * scaleHeightfield;
+	transform.setOrigin(glmVec3ToBulletVector(adjustedOrigin));
 	// btRigidBody* body =
 	world.localCreateRigidBody(PhysicsWorld::StaticRigidBodyMass, transform, heightfieldShape);
 
@@ -178,8 +184,11 @@ void createCollisionHeightfield(PhysicsWorld& world)
 			//                                  indices.size());
 
 			Graphics::ProceduralMesh graphicsMesh;
-			graphicsMesh.Initialize("Heightfield", vertices.data(), indices.data(), nullptr,
-			                        nullptr, nullptr, uvs.data(), nullptr, vertices.size() / 3,
+			char nameBuffer[64];
+			snprintf(nameBuffer, sizeof(nameBuffer), "Heightfield_%d_%d", (int)worldPosition[0],
+			         (int)worldPosition[2]);
+			graphicsMesh.Initialize(nameBuffer, vertices.data(), indices.data(), nullptr, nullptr,
+			                        nullptr, uvs.data(), nullptr, vertices.size() / 3,
 			                        indices.size());
 			// Note that scaling happens in processAllTriangles(), not from the transform
 			graphicsMesh.SetTransform(BulletTransformToGlmMat4(transform));

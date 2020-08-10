@@ -38,9 +38,9 @@ struct
 	PhysicsWorld* cachedPhysicsWorld = nullptr;
 
 	timer objectiveTimer;
-	
+
 	float completionTime = 0.f;
-	
+
 	// UI
 	text displayText;
 	int numObjectivesHit = 0;
@@ -84,19 +84,21 @@ void Initialize(PhysicsWorld* physicsWorld)
 	// Blender coords to ours: swap Y and Z, then invert Z
 	glm::vec3 objectivePositions[] = {
 	    // Near start
-	    glm::vec3(20.f, 0.f, 0.f),
+	    glm::vec3(15.f, 0.f, 0.f),
 	    // Ramps
-	    glm::vec3(-39.91f, 13.25f, -214.2f),
+	    glm::vec3(-29.93f, 9.93f, -160.64f),
 	    // Left pinch
-	    glm::vec3(125.2f, 39.62f, -66.95f),
+	    glm::vec3(93.89f, 29.71f, -50.21f),
 	    // Box
-	    glm::vec3(-78.82f, 15.01f, -6.5f),
+	    glm::vec3(-59.11f, 11.25f, -4.87f),
 	    // Hidden butt
-	    glm::vec3(249.6f, 3.254f, -128.6f),
+	    glm::vec3(187.20f, 2.44f, -96.45f),
 	    // Big hill jump
-	    glm::vec3(-125.4f, 37.37f, -0.975f),
-		// Loop-de-loop
-		glm::vec3(134.8f, 24.24f, 212.3f),
+	    glm::vec3(-94.05f, 28.02f, -0.73f),
+	    // Loop-de-loop
+	    glm::vec3(101.1f, 18.18f, 159.2f),
+	    // Race track
+	    glm::vec3(-63.f, -2.5f, -505.f),
 	};
 
 	// Objectives
@@ -105,9 +107,7 @@ void Initialize(PhysicsWorld* physicsWorld)
 	for (unsigned int i = 0; i < ArraySize(objectivePositions); ++i)
 	{
 		glm::mat4 objectiveLocation = glm::translate(glm::mat4(1.f), objectivePositions[i]);
-		// NOT Normal! Only because I rescaled the world
-		glm::mat4 objectiveScale = glm::scale(glm::mat4(1.f), glm::vec3(0.75f));
-		g_PickUpObjectivesState.objectives[i].renderObject.SetTransform(objectiveScale * objectiveLocation);
+		g_PickUpObjectivesState.objectives[i].renderObject.SetTransform(objectiveLocation);
 		g_PickUpObjectivesState.objectives[i].renderObject.Initialize("PickUp");
 	}
 
