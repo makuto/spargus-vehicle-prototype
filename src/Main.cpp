@@ -309,20 +309,17 @@ int main()
 
 		// Terrain
 		{
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 0.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 1.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 2.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 3.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 4.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 5.f)));
-			createCollisionHeightfield(physicsWorld,
-			                           glm::vec3(-17.f, -30.f, 250.f + ((20.f * 5.f) * 6.f)));
+			const float scalingFactor = 20.f * 5.f;
+			// In this case nothing will be faster going z first, but it's a good habit to have
+			for (int z = 0; z < 10; ++z)
+			{
+				for (int x = 0; x < 10; ++x)
+				{
+					createCollisionHeightfield(
+					    physicsWorld,
+					    glm::vec3(-17.f + (scalingFactor * x), -30.f, 250.f + (scalingFactor * z)));
+				}
+			}
 		}
 
 		// objTest();

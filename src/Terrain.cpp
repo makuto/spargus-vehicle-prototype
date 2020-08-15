@@ -109,7 +109,12 @@ void createCollisionHeightfield(PhysicsWorld& world, const glm::vec3& worldPosit
 		{
 			for (int cellX = 0; cellX < g_TerrainGridSize; cellX++)
 			{
-				float noiseScale = 0.7f;
+				// float noiseScale = 0.7f; // Tricky hills
+				float noiseScale = 0.5f; // Go fast hills
+				// Close to flat, with some nice slopes. Hard to get off the ground at all
+				// float noiseScale = 0.2f;
+				// float noiseScale = 1.0f; // Very technical hills
+				// float noiseScale = 0.6f; // Medium hills
 				float noiseX = (cellX + xNoiseSpaceOffset) * noiseScale;
 				float noiseZ = (cellZ + zNoiseSpaceOffset) * noiseScale;
 
