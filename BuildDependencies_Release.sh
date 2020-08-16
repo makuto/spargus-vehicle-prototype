@@ -23,3 +23,11 @@ cmake .. -DCMAKE_BUILD_TYPE="Release" \
 make || exit 1
 cd ../../
 echo Finished building Horde3D!
+
+# Refer to https://raw.githubusercontent.com/OGRECave/ogre-next/master/Scripts/BuildScripts/output/build_ogre_linux_c%2B%2Blatest.sh
+echo "Building Ogre..."
+cd Ogre/ogre-next
+cd build/Release
+cmake -D OGRE_USE_BOOST=0 -D OGRE_CONFIG_THREAD_PROVIDER=0 -D OGRE_CONFIG_THREADS=0 -D OGRE_BUILD_COMPONENT_SCENE_FORMAT=1 -D OGRE_BUILD_SAMPLES2=1 -D OGRE_BUILD_TESTS=1 -D CMAKE_BUILD_TYPE="Release"  -G Ninja ../.. || exit $?
+ninja || exit $?
+echo "Finished building Ogre"

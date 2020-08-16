@@ -11,6 +11,8 @@
 #include "Performance.hpp"
 #include "Utilities.hpp"
 
+#include "graphics/graphics.hpp"
+
 H3DNode model = 0;
 H3DNode hordeCamera = 0;
 H3DNode buggyNode = 0;
@@ -172,7 +174,7 @@ namespace Graphics
 // 	                         nullptr, nullptr, numVertices, numIndices);
 // }
 
-void Initialize(int winWidth, int winHeight)
+void Initialize(window& win, int winWidth, int winHeight)
 {
 	PerfTimeNamedScope(HordeRenderScope, "Horde Init", tracy::Color::Brown2);
 

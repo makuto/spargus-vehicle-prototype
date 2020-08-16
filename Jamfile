@@ -25,7 +25,8 @@ Dependencies/tracy/TracyClient.cpp
 ;
 
 # This is all that is needed to select Render library
-LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
+# LinkLibraries spargus_vehicle_prototype : libRenderHorde3D ;
+LinkLibraries spargus_vehicle_prototype : libRenderOgre ;
 
 # ArtAssetProcess assets/World.blend :
 # assets/BasicBuggy.blend ;
@@ -83,4 +84,5 @@ BuildAsset assets/PickUp : assets/PickUp.blend ;
 BuildAsset assets/BasicDriver : assets/BasicDriver.blend ;
 
 SubInclude . src RenderLibs Horde3D ;
+SubInclude . src RenderLibs Ogre ;
 # SubInclude . assets ;

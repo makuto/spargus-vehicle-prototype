@@ -274,7 +274,7 @@ int main()
 
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
-		Graphics::Initialize(WindowWidth, WindowHeight);
+		Graphics::Initialize(mainWindow, WindowWidth, WindowHeight);
 
 		if (enableDevGui)
 		{

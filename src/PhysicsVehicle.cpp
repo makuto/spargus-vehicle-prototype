@@ -177,8 +177,8 @@ void CustomRaycastVehicle::updateFriction(btScalar timeStep)
 
 				btScalar impulseSquared = (x * x + y * y);
 
-				glm::mat4 wheelWSTransform = BulletTransformToGlmMat4(getWheelTransformWS(wheel));
-				glm::vec3 wheelNormalDirection = RotateGlmVec3ByMat4(wheelWSTransform, ForwardAxis);
+				// glm::mat4 wheelWSTransform = BulletTransformToGlmMat4(getWheelTransformWS(wheel));
+				// glm::vec3 wheelNormalDirection = RotateGlmVec3ByMat4(wheelWSTransform, ForwardAxis);
 				glm::mat4 chassisTransform =
 				    BulletTransformToGlmMat4(m_chassisBody->getCenterOfMassTransform());
 				// Rotate front wheels by steering angle

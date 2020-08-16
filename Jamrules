@@ -13,8 +13,17 @@ LINK = clang++ ;
 # LINKFLAGS = -shared ;
 # if $(UNIX)      { SUFSHR = .so ; }
 # else if $(NT)   { SUFSHR = .dll ; }
-		
+
 ## Compiler arguments
+
+if $(DEBUG_BUILD)
+{
+  OGRE_C++FLAGS = -DOGRE_DEBUG_MODE=1 ;
+}
+else
+{
+  OGRE_C++FLAGS = -DOGRE_DEBUG_MODE=0 ;
+}
 
 # Arguments used on all projects, regardless of any variables
 # Note that Tracy 0.6.5 requires c++14 (normally C++11 would be fine)
@@ -26,7 +35,29 @@ C++FLAGS = -std=c++14 -stdlib=libstdc++
 # BT_USE_DOUBLE_PRECISION solves the Dantzig LCP missing definition
 # Disabled now that I'm compiling Bullet in single-precision
 # -DBT_USE_DOUBLE_PRECISION
+$(OGRE_C++FLAGS)
 ;
+
+if $(DEBUG_BUILD)
+{
+  OGRE_HDRS = Dependencies/Ogre/ogre-next/OgreMain/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Common/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Pbs/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Unlit/include
+  Dependencies/Ogre/ogre-next/build/Debug/include
+  # Ogre overlay
+  Dependencies/Ogre/ogre-next/Components/Overlay/include ;
+}
+else
+{
+  OGRE_HDRS = Dependencies/Ogre/ogre-next/OgreMain/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Common/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Pbs/include
+  Dependencies/Ogre/ogre-next/Components/Hlms/Unlit/include
+  Dependencies/Ogre/ogre-next/build/Release/include
+  # Ogre overlay
+  Dependencies/Ogre/ogre-next/Components/Overlay/include ;
+}
 
 HDRS = src
 Dependencies/bullet3/src Dependencies/bullet3/Extras/Serialize/BulletWorldImporter
@@ -38,6 +69,8 @@ Dependencies/tinygltf Dependencies/tinyobjloader
 Dependencies/glm
 Dependencies/Horde3D/Horde3D/Bindings/C++
 Dependencies/tracy
+
+$(OGRE_HDRS)
 ;
 
 if $(DEBUG_BUILD)
@@ -45,21 +78,33 @@ if $(DEBUG_BUILD)
   BULLET3_BUILD_DIR = Dependencies/bullet3/build_cmake_debug ;
   # TODO: Separate Horde debug and release build directories
   HORDE3D_BUILD_DIR = Dependencies/Horde3D/build/Horde3D ;
+  OGRE_BUILD_DIR = Dependencies/Ogre/ogre-next/build/Debug ;
 }
 else
 {
   BULLET3_BUILD_DIR = Dependencies/bullet3/build_cmake ;
   HORDE3D_BUILD_DIR = Dependencies/Horde3D/build/Horde3D ;
+  OGRE_BUILD_DIR = Dependencies/Ogre/ogre-next/build/Release ;
 }
 
 # TODO: Make base hold all this weirdness?
 if $(DEBUG_BUILD)
 {
   SFML_LINKLIBS = -lsfml-audio-d -lsfml-graphics-d -lsfml-window-d -lsfml-system-d ;
+  OGRE_LINKLIBS = -lOgreHlmsPbs_d
+  -lOgreHlmsUnlit_d
+  -lOgreMain_d
+  # Ogre 2D overlays
+  -lOgreOverlay_d ;
 }
 else
 {
   SFML_LINKLIBS = -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system ;
+  OGRE_LINKLIBS = -lOgreHlmsPbs
+  -lOgreHlmsUnlit
+  -lOgreMain
+  # Ogre 2D overlays
+  -lOgreOverlay ;
 }
 
 OPTIM = -O0 ;
@@ -109,13 +154,16 @@ $(SFML_LINKLIBS)
 -LDependencies/Horde3D/build/Horde3D/Source/Horde3DUtils
 -lHorde3D
 -lHorde3DUtils
+
+-L$(OGRE_BUILD_DIR)/lib
+$(OGRE_LINKLIBS)
 ;
 
 # LINKFLAGS = -Wl,-rpath,. ;
 
 # TODO: Copy libs to better directory, or static link?
 LINKFLAGS = -g -stdlib=libstdc++
--Wl,-rpath,.:Dependencies/base2.0/dependencies/SFML/lib:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:$(HORDE3D_BUILD_DIR)/Source/Horde3DEngine:$(HORDE3D_BUILD_DIR)/Source/Horde3DUtils ;
+-Wl,-rpath,.:Dependencies/base2.0/dependencies/SFML/lib:$(BULLET3_BUILD_DIR)/src/BulletSoftBody:$(BULLET3_BUILD_DIR)/Extras/InverseDynamics:$(BULLET3_BUILD_DIR)/src/BulletInverseDynamics:$(BULLET3_BUILD_DIR)/examples/ThirdPartyLibs/BussIK:$(BULLET3_BUILD_DIR)/src/BulletDynamics:$(BULLET3_BUILD_DIR)/src/BulletCollision:$(BULLET3_BUILD_DIR)/src/LinearMath:$(BULLET3_BUILD_DIR)/src/Bullet3Common:$(BULLET3_BUILD_DIR)/src/Bullet3Collision:$(BULLET3_BUILD_DIR)/Extras/Serialize/BulletWorldImporter:$(HORDE3D_BUILD_DIR)/Source/Horde3DEngine:$(HORDE3D_BUILD_DIR)/Source/Horde3DUtils:$(OGRE_BUILD_DIR)/lib ;
 
 ##
 ## Jam stuff
@@ -125,7 +173,7 @@ LINKFLAGS = -g -stdlib=libstdc++
 KEEPOBJS = true ; # This doesn't actually fix anything, though it seems like it should
 NOARSCAN = true ; # This actually fixes the problem
 #AR = ar rUu ; # I was thinking maybe the AR command was wrong (always outputting deterministically)
-               # It doesn't seem like this is the problem though
+# It doesn't seem like this is the problem though
 AR = ar cr ;
 
 # Cross compilation
@@ -133,10 +181,10 @@ AR = ar cr ;
 # jam -j4 -q -sCROSS_COMPILE_WINDOWS=true
 # if $(CROSS_COMPILE_WINDOWS)
 # {
-# 	CC = x86_64-w64-mingw32-gcc ;
-# 	LINK = x86_64-w64-mingw32-gcc ;
-# 	AR = x86_64-w64-mingw32-ar ;
-# 	SUFSHR = .dll ;
+  # 	CC = x86_64-w64-mingw32-gcc ;
+  # 	LINK = x86_64-w64-mingw32-gcc ;
+  # 	AR = x86_64-w64-mingw32-ar ;
+  # 	SUFSHR = .dll ;
 # }
 
 # Some helpful Jam commands

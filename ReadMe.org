@@ -38,7 +38,7 @@ Spargus uses several libraries:
 
 - *Bullet 3*: Physics, raycast vehicle
 - *SFML*: 2D graphics, debug 3D graphics, audio, input, window
-- *Horde3D*: 3D graphics
+- *Ogre 2*: 3D graphics
 - *dear ImGui*: Debug GUI/editors
 - *glm*: Math
 - *tinyobjloader*: .obj loading, for collision meshes
@@ -48,6 +48,20 @@ Currently, SFML relies on system installs for its dependencies:
 
 #+BEGIN_SRC sh
 sudo apt install libopenal-dev libvorbis-dev libflac-dev libglew
+#+END_SRC
+
+Ogre requires these dependencies:
+
+#+BEGIN_SRC sh
+sudo apt-get install libfreetype6-dev libfreeimage-dev libzzip-dev \
+libxrandr-dev libxaw7-dev freeglut3-dev libgl1-mesa-dev libglu1-mesa-dev \
+doxygen graphviz python-clang-4.0 libsdl2-dev cmake ninja-build git
+#+END_SRC
+
+Next, download and build Ogre:
+
+#+BEGIN_SRC sh
+./DownloadBuildOgre.sh
 #+END_SRC
 
 Build the rest of the dependencies from source:
