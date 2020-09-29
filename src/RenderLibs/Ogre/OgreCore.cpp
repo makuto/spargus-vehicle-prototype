@@ -216,7 +216,7 @@ void Initialize(window& win, int winWidth, int winHeight)
 		// Also notice the HBU_STATIC flag; since the HBU_WRITE_ONLY
 		// bit would prohibit us from reading the data for importing.
 		v1Mesh = Ogre::v1::MeshManager::getSingleton().load(
-		    "Suzanne.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+		    "Chassis.mesh", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
 		    Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
 
 		bool halfPosition = true;
@@ -226,7 +226,7 @@ void Initialize(window& win, int winWidth, int winHeight)
 		// Create a v2 mesh to import to, with a different name (arbitrary).
 		// Import the v1 mesh to v2
 		v2Mesh = Ogre::MeshManager::getSingleton().createByImportingV1(
-		    "Suzanne.mesh Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		    "Chassis.mesh Imported", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 		    v1Mesh.get(), halfPosition, halfUVs, useQtangents);
 
 		// We don't need the v1 mesh. Free CPU memory, get it out of the GPU.
@@ -238,7 +238,7 @@ void Initialize(window& win, int winWidth, int winHeight)
 		// with the mesh pointer:
 		//  item = sceneManager->createItem( v2Mesh, Ogre::SCENE_DYNAMIC );
 		Ogre::Item* item = sceneManager->createItem(
-		    "Suzanne.mesh Imported", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+		    "Chassis.mesh Imported", Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
 		    Ogre::SCENE_DYNAMIC);
 		// Ogre::SceneNode* rootSceneNode = sceneManager->getRootSceneNode(Ogre::SCENE_DYNAMIC);
 		Ogre::SceneNode* rootSceneNode = sceneManager->getRootSceneNode();
@@ -246,8 +246,9 @@ void Initialize(window& win, int winWidth, int winHeight)
 		{
 			return;
 		}
+		// WTF
 		// Ogre::SceneNode* sceneNode = rootSceneNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
-		Ogre::SceneNode* sceneNode = rootSceneNode->createChildSceneNode();
+		Ogre::SceneNode* sceneNode = static_cast<SceneNode*>(rootSceneNode->createChild()); //rootSceneNode->createChildSceneNode();
 		if (!sceneNode)
 		{
 			return;
