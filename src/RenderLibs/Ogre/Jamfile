@@ -1,0 +1,4 @@
+SubDir . src RenderLibs Ogre ;
+
+Library libRenderOgre : OgreCore.cpp
+GraphicsObject_Ogre.cpp ;

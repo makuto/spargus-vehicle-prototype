@@ -274,7 +274,9 @@ int main()
 
 		initializeWindow(mainWindow);
 		DebugDisplay::initialize(&mainWindow);
+		// mainWindow.getBase()->setActive(false);
 		Graphics::Initialize(mainWindow, WindowWidth, WindowHeight);
+		// mainWindow.getBase()->setActive(true);
 
 		if (enableDevGui)
 		{
@@ -562,7 +564,10 @@ int main()
 				PerfTimeNamedScope(singleViewportScope, "Render single viewport",
 				                   tracy::Color::Goldenrod1);
 
+				// mainWindow.getBase()->resetGLStates();
+				// mainWindow.getBase()->setActive(false);
 				Graphics::Update(previousFrameTime);
+				// mainWindow.getBase()->setActive(true);
 			}
 			else
 			{

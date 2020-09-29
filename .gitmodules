@@ -19,3 +19,6 @@
 [submodule "Dependencies/tracy"]
 	path = Dependencies/tracy
 	url = https://bitbucket.org/wolfpld/tracy.git
+[submodule "Dependencies/blender2ogre"]
+	path = Dependencies/blender2ogre
+	url = https://github.com/OGRECave/blender2ogre
