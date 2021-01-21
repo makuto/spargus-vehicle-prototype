@@ -54,6 +54,11 @@ hlmsDiskCache*
 *.obj
 *.dae
 Content/assets/**/*.geo
+Content/assets/**/*.png
+Content/assets/**/*.jpg
+Content/assets/**/*.dds
 *.gltf
 Collision/
 imgui.ini
+
+.csearchindex
