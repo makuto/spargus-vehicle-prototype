@@ -1,0 +1,7 @@
+<Material>
+	<Shader source="shaders/model.shader" />
+
+	<Sampler name="envMap" map="textures/ambientMap.dds" />
+	<Uniform name="matDiffuseCol" a="0.09939776" b="0.09939776" c="0.09939776" d="1" />
+	<Uniform name="matSpecParams" a="0.09939776" b="0.09939776" c="0.09939776" d="1" />
+</Material>
