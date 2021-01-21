@@ -13,7 +13,7 @@ LINK = clang++ ;
 # LINKFLAGS = -shared ;
 # if $(UNIX)      { SUFSHR = .so ; }
 # else if $(NT)   { SUFSHR = .dll ; }
-		
+
 ## Compiler arguments
 
 # Arguments used on all projects, regardless of any variables
